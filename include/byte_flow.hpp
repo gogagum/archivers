@@ -25,7 +25,53 @@ private:
 public:
     using This = typename Super::This;
     using Word = typename Super::Word;
-    using Tail = typename Super::Tail;
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The Iterator class
+    ///
+    class Iterator {
+    private:
+        /**
+         * @brief Iterator constructor from pointer.
+         * @param ptr.
+         */
+        Iterator(std::byte* ptr);
+    public:
+
+        /**
+         * @brief Iterator copy constructor.
+         * @param other
+         */
+        Iterator(const Iterator& other);
+
+        /**
+         * @brief operator ++
+         * @return reference to self (after incrementing).
+         */
+        Iterator& operator++();
+
+        /**
+         * @brief operator ++
+         * @return copy of self before incrementing,
+         */
+        Iterator operator++(int);
+
+        /**
+         * @brief operator +=
+         * @param offset - number of words to move.
+         * @return reference to self after move.
+         */
+        Iterator& operator+=(std::int64_t offset);
+        Iterator& operator--();
+        Iterator operator--(int);
+        Iterator& operator-=(std::int64_t offset);
+        bool operator==(const Iterator& other);
+        bool operator!=(const Iterator& other);
+    private:
+        std::byte* _ptr;
+    };
+
 public:
 
     /**
@@ -36,16 +82,16 @@ public:
     ByteFlow(const std::byte* ptr, std::size_t size);
 
     /**
-     * @brief takeByteSymbol - method giving one byte symbol.
-     * @return byte symbol.
+     * @brief begin - beginning iterator getter.
+     * @return beginning iterator.
      */
-    Word takeByteSymbol();
+    Iterator begin();
 
     /**
-     * @brief finished - is ByteFlow iterated to the end.
-     * @return `true if finished iterating.
+     * @brief end - ending iterator getter.
+     * @return ending iterator.
      */
-    bool finished() const;
+    Iterator end();
 
     /**
      * @brief countNumberOfWords.
@@ -58,20 +104,6 @@ public:
      * @return number of bytes left.
      */
     std::size_t bytesLeft() const;
-
-public:  // IWordsFlow
-
-    /**
-     * @brief getTail of bytes which is smaller than word.
-     * @return tail.
-     */
-    virtual Tail getTail() override;
-
-    /**
-     * @brief getTailSize - get number of bytes in the tail.
-     * @return tail size.
-     */
-    virtual std::size_t getTailSize() const override;
 
 private:
     std::vector<std::byte> _bytes;
@@ -86,25 +118,24 @@ template <std::size_t numBytes>
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
         const std::byte* ptr, std::size_t size)
   : _currOffset(0) {
-    _bytes.resize(size);
+    _bytes.resize(size * numBytes);
     std::memcpy(_bytes.data(), ptr, size);
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template<std::size_t numBytes>
 auto
-garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::takeByteSymbol(
-        ) -> Word {
-    assert(!finished() && "Can`t take bytes.");
-    auto ret = BytesSymbol<numBytes>(_bytes.data() + _currOffset);
-    _currOffset += numBytes;
-    return ret;
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::begin() -> Iterator
+{
+    return Iterator(_bytes.data());
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
-bool garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::finished() const {
-    return _currOffset + numBytes >= _bytes.size();
+template<std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end() -> Iterator
+{
+    return Iterator(_bytes.data()) + static_cast<std::int64_t>(_bytes.size());
 }
 
 //----------------------------------------------------------------------------//
@@ -122,19 +153,43 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::size_t numBytes>
-auto garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::getTail() -> Tail {
-    auto ret = Tail();
-    ret.resize(getTailSize());
-    std::memcpy(ret.data(), _bytes.data() + countNumberOfWords());
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::Iterator(
+        std::byte* ptr) : _ptr(ptr) {};
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::Iterator(
+        const Iterator& other) : _ptr(other._ptr) {};
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
+        ) -> Iterator& {
+    _ptr += numBytes;
+    return *this;
 }
 
 //----------------------------------------------------------------------------//
 template <std::size_t numBytes>
-std::size_t
-garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::getTailSize() const {
-    return _bytes.size() % Word::size;
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
+        int) -> Iterator {
+    Iterator ret(*this);
+    _ptr += numBytes;
+    return ret;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+=(
+        std::int64_t offset) -> Iterator& {
+    _ptr += numBytes * offset;
+    return *this;
 }
 
 
