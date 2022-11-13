@@ -25,7 +25,7 @@ private:
 public:
     using This = typename Super::This;
     using Word = typename Super::Word;
-
+    using Tail = typename Super::Tail;
 public:
 
     /**
@@ -58,6 +58,20 @@ public:
      * @return number of bytes left.
      */
     std::size_t bytesLeft() const;
+
+public:  // IWordsFlow
+
+    /**
+     * @brief getTail of bytes which is smaller than word.
+     * @return tail.
+     */
+    virtual Tail getTail() override;
+
+    /**
+     * @brief getTailSize - get number of bytes in the tail.
+     * @return tail size.
+     */
+    virtual std::size_t getTailSize() const override;
 
 private:
     std::vector<std::byte> _bytes;
@@ -107,5 +121,21 @@ std::size_t
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
 }
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::getTail() -> Tail {
+    auto ret = Tail();
+    ret.resize(getTailSize());
+    std::memcpy(ret.data(), _bytes.data() + countNumberOfWords());
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+std::size_t
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::getTailSize() const {
+    return _bytes.size() % Word::size;
+}
+
 
 #endif // BIT_FLOW_HPP

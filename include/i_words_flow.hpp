@@ -13,13 +13,15 @@ class IWordsFlow {
 public:
     using This = ThisT;
     using Word = WordT;
-    using TailT = boost::container::static_vector<std::byte, Word::bytesSize>;
+    using Tail = boost::container::static_vector<std::byte, Word::bytesSize>;
 public:
     /**
      * @brief getTail
      * @return
      */
-    virtual TailT getTail() = 0;
+    virtual Tail getTail() = 0;
+
+    virtual std::size_t getTailSize() const = 0;
 };
 
 }
