@@ -2,6 +2,7 @@
 #define BIT_FLOW_HPP
 
 #include "bytes_symbol.hpp""
+#include "i_words_flow.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -9,38 +10,47 @@
 
 namespace garchiever {
 
+template <class WordT>
+class ByteFlow;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteFlow class
 ///
-class ByteFlow {
+template <std::size_t numBytes>
+class ByteFlow<BytesSymbol<numBytes>> : IWordsFlow<ByteFlow<BytesSymbol<numBytes>>,
+                                                   BytesSymbol<numBytes>> {
+private:
+    using Super = IWordsFlow<ByteFlow<BytesSymbol<numBytes>>,
+                             BytesSymbol<numBytes>>;
+public:
+    using This = typename Super::This;
+    using Word = typename Super::Word;
+
 public:
 
     /**
      * @brief ByteFlow constructor from pointer and bytes count.
      * @param ptr - pointer to data.
-     * @param numBytes - bytes count.
+     * @param size - bytes count.
      */
-    ByteFlow(const std::byte* ptr, std::size_t numBytes);
+    ByteFlow(const std::byte* ptr, std::size_t size);
 
     /**
      * @brief takeByteSymbol - method giving one byte symbol.
      * @return byte symbol.
      */
-    template <std::size_t num>
-    BytesSymbol<num> takeByteSymbol();
+    Word takeByteSymbol();
 
     /**
      * @brief finished - is ByteFlow iterated to the end.
      * @return `true if finished iterating.
      */
-    template <std::size_t num>
     bool finished() const;
 
     /**
      * @brief countNumberOfWords.
      * @return number of words.
      */
-    template <std::size_t num>
     std::size_t countNumberOfWords() const;
 
     /**
@@ -58,35 +68,43 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-garchiever::ByteFlow::ByteFlow(const std::byte* ptr, std::size_t numBytes)
+template <std::size_t numBytes>
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
+        const std::byte* ptr, std::size_t size)
   : _currOffset(0) {
-    _bytes.resize(numBytes);
-    std::memcpy(_bytes.data(), ptr, numBytes);
+    _bytes.resize(size);
+    std::memcpy(_bytes.data(), ptr, size);
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t num>
-auto garchiever::ByteFlow::takeByteSymbol() -> BytesSymbol<num> {
-    assert(!finished<num>() && "Can`t take bytes.");
-    auto ret = BytesSymbol<num>(_bytes.data() + _currOffset);
-    _currOffset += num;
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::takeByteSymbol(
+        ) -> Word {
+    assert(!finished() && "Can`t take bytes.");
+    auto ret = BytesSymbol<numBytes>(_bytes.data() + _currOffset);
+    _currOffset += numBytes;
     return ret;
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t num>
-bool garchiever::ByteFlow::finished() const {
-    return _currOffset + num >= _bytes.size();
+template <std::size_t numBytes>
+bool garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::finished() const {
+    return _currOffset + numBytes >= _bytes.size();
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t num>
-std::size_t garchiever::ByteFlow::countNumberOfWords() const {
-    return _bytes.size() / num;
+template <std::size_t numBytes>
+std::size_t
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::countNumberOfWords(
+        ) const {
+    return _bytes.size() / numBytes;
 }
 
 //----------------------------------------------------------------------------//
-std::size_t garchiever::ByteFlow::bytesLeft() const {
+template <std::size_t numBytes>
+std::size_t
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
 }
 
