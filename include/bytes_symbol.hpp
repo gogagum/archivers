@@ -15,8 +15,10 @@ public:
     BytesSymbol(std::byte* ptr);
 private:
     std::array<std::byte, numBytes> _data;
+private:
+    template <std::size_t _numBytes>
+    friend std::size_t ceilLog2(const BytesSymbol<_numBytes>& symbol);
 };
-
 }  // namespace garcheiver
 
 ////////////////////////////////////////////////////////////////////////////////
