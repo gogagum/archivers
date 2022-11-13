@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(archievers main.cpp
     include/arithmetic_coder.hpp
-    include/bit_flow.hpp
-    include/bit_symbol.hpp)
+    include/byte_flow.hpp
+    include/bytes_symbol.hpp)
 
 install(TARGETS archievers
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
