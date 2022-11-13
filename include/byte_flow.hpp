@@ -53,7 +53,7 @@ public:
 
         /**
          * @brief operator ++
-         * @return copy of self before incrementing,
+         * @return copy of self before incrementing.
          */
         Iterator operator++(int);
 
@@ -63,11 +63,39 @@ public:
          * @return reference to self after move.
          */
         Iterator& operator+=(std::int64_t offset);
+
+        /**
+         * @brief operator --
+         * @return reference to self (after decrementing).
+         */
         Iterator& operator--();
+
+        /**
+         * @brief operator --
+         * @return copy of self before decrementing.
+         */
         Iterator operator--(int);
+
+        /**
+         * @brief operator -=
+         * @param offset - number of words to move.
+         * @return reference to self after move.
+         */
         Iterator& operator-=(std::int64_t offset);
-        bool operator==(const Iterator& other);
-        bool operator!=(const Iterator& other);
+
+        /**
+         * @brief operator ==
+         * @param other - other iterator to compare.
+         * @return `true if iterators are equal.
+         */
+        bool operator==(const Iterator& other) const;
+
+        /**
+         * @brief operator !=
+         * @param other - other iterator to compare.
+         * @return `true if iterators are not equal.
+         */
+        bool operator!=(const Iterator& other) const;
     private:
         std::byte* _ptr;
     };
@@ -190,6 +218,50 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+=(
         std::int64_t offset) -> Iterator& {
     _ptr += numBytes * offset;
     return *this;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
+        ) -> Iterator& {
+    _ptr -= numBytes;
+    return *this;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
+        int) -> Iterator {
+    Iterator ret(*this);
+    _ptr -= numBytes;
+    return ret;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator-=(
+        std::int64_t offset) -> Iterator& {
+    _ptr -= numBytes * offset;
+    return *this;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+bool
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator==(
+        const Iterator& other) const {
+    return _ptr == other._ptr;
+}
+
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+bool
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator!=(
+        const Iterator& other) const {
+    return _ptr == other._ptr;
 }
 
 
