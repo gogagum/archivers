@@ -96,6 +96,13 @@ public:
          * @return `true if iterators are not equal.
          */
         bool operator!=(const Iterator& other) const;
+
+        /**
+         * @brief operator * get a symbol.
+         * @return symbol.
+         */
+        BytesSymbol<numBytes> operator*() const;
+
     private:
         std::byte* _ptr;
     };
@@ -113,13 +120,13 @@ public:
      * @brief begin - beginning iterator getter.
      * @return beginning iterator.
      */
-    Iterator begin();
+    Iterator begin() const;
 
     /**
      * @brief end - ending iterator getter.
      * @return ending iterator.
      */
-    Iterator end();
+    Iterator end() const;
 
     /**
      * @brief countNumberOfWords.
@@ -153,7 +160,8 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
 //----------------------------------------------------------------------------//
 template<std::size_t numBytes>
 auto
-garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::begin() -> Iterator
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::begin(
+        ) const -> Iterator
 {
     return Iterator(_bytes.data());
 }
@@ -161,7 +169,8 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::begin() -> Iterator
 //----------------------------------------------------------------------------//
 template<std::size_t numBytes>
 auto
-garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end() -> Iterator
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end(
+        ) const -> Iterator
 {
     return Iterator(_bytes.data()) + static_cast<std::int64_t>(_bytes.size());
 }
@@ -264,5 +273,12 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator!=(
     return _ptr == other._ptr;
 }
 
+//----------------------------------------------------------------------------//
+template <std::size_t numBytes>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator*(
+        ) const -> BytesSymbol<numBytes> {
+    return BytesSymbol<numBytes>(_ptr);
+}
 
 #endif // BIT_FLOW_HPP

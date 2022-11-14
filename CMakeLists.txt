@@ -16,7 +16,8 @@ if(Boost_FOUND)
     add_executable(archiever main.cpp
         include/arithmetic_coder.hpp
         include/byte_flow.hpp
-        include/bytes_symbol.hpp)
+        include/bytes_symbol.hpp
+        include/arithmetic_coder_encoded.hpp)
     target_link_libraries(archiever ${Boost_LIBRARIES})
     install(TARGETS archiever
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

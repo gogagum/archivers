@@ -2,6 +2,9 @@
 #define ARITHMETIC_CODER_HPP
 
 #include <map>
+#include <vector>
+
+#include "arithmetic_coder_encoded.hpp"
 
 namespace garchiever {
 
@@ -14,7 +17,7 @@ public:
 
     using Word = typename FlowT::Word;
 
-    class Res {};
+    using Res = ArithmeticCoderEncoded;
 
 public:
 
@@ -28,31 +31,20 @@ public:
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
-    Res encode() {
-
-    }
+    Res encode();
 
 private:
 
     void _countProbabilities();
 
-    void _countCumulativeProbabilities();
-
-    void _countLengthes();
-
 private:
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The _ByteSymbolInfo class
-    struct _WordInfo{
-        std::size_t numFound;
-        std::size_t cumulativeNumFound;
-        std::size_t length;
-    };
+    template <class Value>
+    using MapWordTo = std::map<Word, Value, typename Word::Order>;
 
 private:
     FlowT _wordFlow;
-    std::map<Word, _WordInfo, typename Word::Order> _wordInfos;
+    MapWordTo<std::size_t> _cumulativeNumFound;
     std::size_t _nonEncodedSize;
 };
 
@@ -62,33 +54,29 @@ private:
 //----------------------------------------------------------------------------//
 template <class FlowT>
 garchiever::ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT&& symbolsFlow)
-    : _wordFlow(symbolsFlow) { }
+        : _wordFlow(symbolsFlow) {
+    _countProbabilities();
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT>
+auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
+
+}
 
 //----------------------------------------------------------------------------//
 template <class FlowT>
 void garchiever::ArithmeticCoder<FlowT>::_countProbabilities() {
-    while (!_wordFlow.finished()) {
-        _wordInfos[_wordFlow.takeWord()].numFound++;
+    MapWordTo<std::size_t> numFound;
+
+    for (auto word : _wordFlow) {
+        numFound[word]++;
     }
     _nonEncodedSize = _wordFlow.bytesLeft();
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT>
-void garchiever::ArithmeticCoder<FlowT>::_countCumulativeProbabilities() {
     std::size_t currNum = 0;
-    for (auto entry : _wordInfos) {
-        auto& info = entry.second;
-        info.cumulativeNumFound = currNum;
-        currNum += info.numFound;
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT>
-void garchiever::ArithmeticCoder<FlowT>::_countLengthes() {
-    for (auto entry : _wordInfos) {
-        auto& info = entry.second;
+    for (auto [word, num] : _cumulativeNumFound) {
+        _cumulativeNumFound[word] = currNum;
+        currNum += num;
     }
 }
 
