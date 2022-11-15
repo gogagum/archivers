@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <cstddef>
+#include <ranges>
 
 namespace garchiever {
 
@@ -22,9 +23,15 @@ public:
     template <class T>
     void putT(T s);
 
+    void fillEnd(bool bit);
+
+    const std::byte* data() const;
+
+    const std::size_t bytesSize() const;
+
 private:
 
-    bool _moveBitFlag();
+    void _moveBitFlag();
 
 private:
     std::vector<std::byte> _data;
@@ -40,14 +47,15 @@ garchiever::ArithmeticCoderEncoded::ArithmeticCoderEncoded()
 
 //----------------------------------------------------------------------------//
 void garchiever::ArithmeticCoderEncoded::putBit(bool bit) {
-    if (auto& byteRef = *_data.rbegin(); bit) {
-        byteRef |= _currBitFlag;
+    if (_currBitFlag == std::byte{0b10000000}) {
+        _data.push_back(std::byte{0b00000000});
+    }
+    if (bit) {
+        *_data.rbegin() |= _currBitFlag;
     } else {
-        byteRef &= ~_currBitFlag;
+        *_data.rbegin() &= ~_currBitFlag;
     }
-    if (_moveBitFlag()) {
-        _data.push_back(std::byte());
-    }
+    _moveBitFlag();
 }
 
 //----------------------------------------------------------------------------//
@@ -68,22 +76,40 @@ template <class T>
 void garchiever::ArithmeticCoderEncoded::putT(T s) {
     using SizeTBytes = std::array<std::byte, sizeof(T)>;
 
-    static_assert(sizeof(SizeTBytes) == sizeof(T));
+    static_assert(sizeof(SizeTBytes) == sizeof(T), "Error with sizes.");
 
     auto& bytes = reinterpret_cast<SizeTBytes&>(s);
-    for (auto byte: bytes) {
+    for (auto byte: std::ranges::reverse_view(bytes)) {
         putByte(byte);
     }
 }
 
 //----------------------------------------------------------------------------//
-bool garchiever::ArithmeticCoderEncoded::_moveBitFlag() {
-    if (_currBitFlag == std::byte{0b00000001}) {
+void garchiever::ArithmeticCoderEncoded::fillEnd(bool bit) {
+    if (_currBitFlag != std::byte{0b10000000}) {
+        while (_currBitFlag != std::byte{0b00000000}) {
+            putBit(bit);
+        }
         _currBitFlag = std::byte{0b10000000};
-        return true;
     }
+}
+
+//----------------------------------------------------------------------------//
+const std::byte* garchiever::ArithmeticCoderEncoded::data() const {
+    return _data.data();
+}
+
+//----------------------------------------------------------------------------//
+const std::size_t garchiever::ArithmeticCoderEncoded::bytesSize() const {
+    return _data.size();
+}
+
+//----------------------------------------------------------------------------//
+void garchiever::ArithmeticCoderEncoded::_moveBitFlag() {
     _currBitFlag >>= 1;
-    return false;
+    if (_currBitFlag == std::byte{0b00000000}) {
+        _currBitFlag = std::byte{0b10000000};
+    }
 }
 
 #endif // ARITHMETIC_CODER_ENCODED_HPP
