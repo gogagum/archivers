@@ -86,11 +86,8 @@ void garchiever::ArithmeticCoderEncoded::putT(T s) {
 
 //----------------------------------------------------------------------------//
 void garchiever::ArithmeticCoderEncoded::fillEnd(bool bit) {
-    if (_currBitFlag != std::byte{0b10000000}) {
-        while (_currBitFlag != std::byte{0b00000000}) {
-            putBit(bit);
-        }
-        _currBitFlag = std::byte{0b10000000};
+    while (_currBitFlag != std::byte{0b10000000}) {
+        putBit(bit);
     }
 }
 
