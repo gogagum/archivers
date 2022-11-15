@@ -16,7 +16,7 @@ class ByteFlow;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteFlow class
 ///
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 class ByteFlow<BytesSymbol<numBytes>> : IWordsFlow<ByteFlow<BytesSymbol<numBytes>>,
                                                    BytesSymbol<numBytes>> {
 private:
@@ -24,7 +24,7 @@ private:
                              BytesSymbol<numBytes>>;
 public:
     using This = typename Super::This;
-    using Word = typename Super::Word;
+    using Sym = typename Super::Sym;
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -77,6 +77,14 @@ public:
         Iterator operator--(int);
 
         /**
+         * @brief operator +
+         * @param integral
+         * @return
+         */
+        template<std::integral IntegralT>
+        Iterator operator+(IntegralT integral);
+
+        /**
          * @brief operator -=
          * @param offset - number of words to move.
          * @return reference to self after move.
@@ -105,6 +113,8 @@ public:
 
     private:
         std::byte* _ptr;
+    private:
+        friend class ByteFlow;
     };
 
 public:
@@ -147,9 +157,11 @@ private:
 
 }  // namespace garchiever
 
+#endif // BIT_FLOW_HPP
+
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
         const std::byte* ptr, std::size_t size)
   : _currOffset(0) {
@@ -158,25 +170,25 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
 }
 
 //----------------------------------------------------------------------------//
-template<std::size_t numBytes>
+template<std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::begin(
         ) const -> Iterator
 {
-    return Iterator(_bytes.data());
+    return Iterator(const_cast<std::byte*>(_bytes.data()));
 }
 
 //----------------------------------------------------------------------------//
-template<std::size_t numBytes>
+template<std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end(
         ) const -> Iterator
 {
-    return Iterator(_bytes.data()) + static_cast<std::int64_t>(_bytes.size());
+    return Iterator(const_cast<std::byte*>(_bytes.data()) + _bytes.size());
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 std::size_t
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::countNumberOfWords(
         ) const {
@@ -184,7 +196,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::countNumberOfWords(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 std::size_t
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
@@ -192,17 +204,17 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::Iterator(
-        std::byte* ptr) : _ptr(ptr) {};
+        std::byte* ptr) : _ptr(ptr) {}
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::Iterator(
-        const Iterator& other) : _ptr(other._ptr) {};
+        const Iterator& other) : _ptr(other._ptr) {}
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
         ) -> Iterator& {
@@ -211,7 +223,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
         int) -> Iterator {
@@ -221,7 +233,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator++(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+=(
         std::int64_t offset) -> Iterator& {
@@ -230,7 +242,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+=(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
         ) -> Iterator& {
@@ -239,7 +251,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
         int) -> Iterator {
@@ -249,7 +261,16 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator--(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
+template <std::integral IntegralT>
+auto
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+(
+        IntegralT i) -> Iterator {
+    return Iterator(_ptr + i);
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator-=(
         std::int64_t offset) -> Iterator& {
@@ -258,7 +279,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator-=(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 bool
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator==(
         const Iterator& other) const {
@@ -266,7 +287,7 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator==(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 bool
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator!=(
         const Iterator& other) const {
@@ -274,11 +295,9 @@ garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator!=(
 }
 
 //----------------------------------------------------------------------------//
-template <std::size_t numBytes>
+template <std::uint8_t numBytes>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator*(
         ) const -> BytesSymbol<numBytes> {
     return BytesSymbol<numBytes>(_ptr);
 }
-
-#endif // BIT_FLOW_HPP

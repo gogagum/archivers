@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "include/arithmetic_coder_encoded.hpp"
+#include "include/arithmetic_decoder_decoded.hpp"
 #include "include/bytes_symbol.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,9 +70,8 @@ TEST(ArithmeticCoderEncodedTest, PutBitAfterByte) {
 TEST(ArithmeticCoderEncodedTest, PutByteAfterBit) {
     auto encoded = garchiever::ArithmeticCoderEncoded();
     encoded.putBit(false);
-    encoded.putByte(std::byte{0b10011101});
-    EXPECT_EQ(encoded.data()[0], std::byte{0b01001110});
-    EXPECT_EQ(encoded.data()[1], std::byte{0b10000000});
+    EXPECT_THROW(encoded.putByte(std::byte{0b10011101}),
+                 garchiever::ArithmeticCoderEncoded::BytesAfterBitsException);
 }
 
 //----------------------------------------------------------------------------//
@@ -125,14 +125,8 @@ TEST(ArithmeticCoderEncodedTest, PutUInt32AfterBit) {
                            //00000000111111112222222233333333
 
     encoded.putBit(false);
-    encoded.putT(tested);
-
-    EXPECT_EQ(encoded.bytesSize(), 5);
-    EXPECT_EQ(encoded.data()[0], std::byte(0b00000000));
-    EXPECT_EQ(encoded.data()[1], std::byte{0b00010000});
-    EXPECT_EQ(encoded.data()[2], std::byte{0b01000000});
-    EXPECT_EQ(encoded.data()[3], std::byte{0b00000100});
-    EXPECT_EQ(encoded.data()[4], std::byte{0b00000000});
+    EXPECT_THROW(encoded.putT(tested),
+                 garchiever::ArithmeticCoderEncoded::BytesAfterBitsException);
 }
 
 //----------------------------------------------------------------------------//
@@ -254,4 +248,53 @@ TEST(BytesSymbolTest, BytesSymbolsInMap) {
     EXPECT_EQ(m[sym1], 37);
     EXPECT_EQ(m.lower_bound(sym1)->second, 37);
     EXPECT_EQ(m.upper_bound(sym1)->second, 42);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
+    using SymDataT = std::array<std::byte, 1>;
+    using SymT = garchiever::BytesSymbol<1>;
+    using MapToInt64 = std::map<SymT, std::int64_t, SymT::Order>;
+
+    SymDataT testData1 = { std::byte{0b00000000} };
+    SymDataT testData2 = { std::byte{0b00001111} };
+    SymDataT testData3 = { std::byte{0b11111111} };
+
+    auto sym1 = SymT(testData1.data());
+    auto sym2 = SymT(testData2.data());
+    auto sym3 = SymT(testData3.data());
+
+    auto m = MapToInt64();
+
+    m[sym1] = 37;
+    m[sym3] = 42;
+
+    EXPECT_EQ(m.size(), 2);
+
+    EXPECT_EQ(m.lower_bound(sym2)->second, 42);
+    EXPECT_EQ(m.upper_bound(sym2)->second, 42);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(ArithmeticDecoderDecoded, Construct) {
+    std::vector<std::byte> testData{
+        static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
+        std::byte{17}, std::byte{11} };
+    auto decoded = garchiever::ArithmeticDecoderDecoded(std::move(testData));
+}
+
+//----------------------------------------------------------------------------//
+TEST(ArithmeticDecoderDecoded, NumBytes) {
+    std::vector<std::byte> testData{
+        static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
+        std::byte{17}, std::byte{11} };
+
+    EXPECT_EQ(testData.size(), 4);
+
+    auto decoded = garchiever::ArithmeticDecoderDecoded(std::move(testData));
+
+    EXPECT_EQ(decoded.takeT<std::uint8_t>(), 2);
+    EXPECT_EQ(decoded.takeByte(), std::byte(25));
+    EXPECT_EQ(decoded.takeByte(), std::byte(17));
 }

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <ranges>
+#include <exception>
 
 namespace garchiever {
 
@@ -14,9 +15,30 @@ namespace garchiever {
 ///
 class ArithmeticCoderEncoded {
 public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The BytesAfterBitsException class
+    ///
+    class BytesAfterBitsException : public std::runtime_error {
+    public:
+        BytesAfterBitsException();
+    };
+
+public:
     ArithmeticCoderEncoded();
 
+    /**
+     * @brief putBit - add single bit in the end.
+     * @param bit - a bit to set.
+     */
     void putBit(bool bit);
+
+    /**
+     * @brief putBitsRepeat
+     * @param bit
+     * @param num
+     */
+    void putBitsRepeat(bool bit, std::size_t num);
 
     void putByte(std::byte b);
 
@@ -36,6 +58,7 @@ private:
 private:
     std::vector<std::byte> _data;
     std::byte _currBitFlag;
+    bool _startedBits;
 };
 
 }
@@ -43,10 +66,12 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 garchiever::ArithmeticCoderEncoded::ArithmeticCoderEncoded()
-    : _currBitFlag{0b10000000} {}
+    : _currBitFlag{0b10000000},
+      _startedBits{false} {}
 
 //----------------------------------------------------------------------------//
 void garchiever::ArithmeticCoderEncoded::putBit(bool bit) {
+    _startedBits = true;
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(std::byte{0b00000000});
     }
@@ -59,16 +84,19 @@ void garchiever::ArithmeticCoderEncoded::putBit(bool bit) {
 }
 
 //----------------------------------------------------------------------------//
-void garchiever::ArithmeticCoderEncoded::putByte(std::byte b) {
-    if (_currBitFlag == std::byte{0b10000000}) {
-        _data.push_back(b);
-    } else {
-        for (std::uint8_t i = 0; i < 8; ++i) {
-            auto currBit = bool((b & std::byte{0b10000000}) >> 7);
-            putBit(currBit);
-            b <<= 1;
-        }
+void
+garchiever::ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
+    for (std::size_t i = 0; i < num; ++i) {
+        putBit(bit);
     }
+}
+
+//----------------------------------------------------------------------------//
+void garchiever::ArithmeticCoderEncoded::putByte(std::byte b) {
+    if (_startedBits) {
+        throw BytesAfterBitsException();
+    }
+    _data.push_back(b);
 }
 
 //----------------------------------------------------------------------------//
@@ -108,5 +136,9 @@ void garchiever::ArithmeticCoderEncoded::_moveBitFlag() {
         _currBitFlag = std::byte{0b10000000};
     }
 }
+
+//----------------------------------------------------------------------------//
+garchiever::ArithmeticCoderEncoded::BytesAfterBitsException::BytesAfterBitsException(
+        ) : std::runtime_error("Can`t write bytes after bits.") { }
 
 #endif // ARITHMETIC_CODER_ENCODED_HPP

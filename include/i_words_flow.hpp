@@ -8,11 +8,11 @@ namespace garchiever {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IWordsFlow class
 ///
-template <class ThisT, class WordT>
+template <class ThisT, class SymT>
 class IWordsFlow {
 public:
     using This = ThisT;
-    using Word = WordT;
+    using Sym = SymT;
 };
 
 }

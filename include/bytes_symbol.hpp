@@ -12,8 +12,13 @@ namespace garchiever {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
 ///
-template <std::uint8_t numBytes>
+template <std::uint8_t _numBytes>
 class BytesSymbol {
+public:
+
+    constexpr static std::uint8_t numBytes = _numBytes;
+    constexpr static std::uint64_t maxNum = 1 << (8 * numBytes);
+
 public:
 
     /**
@@ -49,10 +54,19 @@ private:
      */
     friend bool operator==(const BytesSymbol<numBytes>& bs1,
                            const BytesSymbol<numBytes>& bs2);
+
+    /**
+     * @brief operator == check if two symbols are equal.
+     * @param bs1 - first byte symbol.
+     * @param bs2 - second byte symbol.
+     */
+    friend bool operator!=(const BytesSymbol<numBytes>& bs1,
+                           const BytesSymbol<numBytes>& bs2);
 };
 
 }  // namespace garcheiver
 
+#endif // BIT_SYMBOL_HPP
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -87,4 +101,9 @@ bool operator==(const garchiever::BytesSymbol<numBytes>& bs1,
     return bs1._data == bs2._data;
 }
 
-#endif // BIT_SYMBOL_HPP
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
+bool operator!=(const garchiever::BytesSymbol<numBytes>& bs1,
+                const garchiever::BytesSymbol<numBytes>& bs2) {
+    return bs1._data != bs2._data;
+}
