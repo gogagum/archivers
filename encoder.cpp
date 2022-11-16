@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     std::string fileOut = argv[2];
     */
 
-    std::string fileIn = "very_small.png";
+    std::string fileIn = "slava-durke.png";
     std::string fileOut = "fout";
 
     std::ifstream fin{fileIn, std::ifstream::binary};
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<1>>(reinterpret_cast<const std::byte*>(finData.data()), finData.size());
+    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<3>>(reinterpret_cast<const std::byte*>(finData.data()), finData.size());
     auto coder = garchiever::ArithmeticCoder(std::move(byteFlow));
     auto encoded = coder.encode();
 
