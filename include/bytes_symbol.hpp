@@ -17,9 +17,11 @@ class BytesSymbol {
 public:
 
     constexpr static std::uint8_t numBytes = _numBytes;
-    constexpr static std::uint64_t maxNum = 1 << (8 * numBytes);
+    constexpr static std::uint64_t maxNum = std::uint64_t(1) << (8 * numBytes);
 
 public:
+
+    BytesSymbol() = default;
 
     /**
      * @brief BytesSymbol bytes symbol constructor from pointer to data.

@@ -1,8 +1,13 @@
+#pragma once
+
 #ifndef ARITHMETIC_DECODER_DECODED_HPP
 #define ARITHMETIC_DECODER_DECODED_HPP
 
 #include <vector>
 #include <cstddef>
+#include <stdexcept>
+#include <array>
+#include <ranges>
 
 namespace garchiever {
 

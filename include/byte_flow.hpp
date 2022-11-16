@@ -2,11 +2,12 @@
 #define BIT_FLOW_HPP
 
 #include "bytes_symbol.hpp""
-#include "i_words_flow.hpp"
+#include "i_sym_flow.hpp"
 
 #include <vector>
 #include <cstddef>
 #include <cstring>
+#include <boost/container/static_vector.hpp>
 
 namespace garchiever {
 
@@ -17,11 +18,11 @@ class ByteFlow;
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
-class ByteFlow<BytesSymbol<numBytes>> : IWordsFlow<ByteFlow<BytesSymbol<numBytes>>,
-                                                   BytesSymbol<numBytes>> {
+class ByteFlow<BytesSymbol<numBytes>> : ISymFlow<ByteFlow<BytesSymbol<numBytes>>,
+                                                 BytesSymbol<numBytes>> {
 private:
-    using Super = IWordsFlow<ByteFlow<BytesSymbol<numBytes>>,
-                             BytesSymbol<numBytes>>;
+    using Super = ISymFlow<ByteFlow<BytesSymbol<numBytes>>,
+                           BytesSymbol<numBytes>>;
 public:
     using This = typename Super::This;
     using Sym = typename Super::Sym;
@@ -150,6 +151,24 @@ public:
      */
     std::size_t bytesLeft() const;
 
+public:  // ISymFlow
+
+    /**
+     * @brief getTailSize
+     * @return
+     */
+    virtual std::uint8_t getTailSize() const override;
+
+    /**
+     * @brief getTail
+     * @return
+     */
+    virtual boost::container::static_vector<std::byte, Sym::numBytes> getTail() const override {
+        std::uint8_t tailSize = getTailSize();
+        return boost::container::static_vector<std::byte, Sym::numBytes>(
+            _bytes.end() - tailSize - 1, _bytes.end());
+    }
+
 private:
     std::vector<std::byte> _bytes;
     std::size_t _currOffset;
@@ -200,6 +219,13 @@ template <std::uint8_t numBytes>
 std::size_t
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
+std::uint8_t
+garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::getTailSize() const {
+    return _bytes.size() % numBytes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

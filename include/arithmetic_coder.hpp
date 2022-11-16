@@ -48,7 +48,7 @@ private:
     using MapSymTo = std::map<Sym, Value, typename Sym::Order>;
 
 private:
-    FlowT _wordFlow;
+    FlowT _symFlow;
     MapSymTo<std::int64_t> _cumulativeNumFound;
     std::int64_t _totalSymsCount;
     std::size_t _nonEncodedSize;
@@ -60,7 +60,7 @@ private:
 //----------------------------------------------------------------------------//
 template <class FlowT>
 garchiever::ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT&& symbolsFlow)
-        : _wordFlow(symbolsFlow) {
+        : _symFlow(symbolsFlow) {
     _countProbabilities();
 }
 
@@ -70,6 +70,11 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     auto ret = Res();
 
     ret.putT(static_cast<uint8_t>(Sym::numBytes));
+    ret.putT(static_cast<uint8_t>(_symFlow.getTailSize()));
+    auto tail = _symFlow.getTail();
+    for (auto tailByte : tail) {
+        ret.putByte(tailByte);
+    }
     ret.putT(static_cast<uint64_t>(_cumulativeNumFound.size()));
     for (auto [word, cumulFound]: _cumulativeNumFound) {
         ret.putT(word);
@@ -86,7 +91,7 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     std::uint64_t high = wordsNum;
     std::size_t btf = 0;
 
-    for (auto sym : _wordFlow) {
+    for (auto sym : _symFlow) {
         assert(high >= low && "high must be greater or equal than low");
         std::uint64_t range = high - low;
 
@@ -121,6 +126,7 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     } else {
         ret.putBitsRepeat(false, btf);
     }
+
     return ret;
 }
 
@@ -128,10 +134,10 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
 template <class FlowT>
 void garchiever::ArithmeticCoder<FlowT>::_countProbabilities() {
     MapSymTo<std::uint64_t> numFound;
-    for (auto word : _wordFlow) {
+    for (auto word : _symFlow) {
         numFound[word]++;
     }
-    _nonEncodedSize = _wordFlow.bytesLeft();
+    _nonEncodedSize = _symFlow.bytesLeft();
     _totalSymsCount = 0;
     for (auto [word, num] : _cumulativeNumFound) {
         _cumulativeNumFound[word] = _totalSymsCount;
