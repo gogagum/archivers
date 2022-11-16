@@ -1,7 +1,7 @@
 #ifndef BIT_FLOW_HPP
 #define BIT_FLOW_HPP
 
-#include "bytes_symbol.hpp""
+#include "bytes_symbol.hpp"
 #include "i_sym_flow.hpp"
 
 #include <vector>
@@ -166,7 +166,7 @@ public:  // ISymFlow
     virtual boost::container::static_vector<std::byte, Sym::numBytes> getTail() const override {
         std::uint8_t tailSize = getTailSize();
         return boost::container::static_vector<std::byte, Sym::numBytes>(
-            _bytes.end() - tailSize - 1, _bytes.end());
+            _bytes.end() - tailSize, _bytes.end());
     }
 
 private:
@@ -203,7 +203,7 @@ auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end(
         ) const -> Iterator
 {
-    return Iterator(const_cast<std::byte*>(_bytes.data()) + _bytes.size());
+    return Iterator(const_cast<std::byte*>(_bytes.data() + _bytes.size()));
 }
 
 //----------------------------------------------------------------------------//
@@ -317,7 +317,7 @@ template <std::uint8_t numBytes>
 bool
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator!=(
         const Iterator& other) const {
-    return _ptr == other._ptr;
+    return _ptr != other._ptr;
 }
 
 //----------------------------------------------------------------------------//

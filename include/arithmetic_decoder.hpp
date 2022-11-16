@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "arithmetic_decoder_decoded.hpp"
+#include "misc.hpp"
 
 namespace garchiever {
 
@@ -37,6 +38,7 @@ private:
     Source _source;
     std::uint64_t _numUniqueSyms;
     std::uint64_t _totalSymsCount;
+    std::vector<std::byte> _tail;
 };
 
 }  // garchiever
@@ -47,14 +49,36 @@ private:
 //----------------------------------------------------------------------------//
 template <class SymT>
 garchiever::ArithmeticDecoder<SymT>::ArithmeticDecoder(Source&& source)
-    : _source(std::move(source)),
-      _numUniqueSyms{_source.takeT<std::uint64_t>()} {
+    : _source(std::move(source)) {
+    std::uint8_t tailSize = _source.takeT<std::uint8_t>();
+    _tail.resize(tailSize);
+    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
+    for (auto& tailByte: _tail) {
+        tailByte = _source.takeByte();
+        std::cerr << tailByte << ' ';
+    }
+    std::cerr << std::endl;
+    _numUniqueSyms = _source.takeT<std::uint64_t>();
+    std::cerr << "Unique syms count: " << _numUniqueSyms << std::endl;
     for (std::uint64_t i = 0; i < _numUniqueSyms; ++i) {
         auto sym = _source.takeT<SymT>();
+        std::cerr << "Sym: " << sym;
+        if constexpr (SymT::numBytes == 1) {
+            std::cerr << " SymChar: ";
+            if (char& asChar = *reinterpret_cast<char*>(&sym); asChar == '\0') {
+                std::cerr << "\\0";
+            } else if (asChar == '\n') {
+                std::cerr << "\\n";
+            } else {
+                std::cerr << asChar;
+            }
+        }
         auto numFound = _source.takeT<std::uint64_t>();
+        std::cerr << " Cumulative num: " << numFound << std::endl;
         _cumulativeNumFound[sym] = numFound;
     }
     _totalSymsCount = _source.takeT<std::uint64_t>();
+    std::cerr << "Total count: " << _totalSymsCount << std::endl;
 }
 
 //----------------------------------------------------------------------------//
@@ -66,25 +90,44 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
     constexpr auto wordsNum_4 = wordsNum / 4;
     constexpr auto wordsNum_3to4 = 3 * wordsNum / 4;
 
+    std::uint64_t value = 0;
 
-    std::uint64_t value = _source.takeT<std::uint64_t>();
+    for (std::size_t bitIndex = 0; bitIndex < SymT::numBytes * 8; ++bitIndex) {
+        std::uint64_t digit = _source.takeBit() ? std::uint64_t{1} : std::uint64_t{0};
+        value *= 2;
+        value += digit;
+    }
 
     std::uint64_t low = 0;
-    std::uint64_t high = _totalSymsCount;
+    std::uint64_t high = wordsNum;
 
     std::vector<SymT> syms;
 
     for (std::uint64_t i = 0; i < _totalSymsCount; ++i) {
+        //assert(value <= high);
         std::uint64_t range = high - low;
-        std::uint64_t aux = (value - low) * _totalSymsCount / range;
-        auto sumIter = _cumulativeNumFound.begin();
-        while (sumIter->second < aux) {
-            sumIter = std::next(sumIter);
+        std::int64_t aux = ((value - low) * _totalSymsCount);
+
+        auto symFound = SymT();
+        bool found = false;
+
+        for (auto [sym, _]: _cumulativeNumFound) {
+            if (_getCumulativeNumFoundHigh(sym) * range >= aux
+                && _getCumulativeNumFoundLow(sym) * range <= aux) {
+                symFound = sym;
+                found = true;
+                break;
+            }
         }
-        auto sym = sumIter->first;
-        syms.push_back(sym);
-        high = low + range * _getCumulativeNumFoundHigh(sym) / _totalSymsCount;
-        low = low + range * _getCumulativeNumFoundLow(sym) / _totalSymsCount;
+
+        if (!found) {
+            symFound = _cumulativeNumFound.rbegin()->first;
+        }
+
+        syms.push_back(symFound);
+
+        high = low + range * _getCumulativeNumFoundHigh(symFound) / _totalSymsCount;
+        low = low + range * _getCumulativeNumFoundLow(symFound) / _totalSymsCount;
 
         constexpr std::uint64_t one = std::uint64_t{1};
         constexpr std::uint64_t zero = std::uint64_t{0};
@@ -95,16 +138,19 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
                 low = low * 2;
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? one : zero);
+                value %= SymT::maxNum;
             } else if (low >= wordsNum_2) {
                 high = high * 2 - wordsNum;
                 low = low * 2 - wordsNum;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum + (bit ? one : zero);
+                value %= SymT::maxNum;
             } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
                 high = high * 2 - wordsNum_2;
                 low = low * 2 - wordsNum_2;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum_2 + (bit ? one : zero);
+                value %= SymT::maxNum;
             } else {
                 break;
             }

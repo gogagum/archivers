@@ -1,11 +1,17 @@
+#pragma once
+
 #ifndef BIT_SYMBOL_HPP
 #define BIT_SYMBOL_HPP
 
 #include <cstdint>
+#include <cstddef>
 #include <array>
 #include <cassert>
 #include <cstring>
+#include <ostream>
 #include <boost/range/combine.hpp>
+
+#include "misc.hpp"
 
 namespace garchiever {
 
@@ -54,17 +60,32 @@ private:
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    friend bool operator==(const BytesSymbol<numBytes>& bs1,
-                           const BytesSymbol<numBytes>& bs2);
+    template <std::uint8_t __numBytes>
+    friend bool operator==(const BytesSymbol<__numBytes>& bs1,
+                           const BytesSymbol<__numBytes>& bs2);
 
     /**
      * @brief operator == check if two symbols are equal.
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    friend bool operator!=(const BytesSymbol<numBytes>& bs1,
-                           const BytesSymbol<numBytes>& bs2);
+    template <std::uint8_t __numBytes>
+    friend bool operator!=(const BytesSymbol<__numBytes>& bs1,
+                           const BytesSymbol<__numBytes>& bs2);
+
+    /**
+     * @brief operator <<
+     * @param os
+     * @return
+     */
+    template <std::uint8_t __numBytes>
+    friend std::ostream& operator<<(std::ostream& os, BytesSymbol<__numBytes>);
 };
+
+template <std::uint8_t numBytes>
+std::ostream& operator<<(std::ostream& os,
+                         BytesSymbol<numBytes> sym);
+
 
 }  // namespace garcheiver
 
@@ -108,4 +129,14 @@ template <std::uint8_t numBytes>
 bool operator!=(const garchiever::BytesSymbol<numBytes>& bs1,
                 const garchiever::BytesSymbol<numBytes>& bs2) {
     return bs1._data != bs2._data;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
+std::ostream& garchiever::operator<<(std::ostream& os,
+                                     garchiever::BytesSymbol<numBytes> sym) {
+    for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
+        os << *iter << ' ';
+    }
+    return os << *(sym._data.end() - 1);
 }

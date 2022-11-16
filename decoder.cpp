@@ -1,6 +1,7 @@
 #include <cassert>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "include/arithmetic_decoder_decoded.hpp"
@@ -8,20 +9,38 @@
 #include "include/bytes_symbol.hpp"
 
 int main(int argc, char* argv[]) {
+    /**
     assert(argc == 3 && "Wrong number of arguments.");
 
     std::string fileIn = argv[1];
     std::string fileOut = argv[2];
+    */
 
-    std::basic_ifstream<std::byte> fin;
-    fin.open(fileIn, std::ios::binary | std::ios::in);
+    std::string fileIn = "fout";
+    std::string fileOut = "slava_durke2.png";
 
-    auto inFileData
-            = std::vector<std::byte>(std::istreambuf_iterator<std::byte>(fin),
-                                     std::istreambuf_iterator<std::byte>());
+    std::ifstream fin{fileIn, std::ifstream::ate | std::ifstream::binary};
 
-    auto decoded = garchiever::ArithmeticDecoderDecoded(std::move(inFileData));
+    fin.unsetf(std::ios::skipws);
+
+    // get its size:
+    std::streampos finSize;
+
+    fin.seekg(0, std::ios::end);
+    finSize = fin.tellg();
+    std::cerr << "File size: " << finSize << std::endl;
+    fin.seekg(0, std::ios::beg);
+
+    std::vector<std::byte> finData;
+    finData.resize(finSize);
+
+    fin.read(reinterpret_cast<char*>(finData.data()), finSize);
+
+    auto decoded = garchiever::ArithmeticDecoderDecoded(std::move(finData));
     std::uint8_t symByteLen = decoded.takeT<std::uint8_t>();
+
+    std::cerr << "Word bytes length: "
+              << static_cast<unsigned int>(symByteLen) << std::endl;
 
     std::vector<std::byte> res;
 
@@ -48,6 +67,7 @@ int main(int argc, char* argv[]) {
         break;
     default:
         assert(false);
+        break;
     }
 
     std::ofstream fout;

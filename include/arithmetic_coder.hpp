@@ -4,8 +4,11 @@
 #include <map>
 #include <vector>
 #include <cassert>
+#include <iostream>
+#include <bitset>
 
 #include "arithmetic_coder_encoded.hpp"
+#include "misc.hpp"
 
 namespace garchiever {
 
@@ -51,7 +54,6 @@ private:
     FlowT _symFlow;
     MapSymTo<std::int64_t> _cumulativeNumFound;
     std::int64_t _totalSymsCount;
-    std::size_t _nonEncodedSize;
 };
 
 }  // namespace garchiever
@@ -69,17 +71,28 @@ template <class FlowT>
 auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     auto ret = Res();
 
-    ret.putT(static_cast<uint8_t>(Sym::numBytes));
-    ret.putT(static_cast<uint8_t>(_symFlow.getTailSize()));
+    constexpr std::uint8_t numBytes = Sym::numBytes;
+    ret.putT<std::uint8_t>(numBytes);
+    std::cerr << "Num bytes: " << static_cast<unsigned int>(numBytes) << std::endl;
+    auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
+    ret.putT<std::uint8_t>(tailSize);
+    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
     auto tail = _symFlow.getTail();
     for (auto tailByte : tail) {
         ret.putByte(tailByte);
+        std::cerr << tailByte << ' ';
     }
+    std::cerr << std::endl;
     ret.putT(static_cast<uint64_t>(_cumulativeNumFound.size()));
+    std::cerr << "Number of unique words: "
+              << _cumulativeNumFound.size() << std::endl;
     for (auto [word, cumulFound]: _cumulativeNumFound) {
         ret.putT(word);
-        ret.putT(_cumulativeNumFound);
+        std::cerr << "Word: " << word;
+        ret.putT(_cumulativeNumFound[word]);
+        std::cerr << "Count: " << _cumulativeNumFound[word] << std::endl;
     }
+    std::cerr << "Total count: " << _totalSymsCount << std::endl;
     ret.putT(static_cast<uint64_t>(_totalSymsCount));
 
     constexpr auto wordsNum = static_cast<std::uint64_t>(Sym::maxNum);
@@ -91,7 +104,13 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     std::uint64_t high = wordsNum;
     std::size_t btf = 0;
 
+    std::size_t coded = 0;
+
     for (auto sym : _symFlow) {
+
+        std::cerr << coded << std::endl;
+        coded++;
+
         assert(high >= low && "high must be greater or equal than low");
         std::uint64_t range = high - low;
 
@@ -109,8 +128,8 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
                 ret.putBit(true);
                 ret.putBitsRepeat(false, btf);
                 btf = 0;
-                high = high * 2 - range;
-                low = low * 2 - range;
+                high = high * 2 - wordsNum;
+                low = low * 2 - wordsNum;
             } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
                 high = 2 * high - wordsNum_2;
                 low = 2 * low - wordsNum_2;
@@ -121,10 +140,12 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
         }
     }
 
-    if (low <= wordsNum_4) {
-        ret.putBitsRepeat(false, btf);
+    if (low < wordsNum_4) {
+        ret.putBit(false);
+        ret.putBitsRepeat(true, btf + 1);
     } else {
-        ret.putBitsRepeat(false, btf);
+        ret.putBit(true);
+        ret.putBitsRepeat(false, btf + 1);
     }
 
     return ret;
@@ -137,9 +158,8 @@ void garchiever::ArithmeticCoder<FlowT>::_countProbabilities() {
     for (auto word : _symFlow) {
         numFound[word]++;
     }
-    _nonEncodedSize = _symFlow.bytesLeft();
     _totalSymsCount = 0;
-    for (auto [word, num] : _cumulativeNumFound) {
+    for (auto [word, num] : numFound) {
         _cumulativeNumFound[word] = _totalSymsCount;
         _totalSymsCount += num;
     }

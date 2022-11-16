@@ -61,7 +61,9 @@ garchiever::ArithmeticDecoderDecoded::ArithmeticDecoderDecoded(
       _startedBits{false},
       _bytesRead{0},
       _currBitFlag{0b10000000} {
-    _data.insert(_data.end(), sizeof(std::uint64_t), std::byte{0});
+    _data.insert(_data.end(),
+                 sizeof(std::uint64_t) /** Add more then need possibly. */,
+                 std::byte{0});
 }
 
 //----------------------------------------------------------------------------//
@@ -77,8 +79,10 @@ std::byte garchiever::ArithmeticDecoderDecoded::takeByte() {
 //----------------------------------------------------------------------------//
 bool garchiever::ArithmeticDecoderDecoded::takeBit() {
     _startedBits = true;
-    bool ret = (_data[_bytesRead] & _currBitFlag) == std::byte{0};
+    bool ret = (_data[_bytesRead] & _currBitFlag) != std::byte{0};
     _moveBitFlag();
+    std::cerr << ret ? 1 : 0;
+    return ret;
 }
 
 //----------------------------------------------------------------------------//

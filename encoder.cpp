@@ -7,19 +7,37 @@
 #include "include/byte_flow.hpp"
 
 int main(int argc, char* argv[]) {
+    /**
     assert(argc == 3 && "Wrong number of arguments.");
 
     std::string fileIn = argv[1];
     std::string fileOut = argv[2];
+    */
 
-    std::ifstream fin;
-    fin.open(fileIn, std::ios::binary | std::ios::in);
+    std::string fileIn = "small.png";
+    std::string fileOut = "fout";
 
-    auto inFileData
-            = std::vector<char>(std::istreambuf_iterator<char>(fin),
-                                std::istreambuf_iterator<char>());
+    std::ifstream fin{fileIn, std::ifstream::binary};
 
-    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<1>>(reinterpret_cast<const std::byte*>(inFileData.data()), inFileData.size());
+    // Stop eating new lines in binary mode!!!
+    fin.unsetf(std::ios::skipws);
+
+    // get its size:
+    std::streampos finSize;
+
+    fin.seekg(0, std::ios::end);
+    finSize = fin.tellg();
+    std::cerr << "File size: " << finSize << std::endl;
+    fin.seekg(0, std::ios::beg);
+
+    // reserve capacity
+    std::vector<std::byte> finData;
+    finData.resize(finSize);
+
+    // Read data
+    fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
+
+    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<1>>(reinterpret_cast<const std::byte*>(finData.data()), finData.size());
     auto coder = garchiever::ArithmeticCoder(std::move(byteFlow));
     auto encoded = coder.encode();
 
