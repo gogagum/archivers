@@ -101,38 +101,34 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     constexpr auto wordsNum_3to4 = 3 * wordsNum / 4;
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum;
+    std::uint64_t high = wordsNum * _totalSymsCount;
     std::size_t btf = 0;
 
-    std::size_t coded = 0;
-
     for (auto sym : _symFlow) {
-
-        std::cerr << coded << std::endl;
-        coded++;
-
-        assert(high >= low && "high must be greater or equal than low");
         std::uint64_t range = high - low;
 
         high = low + range * _getCumulativeNumFoundHigh(sym) / _totalSymsCount;
+        assert(high < wordsNum * _totalSymsCount);
         low = low + range * _getCumulativeNumFoundLow(sym) / _totalSymsCount;
 
         while (true) {
-            if (high <= wordsNum_2) {
+            assert(high > low && "high must be greater than low");
+            if (high <= wordsNum_2 * _totalSymsCount) {
                 ret.putBit(false);
                 ret.putBitsRepeat(true, btf);
                 btf = 0;
                 high = high * 2;
                 low = low * 2;
-            } else if (low >= wordsNum_2) {
+            } else if (low >= wordsNum_2 * _totalSymsCount) {
                 ret.putBit(true);
                 ret.putBitsRepeat(false, btf);
                 btf = 0;
-                high = high * 2 - wordsNum;
-                low = low * 2 - wordsNum;
-            } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
-                high = 2 * high - wordsNum_2;
-                low = 2 * low - wordsNum_2;
+                high = high * 2 - wordsNum * _totalSymsCount;
+                low = low * 2 - wordsNum * _totalSymsCount;
+            } else if (low >= wordsNum_4 * _totalSymsCount
+                       && high <= wordsNum_3to4 * _totalSymsCount) {
+                high = high * 2 - wordsNum_2 * _totalSymsCount;
+                low = low * 2 - wordsNum_2 * _totalSymsCount;
                 ++btf;
             } else {
                 break;

@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     std::string fileOut = argv[2];
     */
 
-    std::string fileIn = "small.png";
+    std::string fileIn = "very_small.png";
     std::string fileOut = "fout";
 
     std::ifstream fin{fileIn, std::ifstream::binary};

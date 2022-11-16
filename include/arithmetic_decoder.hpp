@@ -6,6 +6,7 @@
 #include <map>
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 #include "arithmetic_decoder_decoded.hpp"
 #include "misc.hpp"
@@ -104,30 +105,31 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
     std::vector<SymT> syms;
 
     for (std::uint64_t i = 0; i < _totalSymsCount; ++i) {
-        //assert(value <= high);
+
         std::uint64_t range = high - low;
-        std::int64_t aux = ((value - low) * _totalSymsCount);
+        std::uint64_t aux = (value - low) * _totalSymsCount;
 
         auto symFound = SymT();
         bool found = false;
 
         for (auto [sym, _]: _cumulativeNumFound) {
             if (_getCumulativeNumFoundHigh(sym) * range >= aux
-                && _getCumulativeNumFoundLow(sym) * range <= aux) {
+                && _getCumulativeNumFoundLow(sym) * range < aux) {
                 symFound = sym;
                 found = true;
                 break;
             }
         }
 
-        if (!found) {
-            symFound = _cumulativeNumFound.rbegin()->first;
-        }
+        assert(found);
 
         syms.push_back(symFound);
 
-        high = low + range * _getCumulativeNumFoundHigh(symFound) / _totalSymsCount;
+        high = low + range * _getCumulativeNumFoundHigh(symFound) / _totalSymsCount + 1;
         low = low + range * _getCumulativeNumFoundLow(symFound) / _totalSymsCount;
+
+        assert(value >= low);
+        assert(value < high);
 
         constexpr std::uint64_t one = std::uint64_t{1};
         constexpr std::uint64_t zero = std::uint64_t{0};
@@ -138,19 +140,17 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
                 low = low * 2;
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? one : zero);
-                value %= SymT::maxNum;
             } else if (low >= wordsNum_2) {
                 high = high * 2 - wordsNum;
                 low = low * 2 - wordsNum;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum + (bit ? one : zero);
-                value %= SymT::maxNum;
-            } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
+            } else if (low >= wordsNum_4
+                       && high <= wordsNum_3to4) {
                 high = high * 2 - wordsNum_2;
                 low = low * 2 - wordsNum_2;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum_2 + (bit ? one : zero);
-                value %= SymT::maxNum;
             } else {
                 break;
             }
