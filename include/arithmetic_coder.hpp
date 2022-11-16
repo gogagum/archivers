@@ -101,38 +101,43 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     constexpr auto wordsNum_3to4 = 3 * wordsNum / 4;
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum * _totalSymsCount;
+    std::uint64_t high = wordsNum - 1;
     std::size_t btf = 0;
-
+std::cout << "hoho\n";
     for (auto sym : _symFlow) {
-        std::uint64_t range = high - low;
+        std::uint64_t range = high - low + 1;
 
-        high = low + range * _getCumulativeNumFoundHigh(sym) / _totalSymsCount;
-        assert(high < wordsNum * _totalSymsCount);
-        low = low + range * _getCumulativeNumFoundLow(sym) / _totalSymsCount;
+        auto h = _getCumulativeNumFoundHigh(sym);
+        auto l = _getCumulativeNumFoundLow(sym);
+
+        high = low + (range * _getCumulativeNumFoundHigh(sym)) / _totalSymsCount - 1;
+        low = low + (range * _getCumulativeNumFoundLow(sym)) / _totalSymsCount;
+
+        if (high < low) {
+            high = low;
+        }
 
         while (true) {
-            assert(high > low && "high must be greater than low");
-            if (high <= wordsNum_2 * _totalSymsCount) {
+            if (high < wordsNum_2) {
                 ret.putBit(false);
                 ret.putBitsRepeat(true, btf);
                 btf = 0;
-                high = high * 2;
+                high = high * 2 + 1;
                 low = low * 2;
-            } else if (low >= wordsNum_2 * _totalSymsCount) {
+            } else if (low >= wordsNum_2) {
                 ret.putBit(true);
                 ret.putBitsRepeat(false, btf);
                 btf = 0;
-                high = high * 2 - wordsNum * _totalSymsCount;
-                low = low * 2 - wordsNum * _totalSymsCount;
-            } else if (low >= wordsNum_4 * _totalSymsCount
-                       && high <= wordsNum_3to4 * _totalSymsCount) {
-                high = high * 2 - wordsNum_2 * _totalSymsCount;
-                low = low * 2 - wordsNum_2 * _totalSymsCount;
+                high = high * 2 - wordsNum + 1;
+                low = low * 2 - wordsNum;
+            } else if (low >= wordsNum_4 && high < wordsNum_3to4) {
+                high = high * 2 - wordsNum_2 + 1;
+                low = low * 2 - wordsNum_2;
                 ++btf;
             } else {
                 break;
             }
+            assert(high >= low);
         }
     }
 

@@ -100,21 +100,20 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
     }
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum;
+    std::uint64_t high = wordsNum - 1;
 
     std::vector<SymT> syms;
 
     for (std::uint64_t i = 0; i < _totalSymsCount; ++i) {
 
-        std::uint64_t range = high - low;
-        std::uint64_t aux = (value - low) * _totalSymsCount;
+        std::uint64_t range = high - low + 1;
+        std::uint64_t aux = ((value - low + 1) * _totalSymsCount - 1) / range;
 
         auto symFound = SymT();
         bool found = false;
 
         for (auto [sym, _]: _cumulativeNumFound) {
-            if (_getCumulativeNumFoundHigh(sym) * range >= aux
-                && _getCumulativeNumFoundLow(sym) * range < aux) {
+            if (_getCumulativeNumFoundHigh(sym) > aux) {
                 symFound = sym;
                 found = true;
                 break;
@@ -125,29 +124,33 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
 
         syms.push_back(symFound);
 
-        high = low + range * _getCumulativeNumFoundHigh(symFound) / _totalSymsCount + 1;
-        low = low + range * _getCumulativeNumFoundLow(symFound) / _totalSymsCount;
+        high = low + (range * _getCumulativeNumFoundHigh(symFound)) / _totalSymsCount - 1;
+        low = low + (range * _getCumulativeNumFoundLow(symFound)) / _totalSymsCount;
 
-        assert(value >= low);
-        assert(value < high);
+        if (high < value) {
+            high = value;
+        }
+
+        if (low > value) {
+            low = value;
+        }
 
         constexpr std::uint64_t one = std::uint64_t{1};
         constexpr std::uint64_t zero = std::uint64_t{0};
 
         while (true) {
-            if (high <= wordsNum_2) {
-                high = high * 2;
+            if (high < wordsNum_2) {
+                high = high * 2 + 1;
                 low = low * 2;
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? one : zero);
             } else if (low >= wordsNum_2) {
-                high = high * 2 - wordsNum;
+                high = high * 2 - wordsNum + 1;
                 low = low * 2 - wordsNum;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum + (bit ? one : zero);
-            } else if (low >= wordsNum_4
-                       && high <= wordsNum_3to4) {
-                high = high * 2 - wordsNum_2;
+            } else if (low >= wordsNum_4 && high < wordsNum_3to4) {
+                high = high * 2 - wordsNum_2 + 1;
                 low = low * 2 - wordsNum_2;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum_2 + (bit ? one : zero);
