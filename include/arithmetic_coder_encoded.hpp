@@ -1,6 +1,7 @@
 #ifndef ARITHMETIC_CODER_ENCODED_HPP
 #define ARITHMETIC_CODER_ENCODED_HPP
 
+#include <boost/range/adaptor/reversed.hpp>
 #include <vector>
 #include <array>
 #include <cstdint>
@@ -107,7 +108,7 @@ void garchiever::ArithmeticCoderEncoded::putT(T s) {
     static_assert(sizeof(SizeTBytes) == sizeof(T), "Error with sizes.");
 
     auto& bytes = reinterpret_cast<SizeTBytes&>(s);
-    for (auto byte: std::ranges::reverse_view(bytes)) {
+    for (auto byte: boost::adaptors::reverse(bytes)) {
         putByte(byte);
     }
 }
