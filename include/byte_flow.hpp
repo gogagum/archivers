@@ -184,7 +184,7 @@ template <std::uint8_t numBytes>
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::ByteFlow(
         const std::byte* ptr, std::size_t size)
   : _currOffset(0) {
-    _bytes.resize(size * numBytes);
+    _bytes.resize(size);
     std::memcpy(_bytes.data(), ptr, size);
 }
 
@@ -203,7 +203,7 @@ auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end(
         ) const -> Iterator
 {
-    return Iterator(const_cast<std::byte*>(_bytes.data() + _bytes.size()));
+    return Iterator(const_cast<std::byte*>(_bytes.data() + countNumberOfWords() * numBytes));
 }
 
 //----------------------------------------------------------------------------//
@@ -292,7 +292,7 @@ template <std::integral IntegralT>
 auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::Iterator::operator+(
         IntegralT i) -> Iterator {
-    return Iterator(_ptr + i);
+    return Iterator(_ptr + i * numBytes);
 }
 
 //----------------------------------------------------------------------------//

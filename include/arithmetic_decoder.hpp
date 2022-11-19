@@ -107,13 +107,13 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
     for (std::uint64_t i = 0; i < _totalSymsCount; ++i) {
 
         std::uint64_t range = high - low + 1;
-        std::uint64_t aux = ((value - low + 1) * _totalSymsCount - 1) / range;
+        std::uint64_t aux = ((value - low + 1) * _totalSymsCount);
 
         auto symFound = SymT();
         bool found = false;
 
         for (auto [sym, _]: _cumulativeNumFound) {
-            if (_getCumulativeNumFoundHigh(sym) > aux) {
+            if (_getCumulativeNumFoundHigh(sym) * range > aux) {
                 symFound = sym;
                 found = true;
                 break;
@@ -126,14 +126,6 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
 
         high = low + (range * _getCumulativeNumFoundHigh(symFound)) / _totalSymsCount - 1;
         low = low + (range * _getCumulativeNumFoundLow(symFound)) / _totalSymsCount;
-
-        if (high < value) {
-            high = value;
-        }
-
-        if (low > value) {
-            low = value;
-        }
 
         constexpr std::uint64_t one = std::uint64_t{1};
         constexpr std::uint64_t zero = std::uint64_t{0};
@@ -161,6 +153,7 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
     }
     std::vector<std::byte> ret(syms.size() * SymT::numBytes);
     std::memcpy(ret.data(), syms.data(), syms.size() * SymT::numBytes);
+    ret.insert(ret.end(), _tail.begin(), _tail.end());
     return ret;
 }
 

@@ -103,7 +103,9 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
     std::uint64_t low = 0;
     std::uint64_t high = wordsNum - 1;
     std::size_t btf = 0;
-std::cout << "hoho\n";
+
+    std::size_t i = 0;
+
     for (auto sym : _symFlow) {
         std::uint64_t range = high - low + 1;
 
@@ -116,6 +118,10 @@ std::cout << "hoho\n";
         if (high < low) {
             high = low;
         }
+
+        std::cerr << '|';
+        std::cerr << i << sym << std::endl;
+        ++i;
 
         while (true) {
             if (high < wordsNum_2) {
@@ -137,9 +143,11 @@ std::cout << "hoho\n";
             } else {
                 break;
             }
-            assert(high >= low);
         }
+        std::cerr << std::endl;
     }
+
+    std::cerr << "Final bits to follow: " << btf << std::endl;
 
     if (low < wordsNum_4) {
         ret.putBit(false);
