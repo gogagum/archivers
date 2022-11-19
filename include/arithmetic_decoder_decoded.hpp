@@ -3,6 +3,7 @@
 #ifndef ARITHMETIC_DECODER_DECODED_HPP
 #define ARITHMETIC_DECODER_DECODED_HPP
 
+#include <boost/range/adaptor/reversed.hpp>
 #include <vector>
 #include <cstddef>
 #include <stdexcept>
@@ -81,7 +82,7 @@ bool garchiever::ArithmeticDecoderDecoded::takeBit() {
     _startedBits = true;
     bool ret = (_data[_bytesRead] & _currBitFlag) != std::byte{0};
     _moveBitFlag();
-    std::cerr << ret ? 1 : 0;
+    std::cerr << (ret ? 1 : 0);
     return ret;
 }
 
@@ -94,7 +95,7 @@ T garchiever::ArithmeticDecoderDecoded::takeT() {
 
     auto ret = T();
     auto& bytes = reinterpret_cast<TBytes&>(ret);
-    for (auto& byte: std::ranges::reverse_view(bytes)) {
+    for (auto& byte: boost::adaptors::reverse(bytes)) {
         byte = takeByte();
     }
     return ret;
