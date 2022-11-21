@@ -1,9 +1,12 @@
+#pragma once
+
 #ifndef ARITHMETIC_CODER_HPP
 #define ARITHMETIC_CODER_HPP
 
 #include <map>
 #include <vector>
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <bitset>
 
@@ -15,7 +18,7 @@ namespace garchiever {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT>
+template <class FlowT, typename CountT = std::uint32_t>
 class ArithmeticCoder {
 public:
 
@@ -41,9 +44,15 @@ private:
 
     void _countProbabilities();
 
-    std::uint64_t _getCumulativeNumFoundLow(const Sym& word);
+    CountT _getCumulativeNumFoundLow(const Sym& word);
 
-    std::uint64_t _getCumulativeNumFoundHigh(const Sym& word);
+    CountT _getCumulativeNumFoundHigh(const Sym& word);
+
+    void _serializeNumBytes(Res& res);
+
+    void _serializeTail(Res& res);
+
+    void _serializeAlphabet(Res& res);
 
 private:
 
@@ -52,48 +61,28 @@ private:
 
 private:
     FlowT _symFlow;
-    MapSymTo<std::int64_t> _cumulativeNumFound;
-    std::int64_t _totalSymsCount;
+    MapSymTo<CountT> _cumulativeNumFound;
+    CountT _totalSymsCount;
 };
 
 }  // namespace garchiever
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT>
-garchiever::ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT&& symbolsFlow)
+template <class FlowT, typename CountT>
+garchiever::ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow) {
     _countProbabilities();
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT>
-auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
+template <class FlowT, typename CountT>
+auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     auto ret = Res();
 
-    constexpr std::uint8_t numBytes = Sym::numBytes;
-    ret.putT<std::uint8_t>(numBytes);
-    std::cerr << "Num bytes: " << static_cast<unsigned int>(numBytes) << std::endl;
-    auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
-    ret.putT<std::uint8_t>(tailSize);
-    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
-    auto tail = _symFlow.getTail();
-    for (auto tailByte : tail) {
-        ret.putByte(tailByte);
-        std::cerr << tailByte << ' ';
-    }
-    std::cerr << std::endl;
-    ret.putT(static_cast<uint64_t>(_cumulativeNumFound.size()));
-    std::cerr << "Number of unique words: "
-              << _cumulativeNumFound.size() << std::endl;
-    for (auto [word, cumulFound]: _cumulativeNumFound) {
-        ret.putT(word);
-        std::cerr << "Word: " << word;
-        ret.putT(_cumulativeNumFound[word]);
-        std::cerr << "Count: " << _cumulativeNumFound[word] << std::endl;
-    }
-    std::cerr << "Total count: " << _totalSymsCount << std::endl;
-    ret.putT(static_cast<uint64_t>(_totalSymsCount));
+    _serializeNumBytes(ret);
+    _serializeTail(ret);
+    _serializeAlphabet(ret);
 
     constexpr auto wordsNum = static_cast<std::uint64_t>(Sym::maxNum);
     constexpr auto wordsNum_2 = wordsNum / 2;
@@ -112,8 +101,8 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
         auto h = _getCumulativeNumFoundHigh(sym);
         auto l = _getCumulativeNumFoundLow(sym);
 
-        high = low + (range * _getCumulativeNumFoundHigh(sym)) / _totalSymsCount - 1;
-        low = low + (range * _getCumulativeNumFoundLow(sym)) / _totalSymsCount;
+        high = low + (range * h) / _totalSymsCount - 1;
+        low = low + (range * l) / _totalSymsCount;
 
         if (high < low) {
             high = low;
@@ -161,8 +150,8 @@ auto garchiever::ArithmeticCoder<FlowT>::encode() -> Res {
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT>
-void garchiever::ArithmeticCoder<FlowT>::_countProbabilities() {
+template <class FlowT, typename CountT>
+void garchiever::ArithmeticCoder<FlowT, CountT>::_countProbabilities() {
     MapSymTo<std::uint64_t> numFound;
     for (auto word : _symFlow) {
         numFound[word]++;
@@ -175,24 +164,75 @@ void garchiever::ArithmeticCoder<FlowT>::_countProbabilities() {
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT>
-std::uint64_t
-garchiever::ArithmeticCoder<FlowT>::_getCumulativeNumFoundLow(const Sym &word) {
+template <class FlowT, typename CountT>
+auto
+garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
+        const Sym &word) -> CountT {
     assert(_cumulativeNumFound.contains(word));
     return _cumulativeNumFound[word];
 }
 
 
 //----------------------------------------------------------------------------//
-template <class FlowT>
-std::uint64_t
-garchiever::ArithmeticCoder<FlowT>::_getCumulativeNumFoundHigh(const Sym &word) {
+template <class FlowT, typename CountT>
+auto
+garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
+        const Sym &word) -> CountT {
     assert(_cumulativeNumFound.contains(word));
     auto iter = _cumulativeNumFound.find(word);
     if (auto nextIter = std::next(iter); nextIter == _cumulativeNumFound.end()) {
         return _totalSymsCount;
     } else {
         return nextIter->second;
+    }
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT, typename CountT>
+void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeNumBytes(Res& res) {
+    constexpr std::uint8_t numBytes = Sym::numBytes;
+    res.putT<std::uint8_t>(numBytes);
+    std::cerr << "Num bytes: "
+              << static_cast<unsigned int>(numBytes) << std::endl;
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT, typename CountT>
+void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
+    auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
+    res.putT<std::uint8_t>(tailSize);
+    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize)
+              << std::endl;
+
+    auto tail = _symFlow.getTail();
+    for (auto tailByte : tail) {
+        res.putByte(tailByte);
+        std::cerr << tailByte << ' ';
+    }
+    std::cerr << std::endl;
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT, typename CountT>
+void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
+    { // Number of unique words
+        res.putT<std::uint32_t>(_cumulativeNumFound.size());
+        std::cerr << "Number of unique words: "
+                  << _cumulativeNumFound.size() << std::endl;
+    }
+
+    { // Unique words and their counts
+        for (auto [word, cumulFound]: _cumulativeNumFound) {
+            res.putT(word);
+            std::cerr << "Word: " << word;
+            res.putT<CountT>(cumulFound);
+            std::cerr << "Count: " << cumulFound << std::endl;
+        }
+    }
+
+    { // Total words count.
+        std::cerr << "Total count: " << _totalSymsCount << std::endl;
+        res.putT<CountT>(_totalSymsCount);
     }
 }
 

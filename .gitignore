@@ -71,3 +71,7 @@ Thumbs.db
 *.dll
 *.exe
 
+.kdev4
+archievers.kdev4
+build/
+CMakeLists.txt.user

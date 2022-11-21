@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstddef>
 #include <stdexcept>
+#include <iostream>>
 #include <array>
 #include <ranges>
 
@@ -76,7 +77,6 @@ std::byte garchiever::ArithmeticDecoderDecoded::takeByte() {
 //----------------------------------------------------------------------------//
 bool garchiever::ArithmeticDecoderDecoded::takeBit() {
     _startedBits = true;
-    assert(_bytesRead <= _data.size());
     if (_bytesRead == _data.size()) {
         return false;
     }

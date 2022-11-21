@@ -5,8 +5,10 @@
 
 #include <map>
 #include <cstdint>
+#include <cstddef>
 #include <cstring>
 #include <algorithm>
+#include <iostream>
 
 #include "arithmetic_decoder_decoded.hpp"
 #include "misc.hpp"
@@ -16,7 +18,7 @@ namespace garchiever {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT>
+template <class SymT, typename CountT = std::uint32_t>
 class ArithmeticDecoder{
 public:
     using Source = ArithmeticDecoderDecoded;
@@ -26,20 +28,33 @@ public:
     std::vector<std::byte> decode();
 
 private:
-    using MapToUint64T = std::map<SymT, std::uint64_t, typename SymT::Order>;
+    using MapSymToCount = std::map<SymT, CountT, typename SymT::Order>;
+
+    struct Alphabet {
+        MapSymToCount cumulativeNumFound;
+        std::uint64_t numUniqueSyms;
+        CountT totalSymsCount;
+    };
+
+    constexpr static auto wordsNum = static_cast<std::uint64_t>(SymT::maxNum);
+    constexpr static auto wordsNum_2 = wordsNum / 2;
+    constexpr static auto wordsNum_4 = wordsNum / 4;
+    constexpr static auto wordsNum_3to4 = 3 * wordsNum / 4;
 
 private:
 
-    std::uint64_t _getCumulativeNumFoundLow(const SymT& sym);
+    CountT _getCumulativeNumFoundLow(const SymT& sym);
 
-    std::uint64_t _getCumulativeNumFoundHigh(const SymT& sym);
+    CountT _getCumulativeNumFoundHigh(const SymT& sym);
+
+    std::vector<std::byte> _deserializeTail();
+
+    Alphabet _deserializeAlphabet();
 
 private:
-    MapToUint64T _cumulativeNumFound;
     Source _source;
-    std::uint64_t _numUniqueSyms;
-    std::uint64_t _totalSymsCount;
     std::vector<std::byte> _tail;
+    Alphabet _alphabet;
 };
 
 }  // garchiever
@@ -48,49 +63,16 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT>
-garchiever::ArithmeticDecoder<SymT>::ArithmeticDecoder(Source&& source)
-    : _source(std::move(source)) {
-    std::uint8_t tailSize = _source.takeT<std::uint8_t>();
-    _tail.resize(tailSize);
-    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
-    for (auto& tailByte: _tail) {
-        tailByte = _source.takeByte();
-        std::cerr << tailByte << ' ';
-    }
-    std::cerr << std::endl;
-    _numUniqueSyms = _source.takeT<std::uint64_t>();
-    std::cerr << "Unique syms count: " << _numUniqueSyms << std::endl;
-    for (std::uint64_t i = 0; i < _numUniqueSyms; ++i) {
-        auto sym = _source.takeT<SymT>();
-        std::cerr << "Sym: " << sym;
-        if constexpr (SymT::numBytes == 1) {
-            std::cerr << " SymChar: ";
-            if (char& asChar = *reinterpret_cast<char*>(&sym); asChar == '\0') {
-                std::cerr << "\\0";
-            } else if (asChar == '\n') {
-                std::cerr << "\\n";
-            } else {
-                std::cerr << asChar;
-            }
-        }
-        auto numFound = _source.takeT<std::uint64_t>();
-        std::cerr << " Cumulative num: " << numFound << std::endl;
-        _cumulativeNumFound[sym] = numFound;
-    }
-    _totalSymsCount = _source.takeT<std::uint64_t>();
-    std::cerr << "Total count: " << _totalSymsCount << std::endl;
-}
+template <class SymT, typename CountT>
+garchiever::ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
+    : _source(std::move(source)),
+      _tail(_deserializeTail()),
+      _alphabet(_deserializeAlphabet()) { }
 
 //----------------------------------------------------------------------------//
-template <class SymT>
+template <class SymT, typename CountT>
 std::vector<std::byte>
-garchiever::ArithmeticDecoder<SymT>::decode() {
-    constexpr auto wordsNum = static_cast<std::uint64_t>(SymT::maxNum);
-    constexpr auto wordsNum_2 = wordsNum / 2;
-    constexpr auto wordsNum_4 = wordsNum / 4;
-    constexpr auto wordsNum_3to4 = 3 * wordsNum / 4;
-
+garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
     std::uint64_t value = 0;
 
     for (std::size_t bitIndex = 0; bitIndex < SymT::numBytes * 8; ++bitIndex) {
@@ -104,28 +86,25 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
 
     std::vector<SymT> syms;
 
-    for (std::uint64_t i = 0; i < _totalSymsCount; ++i) {
-
+    for (std::uint64_t i = 0; i < _alphabet.totalSymsCount; ++i) {
         std::uint64_t range = high - low + 1;
-        std::uint64_t aux = ((value - low + 1) * _totalSymsCount);
+        std::uint64_t aux = ((value - low + 1) * _alphabet.totalSymsCount);
 
-        auto symFound = SymT();
-        bool found = false;
+        std::optional<SymT> symOpt;
 
-        for (auto [sym, _]: _cumulativeNumFound) {
+        for (auto [sym, _]: _alphabet.cumulativeNumFound) {
             if (_getCumulativeNumFoundHigh(sym) * range > aux) {
-                symFound = sym;
-                found = true;
+                symOpt = sym;
                 break;
             }
         }
 
-        assert(found);
+        assert(symOpt.has_value());
+        auto sym = symOpt.value();
+        syms.push_back(sym);
 
-        syms.push_back(symFound);
-
-        high = low + (range * _getCumulativeNumFoundHigh(symFound)) / _totalSymsCount - 1;
-        low = low + (range * _getCumulativeNumFoundLow(symFound)) / _totalSymsCount;
+        high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount - 1;
+        low = low + (range * _getCumulativeNumFoundLow(sym)) / _alphabet.totalSymsCount;
 
         constexpr std::uint64_t one = std::uint64_t{1};
         constexpr std::uint64_t zero = std::uint64_t{0};
@@ -158,23 +137,71 @@ garchiever::ArithmeticDecoder<SymT>::decode() {
 }
 
 //----------------------------------------------------------------------------//
-template <class SymT>
-std::uint64_t
-garchiever::ArithmeticDecoder<SymT>::_getCumulativeNumFoundLow(const SymT &word) {
-    assert(_cumulativeNumFound.contains(word));
-    return _cumulativeNumFound[word];
+template <class SymT, typename CountT>
+auto
+garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
+        const SymT &word) -> CountT {
+    assert(_alphabet.cumulativeNumFound.contains(word));
+    return _alphabet.cumulativeNumFound[word];
 }
 
 
 //----------------------------------------------------------------------------//
-template <class SymT>
-std::uint64_t
-garchiever::ArithmeticDecoder<SymT>::_getCumulativeNumFoundHigh(const SymT &word) {
-    assert(_cumulativeNumFound.contains(word));
-    auto iter = _cumulativeNumFound.find(word);
-    if (auto nextIter = std::next(iter); nextIter == _cumulativeNumFound.end()) {
-        return _totalSymsCount;
+template <class SymT, typename CountT>
+auto
+garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
+        const SymT &word) -> CountT {
+    assert(_alphabet.cumulativeNumFound.contains(word));
+    auto iter = _alphabet.cumulativeNumFound.find(word);
+    if (auto nextIter = std::next(iter);
+            nextIter == _alphabet.cumulativeNumFound.end()) {
+        return _alphabet.totalSymsCount;
     } else {
         return nextIter->second;
     }
 }
+
+//----------------------------------------------------------------------------//
+template <class SymT, typename CountT>
+std::vector<std::byte>
+garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
+    std::uint8_t tailSize = _source.takeT<std::uint8_t>();
+    std::vector<std::byte> tail(tailSize);
+    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
+    for (auto& tailByte: _tail) {
+        tailByte = _source.takeByte();
+        std::cerr << tailByte << ' ';
+    }
+    std::cerr << std::endl;
+    return tail;
+}
+
+//----------------------------------------------------------------------------//
+template <class SymT, typename CountT>
+auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
+        ) -> Alphabet {
+    Alphabet ret;
+    ret.numUniqueSyms = _source.takeT<std::uint32_t>();
+    std::cerr << "Unique syms count: " << ret.numUniqueSyms << std::endl;
+    for (std::uint64_t i = 0; i < ret.numUniqueSyms; ++i) {
+        auto sym = _source.takeT<SymT>();
+        std::cerr << "Sym: " << sym;
+        if constexpr (SymT::numBytes == 1) {
+            std::cerr << " SymChar: ";
+            if (char& asChar = *reinterpret_cast<char*>(&sym); asChar == '\0') {
+                std::cerr << "\\0";
+            } else if (asChar == '\n') {
+                std::cerr << "\\n";
+            } else {
+                std::cerr << asChar;
+            }
+        }
+        auto numFound = _source.takeT<CountT>();
+        std::cerr << " Cumulative num: " << numFound << std::endl;
+        ret.cumulativeNumFound[sym] = numFound;
+    }
+    ret.totalSymsCount = _source.takeT<CountT>();
+    std::cerr << "Total count: " << ret.totalSymsCount << std::endl;
+    return ret;
+}
+
