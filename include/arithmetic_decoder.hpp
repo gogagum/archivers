@@ -3,6 +3,7 @@
 #ifndef ARITHMETIC_DECODER_HPP
 #define ARITHMETIC_DECODER_HPP
 
+#include <boost/container/static_vector.hpp>
 #include <map>
 #include <cstdint>
 #include <cstddef>
@@ -23,13 +24,25 @@ class ArithmeticDecoder{
 public:
     using Source = ArithmeticDecoderDecoded;
 public:
+
+    /**
+     * @brief ArithmeticDecoder constructor from file source.
+     * @param source
+     */
     ArithmeticDecoder(Source&& source);
 
+    /**
+     * @brief decode - decode source as a vector of bytes.
+     * @return
+     */
     std::vector<std::byte> decode();
 
 private:
     using MapSymToCount = std::map<SymT, CountT, typename SymT::Order>;
 
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The Alphabet class
+    ///
     struct Alphabet {
         MapSymToCount cumulativeNumFound;
         std::uint64_t numUniqueSyms;
@@ -47,13 +60,13 @@ private:
 
     CountT _getCumulativeNumFoundHigh(const SymT& sym);
 
-    std::vector<std::byte> _deserializeTail();
+    boost::container::static_vector<std::byte, SymT::numBytes> _deserializeTail();
 
     Alphabet _deserializeAlphabet();
 
 private:
     Source _source;
-    std::vector<std::byte> _tail;
+    boost::container::static_vector<std::byte, SymT::numBytes> _tail;
     Alphabet _alphabet;
 };
 
@@ -77,7 +90,7 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
 
     for (std::size_t bitIndex = 0; bitIndex < SymT::numBytes * 8; ++bitIndex) {
         std::uint64_t digit = _source.takeBit() ? std::uint64_t{1} : std::uint64_t{0};
-        value *= 2;
+        value <<= 1;
         value += digit;
     }
 
@@ -106,25 +119,22 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
         high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount - 1;
         low = low + (range * _getCumulativeNumFoundLow(sym)) / _alphabet.totalSymsCount;
 
-        constexpr std::uint64_t one = std::uint64_t{1};
-        constexpr std::uint64_t zero = std::uint64_t{0};
-
         while (true) {
             if (high < wordsNum_2) {
                 high = high * 2 + 1;
                 low = low * 2;
                 bool bit = _source.takeBit();
-                value = value * 2 + (bit ? one : zero);
+                value = value * 2 + (bit ? 1 : 0);
             } else if (low >= wordsNum_2) {
                 high = high * 2 - wordsNum + 1;
                 low = low * 2 - wordsNum;
                 bool bit = _source.takeBit();
-                value = value * 2 - wordsNum + (bit ? one : zero);
+                value = value * 2 - wordsNum + (bit ? 1 : 0);
             } else if (low >= wordsNum_4 && high < wordsNum_3to4) {
                 high = high * 2 - wordsNum_2 + 1;
                 low = low * 2 - wordsNum_2;
                 bool bit = _source.takeBit();
-                value = value * 2 - wordsNum_2 + (bit ? one : zero);
+                value = value * 2 - wordsNum_2 + (bit ? 1 : 0);
             } else {
                 break;
             }
@@ -163,10 +173,10 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-std::vector<std::byte>
+boost::container::static_vector<std::byte, SymT::numBytes>
 garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
-    std::vector<std::byte> tail(tailSize);
+    boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
     std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
     for (auto& tailByte: _tail) {
         tailByte = _source.takeByte();
