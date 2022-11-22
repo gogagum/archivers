@@ -38,13 +38,26 @@ public:
     std::vector<std::byte> decode();
 
 private:
-    using MapSymToCount = std::map<SymT, CountT, typename SymT::Order>;
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The SymInfo class
+    ///
+    struct SymInfo {
+        SymT sym;
+        CountT count;
+
+        ////////////////////////////////////////////////////////////////////////
+        /// \brief The SymOrder class
+        ///
+        struct SymOrder {
+            bool operator()(const SymInfo& si1, const SymInfo& si2) const;
+        };
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     /// \brief The Alphabet class
     ///
     struct Alphabet {
-        MapSymToCount cumulativeNumFound;
+        std::vector<SymInfo> cumulativeNumFound;
         std::uint64_t numUniqueSyms;
         CountT totalSymsCount;
     };
@@ -95,43 +108,47 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
     }
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum - 1;
+    std::uint64_t high = wordsNum;
 
     std::vector<SymT> syms;
 
     for (std::uint64_t i = 0; i < _alphabet.totalSymsCount; ++i) {
-        std::uint64_t range = high - low + 1;
-        std::uint64_t aux = ((value - low + 1) * _alphabet.totalSymsCount);
+        std::uint64_t range = high - low;
+        std::uint64_t aux = ((value - low + 1) * _alphabet.totalSymsCount - 1);
 
-        std::optional<SymT> symOpt;
+        auto it = _alphabet.cumulativeNumFound.begin();
+        bool found = false;
 
-        for (auto [sym, _]: _alphabet.cumulativeNumFound) {
-            if (_getCumulativeNumFoundHigh(sym) * range > aux) {
-                symOpt = sym;
-                break;
+        while (!found) {
+            std::size_t offset = 1;
+            while ((it + offset * 2 - 1) < _alphabet.cumulativeNumFound.end()
+                   && (it + offset * 2 - 1)->count * range <= aux) {
+                offset *= 2;
             }
+            it += (offset - 1);
+            found = (offset == 1);
         }
 
-        assert(symOpt.has_value());
-        auto sym = symOpt.value();
+        auto sym = it->sym;
+        std::cerr << "Sym: " << sym << std::endl;
         syms.push_back(sym);
 
-        high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount - 1;
+        high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount;
         low = low + (range * _getCumulativeNumFoundLow(sym)) / _alphabet.totalSymsCount;
 
         while (true) {
-            if (high < wordsNum_2) {
-                high = high * 2 + 1;
+            if (high <= wordsNum_2) {
+                high = high * 2;
                 low = low * 2;
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? 1 : 0);
             } else if (low >= wordsNum_2) {
-                high = high * 2 - wordsNum + 1;
+                high = high * 2 - wordsNum;
                 low = low * 2 - wordsNum;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum + (bit ? 1 : 0);
-            } else if (low >= wordsNum_4 && high < wordsNum_3to4) {
-                high = high * 2 - wordsNum_2 + 1;
+            } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
+                high = high * 2 - wordsNum_2;
                 low = low * 2 - wordsNum_2;
                 bool bit = _source.takeBit();
                 value = value * 2 - wordsNum_2 + (bit ? 1 : 0);
@@ -150,9 +167,14 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
 template <class SymT, typename CountT>
 auto
 garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
-        const SymT &word) -> CountT {
-    assert(_alphabet.cumulativeNumFound.contains(word));
-    return _alphabet.cumulativeNumFound[word];
+        const SymT &sym) -> CountT {
+    auto fakeInfo = SymInfo(sym, 0);
+    auto iter = std::lower_bound(_alphabet.cumulativeNumFound.begin(),
+                                 _alphabet.cumulativeNumFound.end(),
+                                 fakeInfo, typename SymInfo::SymOrder());
+    assert(iter != _alphabet.cumulativeNumFound.end());
+
+    return iter->count;
 }
 
 
@@ -160,14 +182,17 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
 template <class SymT, typename CountT>
 auto
 garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
-        const SymT &word) -> CountT {
-    assert(_alphabet.cumulativeNumFound.contains(word));
-    auto iter = _alphabet.cumulativeNumFound.find(word);
+        const SymT &sym) -> CountT {
+    auto fakeInfo = SymInfo(sym, 0);
+    auto iter = std::lower_bound(_alphabet.cumulativeNumFound.begin(),
+                                 _alphabet.cumulativeNumFound.end(),
+                                 fakeInfo, typename SymInfo::SymOrder());
+    assert(iter != _alphabet.cumulativeNumFound.end());
     if (auto nextIter = std::next(iter);
             nextIter == _alphabet.cumulativeNumFound.end()) {
         return _alphabet.totalSymsCount;
     } else {
-        return nextIter->second;
+        return nextIter->count;
     }
 }
 
@@ -193,7 +218,7 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
     Alphabet ret;
     ret.numUniqueSyms = _source.takeT<std::uint32_t>();
     std::cerr << "Unique syms count: " << ret.numUniqueSyms << std::endl;
-    for (std::uint64_t i = 0; i < ret.numUniqueSyms; ++i) {
+    for (std::uint64_t i = 0; i < ret.numUniqueSyms; ++i) {        
         auto sym = _source.takeT<SymT>();
         std::cerr << "Sym: " << sym;
         if constexpr (SymT::numBytes == 1) {
@@ -208,10 +233,20 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
         }
         auto numFound = _source.takeT<CountT>();
         std::cerr << " Cumulative num: " << numFound << std::endl;
-        ret.cumulativeNumFound[sym] = numFound;
+        ret.cumulativeNumFound.emplace_back(sym, numFound);
     }
     ret.totalSymsCount = _source.takeT<CountT>();
     std::cerr << "Total count: " << ret.totalSymsCount << std::endl;
     return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+template <class SymT, typename CountT>
+bool
+garchiever::ArithmeticDecoder<SymT, CountT>::SymInfo::SymOrder::operator() (
+        const SymInfo& si1, const SymInfo& si2) const {
+    const typename SymT::Order order;
+    return order(si1.sym, si2.sym);
 }
 
