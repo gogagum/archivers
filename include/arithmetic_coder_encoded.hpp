@@ -16,6 +16,10 @@ namespace garchiever {
 ///
 class ArithmeticCoderEncoded {
 public:
+
+    /**
+     * @brief ArithmeticCoderEncoded - enpty encoded constructor
+     */
     ArithmeticCoderEncoded();
 
     /**
@@ -26,20 +30,34 @@ public:
 
     /**
      * @brief putBitsRepeat
-     * @param bit
-     * @param num
+     * @param bit - bit which is set
+     * @param num - number of bits repeated
      */
     void putBitsRepeat(bool bit, std::size_t num);
 
+    /**
+     * @brief putByte - add byte in the end
+     * @param b - byte
+     */
     void putByte(std::byte b);
 
+    /**
+     * @brief putT - put object as a byte sequence
+     * @param s - object
+     */
     template <class T>
     void putT(T s);
 
-    void fillEnd(bool bit);
-
+    /**
+     * @brief data - get data pointer
+     * @return data pointer
+     */
     const std::byte* data() const;
 
+    /**
+     * @brief bytesSize - get data bytes size
+     * @return data size in bytes
+     */
     const std::size_t bytesSize() const;
 
 private:
@@ -99,13 +117,6 @@ void garchiever::ArithmeticCoderEncoded::putT(T s) {
     auto& bytes = reinterpret_cast<SizeTBytes&>(s);
     for (auto byte: boost::adaptors::reverse(bytes)) {
         putByte(byte);
-    }
-}
-
-//----------------------------------------------------------------------------//
-void garchiever::ArithmeticCoderEncoded::fillEnd(bool bit) {
-    while (_currBitFlag != std::byte{0b10000000}) {
-        putBit(bit);
     }
 }
 

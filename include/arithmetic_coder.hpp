@@ -52,6 +52,9 @@ private:
     template <class Value>
     using MapSymTo = std::map<Sym, Value, typename Sym::Order>;
 
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The SymsData class
+    ///
     struct SymsData {
         MapSymTo<CountT> cumulativeNumFound;
         CountT totalSymsCount;
@@ -113,7 +116,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         high = low + (range * h) / _symsData.totalSymsCount;
         low = low + (range * l) / _symsData.totalSymsCount;
 
-        std::cerr << '|' << i << ' ' << sym << std::endl;
+        std::cerr << "i: " << i << " Sym: " << sym << std::endl;
         ++i;
 
         while (true) {
@@ -150,6 +153,8 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         ret.putBit(true);
         ret.putBitsRepeat(false, btf + 1);
     }
+
+    std::cerr << std::endl;
 
     return ret;
 }

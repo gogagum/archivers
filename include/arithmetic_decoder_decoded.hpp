@@ -29,15 +29,35 @@ public:
 
 public:
 
+    /**
+     * @brief ArithmeticDecoderDecoded
+     * @param data
+     */
     ArithmeticDecoderDecoded(std::vector<std::byte>&& data);
 
+    /**
+     * @brief takeByte
+     * @return
+     */
     std::byte takeByte();
 
+    /**
+     * @brief takeBit
+     * @return
+     */
     bool takeBit();
 
+    /**
+     * @brief takeT
+     * @return
+     */
     template <class T>
     T takeT();
 
+    /**
+     * @brief getSymNumBytes
+     * @return
+     */
     uint8_t getSymNumBytes() const;
 
 private:

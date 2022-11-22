@@ -110,33 +110,6 @@ TEST(ArithmeticCoderEncodedTest, PutUInt32) {
     EXPECT_EQ(encoded.data()[3], std::byte{0b00001000});
 }
 
-//----------------------------------------------------------------------------//
-TEST(ArithmeticCoderEncodedTest, FillEndFalseEmpty) {
-    auto encoded = garchiever::ArithmeticCoderEncoded();
-    encoded.fillEnd(false);
-
-    EXPECT_EQ(encoded.bytesSize(), 0);
-}
-
-//----------------------------------------------------------------------------//
-TEST(ArithmeticCoderEncodedTest, FillEndTrueEmpty) {
-    auto encoded = garchiever::ArithmeticCoderEncoded();
-    encoded.fillEnd(true);
-
-    EXPECT_EQ(encoded.bytesSize(), 0);
-}
-
-//----------------------------------------------------------------------------//
-TEST(ArithmeticCoderEncodedTest, FillEndAfterOneBitTrueEmpty) {
-    auto encoded = garchiever::ArithmeticCoderEncoded();
-
-    encoded.putBit(false);
-    encoded.fillEnd(true);
-
-    EXPECT_EQ(encoded.bytesSize(), 1);
-    EXPECT_EQ(encoded.data()[0], std::byte{0b01111111});
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, Construct) {
