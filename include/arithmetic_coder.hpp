@@ -92,7 +92,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     _serializeAlphabet(ret);
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum;
+    std::uint64_t high = wordsNum * 256;
     std::size_t btf = 0;
 
     std::size_t i = 0;
@@ -110,21 +110,21 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         ++i;
 
         while (true) {
-            if (high <= wordsNum_2) {
+            if (high <= wordsNum_2 * 256) {
                 ret.putBit(false);
                 ret.putBitsRepeat(true, btf);
                 btf = 0;
                 high = high * 2;
                 low = low * 2;
-            } else if (low >= wordsNum_2) {
+            } else if (low >= wordsNum_2 * 256) {
                 ret.putBit(true);
                 ret.putBitsRepeat(false, btf);
                 btf = 0;
-                high = high * 2 - wordsNum;
-                low = low * 2 - wordsNum;
-            } else if (low >= wordsNum_4 && high <= wordsNum_3to4) {
-                high = high * 2 - wordsNum_2;
-                low = low * 2 - wordsNum_2;
+                high = high * 2 - wordsNum * 256;
+                low = low * 2 - wordsNum * 256;
+            } else if (low >= wordsNum_4 * 256 && high <= wordsNum_3to4 * 256) {
+                high = high * 2 - wordsNum_2 * 256;
+                low = low * 2 - wordsNum_2 * 256;
                 ++btf;
             } else {
                 break;
@@ -135,7 +135,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
 
     std::cerr << "Final bits to follow: " << btf << std::endl;
 
-    if (low < wordsNum_4) {
+    if (low < wordsNum_4 * 256) {
         ret.putBit(false);
         ret.putBitsRepeat(true, btf + 1);
     } else {

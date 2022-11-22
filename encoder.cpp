@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<2>>(reinterpret_cast<const std::byte*>(finData.data()), finData.size());
+    auto byteFlow = garchiever::ByteFlow<garchiever::BytesSymbol<1>>(reinterpret_cast<const std::byte*>(finData.data()), finData.size());
     auto coder = garchiever::ArithmeticCoder(std::move(byteFlow));
     auto encoded = coder.encode();
 

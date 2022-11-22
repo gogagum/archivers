@@ -67,14 +67,6 @@ TEST(ArithmeticCoderEncodedTest, PutBitAfterByte) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(ArithmeticCoderEncodedTest, PutByteAfterBit) {
-    auto encoded = garchiever::ArithmeticCoderEncoded();
-    encoded.putBit(false);
-    EXPECT_THROW(encoded.putByte(std::byte{0b10011101}),
-                 garchiever::ArithmeticCoderEncoded::BytesAfterBitsException);
-}
-
-//----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutByte2) {
     auto encoded = garchiever::ArithmeticCoderEncoded();
     encoded.putByte(std::byte{42});
@@ -116,17 +108,6 @@ TEST(ArithmeticCoderEncodedTest, PutUInt32) {
     EXPECT_EQ(encoded.data()[1], std::byte{0b00100000});
     EXPECT_EQ(encoded.data()[2], std::byte{0b10000000});
     EXPECT_EQ(encoded.data()[3], std::byte{0b00001000});
-}
-
-//----------------------------------------------------------------------------//
-TEST(ArithmeticCoderEncodedTest, PutUInt32AfterBit) {
-    auto encoded = garchiever::ArithmeticCoderEncoded();
-    std::uint32_t tested = 0b00000000001000001000000000001000;
-                           //00000000111111112222222233333333
-
-    encoded.putBit(false);
-    EXPECT_THROW(encoded.putT(tested),
-                 garchiever::ArithmeticCoderEncoded::BytesAfterBitsException);
 }
 
 //----------------------------------------------------------------------------//

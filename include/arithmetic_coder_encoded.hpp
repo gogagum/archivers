@@ -3,11 +3,11 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 #include <vector>
+#include <iostream>
 #include <array>
 #include <cstdint>
 #include <cstddef>
 #include <ranges>
-#include <exception>
 
 namespace garchiever {
 
@@ -15,16 +15,6 @@ namespace garchiever {
 /// \brief The ArithmeticCoderEncoded class
 ///
 class ArithmeticCoderEncoded {
-public:
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The BytesAfterBitsException class
-    ///
-    class BytesAfterBitsException : public std::runtime_error {
-    public:
-        BytesAfterBitsException();
-    };
-
 public:
     ArithmeticCoderEncoded();
 
@@ -95,9 +85,7 @@ garchiever::ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
 
 //----------------------------------------------------------------------------//
 void garchiever::ArithmeticCoderEncoded::putByte(std::byte b) {
-    if (_startedBits) {
-        throw BytesAfterBitsException();
-    }
+    assert(!_startedBits && "Can`t write bytes after bits.");
     _data.push_back(b);
 }
 
@@ -138,9 +126,5 @@ void garchiever::ArithmeticCoderEncoded::_moveBitFlag() {
         _currBitFlag = std::byte{0b10000000};
     }
 }
-
-//----------------------------------------------------------------------------//
-garchiever::ArithmeticCoderEncoded::BytesAfterBitsException::BytesAfterBitsException(
-        ) : std::runtime_error("Can`t write bytes after bits.") { }
 
 #endif // ARITHMETIC_CODER_ENCODED_HPP
