@@ -107,10 +107,8 @@ bool garchiever::BytesSymbol<numBytes>::Order::operator()(
     for (auto [firstB, secondB] : boost::range::combine(s1._data, s2._data)) {
         std::uint8_t firstU = static_cast<std::uint8_t>(firstB);
         std::uint8_t secondU = static_cast<std::uint8_t>(secondB);
-        if (firstU < secondU) {
-            return true;
-        } else if (firstU > secondU) {
-            return false;
+        if (firstU != secondU) {
+            return firstU < secondU;
         }
     }
     return false;

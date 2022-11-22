@@ -3,7 +3,6 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 #include <vector>
-#include <iostream>
 #include <array>
 #include <cstdint>
 #include <cstddef>

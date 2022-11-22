@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef I_WORDS_FLOW_HPP
 #define I_WORDS_FLOW_HPP
 

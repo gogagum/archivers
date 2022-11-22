@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <cstring>
 #include <algorithm>
-#include <iostream>
 
 #include "arithmetic_decoder_decoded.hpp"
 #include "misc.hpp"
@@ -136,7 +135,6 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
         }
 
         auto sym = it->sym;
-        std::cerr << "Sym: " << sym << std::endl;
         syms.push_back(sym);
 
         high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount;
@@ -208,12 +206,9 @@ boost::container::static_vector<std::byte, SymT::numBytes>
 garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
     boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
-    std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
     for (auto& tailByte: tail) {
         tailByte = _source.takeByte();
-        std::cerr << tailByte << ' ';
     }
-    std::cerr << std::endl;
     return tail;
 }
 
@@ -223,26 +218,12 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
         ) -> Alphabet {
     Alphabet ret;
     ret.numUniqueSyms = _source.takeT<std::uint32_t>();
-    std::cerr << "Unique syms count: " << ret.numUniqueSyms << std::endl;
     for (std::uint64_t i = 0; i < ret.numUniqueSyms; ++i) {        
         auto sym = _source.takeT<SymT>();
-        std::cerr << "Sym: " << sym;
-        if constexpr (SymT::numBytes == 1) {
-            std::cerr << " SymChar: ";
-            if (char& asChar = *reinterpret_cast<char*>(&sym); asChar == '\0') {
-                std::cerr << "\\0";
-            } else if (asChar == '\n') {
-                std::cerr << "\\n";
-            } else {
-                std::cerr << asChar;
-            }
-        }
         auto numFound = _source.takeT<CountT>();
-        std::cerr << " Cumulative num: " << numFound << std::endl;
         ret.cumulativeNumFound.emplace_back(sym, numFound);
     }
     ret.totalSymsCount = _source.takeT<CountT>();
-    std::cerr << "Total count: " << ret.totalSymsCount << std::endl;
     return ret;
 }
 
