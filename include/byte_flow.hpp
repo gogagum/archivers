@@ -163,7 +163,8 @@ public:  // ISymFlow
      * @brief getTail
      * @return
      */
-    virtual boost::container::static_vector<std::byte, Sym::numBytes> getTail() const override {
+    virtual boost::container::static_vector<std::byte, Sym::numBytes> getTail(
+            ) const override {
         std::uint8_t tailSize = getTailSize();
         return boost::container::static_vector<std::byte, Sym::numBytes>(
             _bytes.end() - tailSize, _bytes.end());
@@ -203,7 +204,8 @@ auto
 garchiever::ByteFlow<garchiever::BytesSymbol<numBytes>>::end(
         ) const -> Iterator
 {
-    return Iterator(const_cast<std::byte*>(_bytes.data() + countNumberOfWords() * numBytes));
+    return Iterator(const_cast<std::byte*>(_bytes.data()
+                                           + countNumberOfWords() * numBytes));
 }
 
 //----------------------------------------------------------------------------//

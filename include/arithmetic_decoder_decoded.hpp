@@ -7,7 +7,6 @@
 #include <vector>
 #include <cstddef>
 #include <stdexcept>
-#include <iostream>
 #include <array>
 #include <ranges>
 
@@ -102,7 +101,6 @@ bool garchiever::ArithmeticDecoderDecoded::takeBit() {
     }
     bool ret = (_data[_bytesRead] & _currBitFlag) != std::byte{0};
     _moveBitFlag();
-    std::cerr << (ret ? 1 : 0);
     return ret;
 }
 

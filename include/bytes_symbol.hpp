@@ -74,9 +74,9 @@ private:
                            const BytesSymbol<__numBytes>& bs2);
 
     /**
-     * @brief operator <<
-     * @param os
-     * @return
+     * @brief operator << for debug output.
+     * @param os - output stream.
+     * @return output stream reference.
      */
     template <std::uint8_t __numBytes>
     friend std::ostream& operator<<(std::ostream& os, BytesSymbol<__numBytes>);
@@ -107,10 +107,8 @@ bool garchiever::BytesSymbol<numBytes>::Order::operator()(
     for (auto [firstB, secondB] : boost::range::combine(s1._data, s2._data)) {
         std::uint8_t firstU = static_cast<std::uint8_t>(firstB);
         std::uint8_t secondU = static_cast<std::uint8_t>(secondB);
-        if (firstU < secondU) {
-            return true;
-        } else if (firstU > secondU) {
-            return false;
+        if (firstU != secondU) {
+            return firstU < secondU;
         }
     }
     return false;
