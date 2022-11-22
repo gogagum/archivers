@@ -62,10 +62,10 @@ private:
         CountT totalSymsCount;
     };
 
-    constexpr static auto wordsNum = static_cast<std::uint64_t>(SymT::maxNum);
-    constexpr static auto wordsNum_2 = wordsNum / 2;
-    constexpr static auto wordsNum_4 = wordsNum / 4;
-    constexpr static auto wordsNum_3to4 = 3 * wordsNum / 4;
+    constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::maxNum);
+    constexpr static auto symsNum_2 = symsNum / 2;
+    constexpr static auto symsNum_4 = symsNum / 4;
+    constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
 
 private:
 
@@ -77,10 +77,14 @@ private:
 
     Alphabet _deserializeAlphabet();
 
+    std::uint8_t _computeAdditionalBitsCnt() const;
+
 private:
     Source _source;
-    boost::container::static_vector<std::byte, SymT::numBytes> _tail;
-    Alphabet _alphabet;
+    const boost::container::static_vector<std::byte, SymT::numBytes> _tail;
+    const Alphabet _alphabet;
+    const std::uint8_t _additionalBitsCnt;
+    const std::uint64_t _correctingConst;
 };
 
 }  // garchiever
@@ -93,7 +97,9 @@ template <class SymT, typename CountT>
 garchiever::ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
-      _alphabet(_deserializeAlphabet()) {}
+      _alphabet(_deserializeAlphabet()),
+      _additionalBitsCnt(_computeAdditionalBitsCnt()),
+      _correctingConst(std::uint64_t{1} << _additionalBitsCnt) {}
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
@@ -102,13 +108,13 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
     std::uint64_t value = 0;
 
     for (std::size_t bitIndex = 0;
-         bitIndex < SymT::numBytes * 8 + 8;
+         bitIndex < SymT::numBytes * 8 + _additionalBitsCnt;
          ++bitIndex) {
         value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum * 256;
+    std::uint64_t high = symsNum * _correctingConst;
 
     std::vector<SymT> syms;
 
@@ -137,21 +143,21 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
         low = low + (range * _getCumulativeNumFoundLow(sym)) / _alphabet.totalSymsCount;
 
         while (true) {
-            if (high <= wordsNum_2 * 256) {
+            if (high <= symsNum_2 * _correctingConst) {
                 high = high * 2;
                 low = low * 2;
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (low >= wordsNum_2 * 256) {
-                high = high * 2 - wordsNum * 256;
-                low = low * 2 - wordsNum * 256;
+            } else if (low >= symsNum_2 * _correctingConst) {
+                high = high * 2 - symsNum * _correctingConst;
+                low = low * 2 - symsNum * _correctingConst;
                 bool bit = _source.takeBit();
-                value = value * 2 - wordsNum * 256 + (bit ? 1 : 0);
-            } else if (low >= wordsNum_4 * 256 && high <= wordsNum_3to4 * 256) {
-                high = high * 2 - wordsNum_2 * 256;
-                low = low * 2 - wordsNum_2 * 256;
+                value = value * 2 - symsNum * _correctingConst + (bit ? 1 : 0);
+            } else if (low >= symsNum_4 * _correctingConst && high <= symsNum_3to4 * _correctingConst) {
+                high = high * 2 - symsNum_2 * _correctingConst;
+                low = low * 2 - symsNum_2 * _correctingConst;
                 bool bit = _source.takeBit();
-                value = value * 2 - wordsNum_2 * 256 + (bit ? 1 : 0);
+                value = value * 2 - symsNum_2 * _correctingConst + (bit ? 1 : 0);
             } else {
                 break;
             }
@@ -203,7 +209,7 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
     boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
     std::cerr << "Tail size: " << static_cast<unsigned int>(tailSize) << std::endl;
-    for (auto& tailByte: _tail) {
+    for (auto& tailByte: tail) {
         tailByte = _source.takeByte();
         std::cerr << tailByte << ' ';
     }
@@ -237,6 +243,16 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
     }
     ret.totalSymsCount = _source.takeT<CountT>();
     std::cerr << "Total count: " << ret.totalSymsCount << std::endl;
+    return ret;
+}
+
+//----------------------------------------------------------------------------//
+template <class SymT, typename CountT>
+std::uint8_t garchiever::ArithmeticDecoder<SymT, CountT>::_computeAdditionalBitsCnt(
+        ) const {
+    std::uint8_t ret = 0;
+    for (; (symsNum << ret) < (std::uint64_t{1} << 40); ++ret) {
+    }
     return ret;
 }
 

@@ -42,10 +42,10 @@ public:
 
 private:
 
-    constexpr static auto wordsNum = static_cast<std::uint64_t>(Sym::maxNum);
-    constexpr static auto wordsNum_2 = wordsNum / 2;
-    constexpr static auto wordsNum_4 = wordsNum / 4;
-    constexpr static auto wordsNum_3to4 = 3 * wordsNum / 4;
+    constexpr static auto symsNum = static_cast<std::uint64_t>(Sym::maxNum);
+    constexpr static auto symsNum_2 = symsNum / 2;
+    constexpr static auto symsNum_4 = symsNum / 4;
+    constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
 
 private:
 
@@ -70,6 +70,7 @@ private:
     FlowT _symFlow;
     MapSymTo<CountT> _cumulativeNumFound;
     CountT _totalSymsCount;
+    std::uint64_t _correctingConst;
 };
 
 }  // namespace garchiever
@@ -80,6 +81,10 @@ template <class FlowT, typename CountT>
 garchiever::ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow) {
     _countProbabilities();
+    _correctingConst = 1;
+    while (_correctingConst * symsNum < (std::uint64_t{1} << 40)) {
+        _correctingConst <<= 1;
+    }
 }
 
 //----------------------------------------------------------------------------//
@@ -92,7 +97,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     _serializeAlphabet(ret);
 
     std::uint64_t low = 0;
-    std::uint64_t high = wordsNum * 256;
+    std::uint64_t high = symsNum * _correctingConst;
     std::size_t btf = 0;
 
     std::size_t i = 0;
@@ -110,21 +115,22 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         ++i;
 
         while (true) {
-            if (high <= wordsNum_2 * 256) {
+            if (high <= symsNum_2 * _correctingConst) {
                 ret.putBit(false);
                 ret.putBitsRepeat(true, btf);
                 btf = 0;
                 high = high * 2;
                 low = low * 2;
-            } else if (low >= wordsNum_2 * 256) {
+            } else if (low >= symsNum_2 * _correctingConst) {
                 ret.putBit(true);
                 ret.putBitsRepeat(false, btf);
                 btf = 0;
-                high = high * 2 - wordsNum * 256;
-                low = low * 2 - wordsNum * 256;
-            } else if (low >= wordsNum_4 * 256 && high <= wordsNum_3to4 * 256) {
-                high = high * 2 - wordsNum_2 * 256;
-                low = low * 2 - wordsNum_2 * 256;
+                high = high * 2 - symsNum * _correctingConst;
+                low = low * 2 - symsNum * _correctingConst;
+            } else if (low >= symsNum_4 * _correctingConst
+                       && high <= symsNum_3to4 * _correctingConst) {
+                high = high * 2 - symsNum_2 * _correctingConst;
+                low = low * 2 - symsNum_2 * _correctingConst;
                 ++btf;
             } else {
                 break;
@@ -135,7 +141,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
 
     std::cerr << "Final bits to follow: " << btf << std::endl;
 
-    if (low < wordsNum_4 * 256) {
+    if (low < symsNum_4 * _correctingConst) {
         ret.putBit(false);
         ret.putBitsRepeat(true, btf + 1);
     } else {
