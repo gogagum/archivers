@@ -10,7 +10,6 @@
 #include <bitset>
 
 #include "arithmetic_coder_encoded.hpp"
-#include "misc.hpp"
 
 namespace garchiever {
 
@@ -229,7 +228,7 @@ template <class FlowT, typename CountT>
 std::uint64_t
 garchiever::ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
     std::uint64_t correctingConst = 1;
-    while (correctingConst * symsNum < (std::uint64_t{1} << 40)) {
+    while (correctingConst * symsNum < (1ull << 40)) {
         correctingConst <<= 1;
     }
     return correctingConst;

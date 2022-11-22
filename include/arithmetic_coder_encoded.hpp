@@ -80,7 +80,6 @@ garchiever::ArithmeticCoderEncoded::ArithmeticCoderEncoded()
 //----------------------------------------------------------------------------//
 void garchiever::ArithmeticCoderEncoded::putBit(bool bit) {
     _startedBits = true;
-    std::cerr << (bit ? 1 : 0);
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(std::byte{0b00000000});
     }

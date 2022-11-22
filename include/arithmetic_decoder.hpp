@@ -4,6 +4,8 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/container/static_vector.hpp>
+#include <boost/range/algorithm_ext/insert.hpp>
+#include <boost/range/irange.hpp>
 #include <map>
 #include <cstdint>
 #include <cstddef>
@@ -11,7 +13,6 @@
 #include <algorithm>
 
 #include "arithmetic_decoder_decoded.hpp"
-#include "misc.hpp"
 
 namespace garchiever {
 
@@ -59,6 +60,13 @@ private:
         std::vector<SymInfo> cumulativeNumFound;
         std::uint64_t numUniqueSyms;
         CountT totalSymsCount;
+
+        /**
+         * @brief findInfo
+         * @param aux
+         * @return
+         */
+        typename std::vector<SymInfo>::const_iterator findInfo(CountT aux) const;
     };
 
     constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::maxNum);
@@ -105,10 +113,10 @@ template <class SymT, typename CountT>
 std::vector<std::byte>
 garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
     std::uint64_t value = 0;
+    std::size_t valueBits = SymT::numBytes * 8 + _additionalBitsCnt;
+    assert(valueBits < 64 && "`value must be placeble in 64 bits");
 
-    for (std::size_t bitIndex = 0;
-         bitIndex < SymT::numBytes * 8 + _additionalBitsCnt;
-         ++bitIndex) {
+    for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
         value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
@@ -119,22 +127,9 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
 
     for (std::uint64_t i = 0; i < _alphabet.totalSymsCount; ++i) {
         std::uint64_t range = high - low;
-        std::uint64_t aux = ((value - low + 1) * _alphabet.totalSymsCount - 1);
+        std::uint64_t aux = ((value - low + 1) * _alphabet.totalSymsCount - 1) / range;
 
-        auto it = _alphabet.cumulativeNumFound.begin();
-        bool found = false;
-
-        while (!found) {
-            std::size_t offset = 1;
-            while ((it + offset * 2 - 1) < _alphabet.cumulativeNumFound.end()
-                   && (it + offset * 2 - 1)->count * range <= aux) {
-                offset *= 2;
-            }
-            it += (offset - 1);
-            found = (offset == 1);
-        }
-
-        auto sym = it->sym;
+        auto sym = _alphabet.findInfo(aux)->sym;
         syms.push_back(sym);
 
         high = low + (range * _getCumulativeNumFoundHigh(sym)) / _alphabet.totalSymsCount;
@@ -151,7 +146,8 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
                 low = low * 2 - symsNum * _correctingConst;
                 bool bit = _source.takeBit();
                 value = value * 2 - symsNum * _correctingConst + (bit ? 1 : 0);
-            } else if (low >= symsNum_4 * _correctingConst && high <= symsNum_3to4 * _correctingConst) {
+            } else if (low >= symsNum_4 * _correctingConst
+                       && high <= symsNum_3to4 * _correctingConst) {
                 high = high * 2 - symsNum_2 * _correctingConst;
                 low = low * 2 - symsNum_2 * _correctingConst;
                 bool bit = _source.takeBit();
@@ -163,7 +159,7 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
     }
     std::vector<std::byte> ret(syms.size() * SymT::numBytes);
     std::memcpy(ret.data(), syms.data(), syms.size() * SymT::numBytes);
-    ret.insert(ret.end(), _tail.begin(), _tail.end());
+    boost::range::insert(ret, ret.end(), _tail);
     return ret;
 }
 
@@ -218,7 +214,7 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
         ) -> Alphabet {
     Alphabet ret;
     ret.numUniqueSyms = _source.takeT<std::uint32_t>();
-    for (std::uint64_t i = 0; i < ret.numUniqueSyms; ++i) {        
+    for (auto _ : boost::irange<std::uint64_t>(0, ret.numUniqueSyms)) {
         auto sym = _source.takeT<SymT>();
         auto numFound = _source.takeT<CountT>();
         ret.cumulativeNumFound.emplace_back(sym, numFound);
@@ -235,6 +231,28 @@ std::uint8_t garchiever::ArithmeticDecoder<SymT, CountT>::_computeAdditionalBits
     for (; (symsNum << ret) < (std::uint64_t{1} << 40); ++ret) {
     }
     return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+template <class SymT, typename CountT>
+auto
+garchiever::ArithmeticDecoder<SymT, CountT>::Alphabet::findInfo(
+        CountT aux) const -> typename std::vector<SymInfo>::const_iterator {
+    auto it = cumulativeNumFound.begin();
+    bool found = false;
+
+    while (!found) {
+        std::size_t offset = 1;
+        while ((it + offset * 2 - 1) < cumulativeNumFound.end()
+               && (it + offset * 2 - 1)->count <= aux) {
+            offset *= 2;
+        }
+        it += (offset - 1);
+        found = (offset == 1);
+    }
+
+    return it;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

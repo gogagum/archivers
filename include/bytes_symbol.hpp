@@ -74,9 +74,9 @@ private:
                            const BytesSymbol<__numBytes>& bs2);
 
     /**
-     * @brief operator <<
-     * @param os
-     * @return
+     * @brief operator << for debug output.
+     * @param os - output stream.
+     * @return output stream reference.
      */
     template <std::uint8_t __numBytes>
     friend std::ostream& operator<<(std::ostream& os, BytesSymbol<__numBytes>);
