@@ -1,6 +1,7 @@
 #ifndef BASE_DICTIONARY_HPP
 #define BASE_DICTIONARY_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -15,6 +16,8 @@ template <class WordT>
 class BaseDictionary {
 protected:
     BaseDictionary();
+
+    BaseDictionary(std::vector<std::uint64_t>&& cumulativeNumFound);
 
 public:
     /**
@@ -38,6 +41,17 @@ public:
      */
     std::uint64_t getHigherCumulativeNumFound(const WordT& word) const;
 
+    /**
+     * @brief totalWordsCount
+     * @return
+     */
+    std::uint64_t totalWordsCount() const;
+
+    /**
+     * @brief numUniqueWords
+     * @return
+     */
+    std::uint64_t numUniqueWords() const;
 
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
@@ -47,6 +61,12 @@ protected:
 //----------------------------------------------------------------------------//
 template <class WordT>
 BaseDictionary<WordT>::BaseDictionary() {}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+BaseDictionary<WordT>::BaseDictionary(
+        std::vector<std::uint64_t>&& cumulativeNumFound)
+    : _cumulativeNumFound(std::move(cumulativeNumFound)){}
 
 //----------------------------------------------------------------------------//
 template <class WordT>
@@ -87,6 +107,24 @@ template <class WordT>
 std::uint64_t
 BaseDictionary<WordT>::getHigherCumulativeNumFound(const WordT& word) const {
     return _cumulativeNumFound[WordT::ord(word)];
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+std::uint64_t BaseDictionary<WordT>::totalWordsCount() const {
+    return *_cumulativeNumFound.rbegin();
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+std::uint64_t BaseDictionary<WordT>::numUniqueWords() const {
+    std::uint64_t prevCumulativeNumFound = 0;
+    return std::ranges::count_if(_cumulativeNumFound,
+                                 [&prevCumulativeNumFound](auto count) {
+                                     auto ret = count != prevCumulativeNumFound;
+                                     prevCumulativeNumFound = count;
+                                     return ret;
+                                 });
 }
 
 }  // namespace ga::dict
