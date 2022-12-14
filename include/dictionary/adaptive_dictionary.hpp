@@ -31,7 +31,7 @@ public:
 template <class WordT>
 AdaptiveDictionary<WordT>::AdaptiveDictionary() {
     for (std::size_t i = 0; i < WordT::wordsCount; ++i) {
-        this->_cumulativeNumFound[i] = i + 1;
+        this->_cumulativeNumFound.push_back(i + 1);
     }
 }
 
