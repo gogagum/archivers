@@ -4,6 +4,7 @@
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/bytes_symbol.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
+#include "include/dictionary/static_dicitionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -115,7 +116,7 @@ TEST(ArithmeticCoderEncodedTest, PutUInt32) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, Construct) {
     std::array<std::byte, 5> testData;
-    auto sym = ga::BytesSymbol<5>(testData.data());
+    [[maybe_unused]] auto sym = ga::BytesSymbol<5>(testData.data());
 }
 
 //----------------------------------------------------------------------------//
@@ -387,4 +388,39 @@ TEST(UniformDict, CumulativeNumFoundHighZero) {
     auto symData = std::array<std::byte, 1>{std::byte{0}};
     auto word = ga::BytesSymbol<1>(symData.data());
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(StaticDictionary, Construct) {
+    auto freq = std::array<std::uint64_t, 256>{};
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq.begin(), freq.end());
+}
+
+//----------------------------------------------------------------------------//
+TEST(StaticDictionary, Ord2Bytes1) {
+    auto freq = std::vector<std::uint64_t>(256 * 256, 0);
+    std::fill(freq.begin() + 42, freq.begin() + 112, 37);
+    std::fill(freq.begin() + 112, freq.end(), 42);
+
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+
+    auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{111}};
+    auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
+
+    EXPECT_EQ(dict.getWord(37), word1);
+}
+
+//----------------------------------------------------------------------------//
+TEST(StaticDictionary, Ord2Bytes2) {
+    auto freq = std::vector<std::uint64_t>(256 * 256, 0);
+    std::fill(freq.begin() + 42, freq.begin() + 112, 37);
+    std::fill(freq.begin() + 112, freq.end(), 42);
+
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+
+    auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{41}};
+    auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
+
+    EXPECT_EQ(dict.getWord(36), word1);
 }
