@@ -3,6 +3,7 @@
 #include "include/arithmetic_coder_encoded.hpp"
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/bytes_symbol.hpp"
+#include "include/dictionary/uniform_dictionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -325,5 +326,33 @@ TEST(ArithmeticDecoderDecoded, UInt16T) {
 
     EXPECT_EQ(decoded.takeT<std::uint16_t>(),
               std::uint16_t{0b0110001000100110});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(UniformDict, Construct) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, Ord2Bytes) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+    std::array<std::byte, 2> symBytes {std::byte{0x00}, std::byte{0x02}};
+    EXPECT_EQ(dict.getWord(2), ga::BytesSymbol<2>(symBytes.data()));
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, Ord3Bytes) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<3>>();
+    std::array<std::byte, 3> symBytes =
+        {std::byte{0x00}, std::byte{0x00}, std::byte{0x1A}};
+    EXPECT_EQ(dict.getWord(26), ga::BytesSymbol<3>(symBytes.data()));
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, OrdLongOrd) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+    std::array<std::byte, 2> symBytes = { std::byte{8}, std::byte{42} };
+    EXPECT_EQ(dict.getWord(256 * 8 + 42), ga::BytesSymbol<2>(symBytes.data()));
 }
 

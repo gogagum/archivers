@@ -27,7 +27,19 @@ public:
 
 public:
 
+    /**
+     * @brief ord
+     * @param word
+     * @return
+     */
     static std::uint64_t ord(const BytesSymbol<numBytes>& word);
+
+    /**
+     * @brief byOrd
+     * @param ord
+     * @return
+     */
+    static BytesSymbol<numBytes> byOrd(std::uint64_t ord);
 
 public:
 
@@ -131,6 +143,17 @@ ga::BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
     std::copy(word._data.begin(), word._data.end(), asBytesArr.end() - numBytes);
     return ret;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t _numBytes>
+auto ga::BytesSymbol<_numBytes>::byOrd(
+        std::uint64_t ord) -> ga::BytesSymbol<numBytes> {
+    static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
+    const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
+    std::array<std::byte, _numBytes> retBytes;
+    std::copy(asBytesOrdArr.rend() - numBytes, asBytesOrdArr.rend(), retBytes.begin());
+    return ga::BytesSymbol<_numBytes>(retBytes.data());
 }
 
 //----------------------------------------------------------------------------//
