@@ -176,84 +176,68 @@ private:
     std::size_t _currOffset;
 };
 
-}  // namespace ga
-
-#endif // BIT_FLOW_HPP
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::ByteFlow(
-        const std::byte* ptr, std::size_t size)
-  : _currOffset(0) {
+ByteFlow<BytesSymbol<numBytes>>::ByteFlow(const std::byte* ptr, std::size_t size)
+        : _currOffset(0) {
     _bytes.resize(size);
     std::memcpy(_bytes.data(), ptr, size);
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::begin() const -> Iterator
+auto ByteFlow<BytesSymbol<numBytes>>::begin() const -> Iterator
 {
     return Iterator(const_cast<std::byte*>(_bytes.data()));
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::end() const -> Iterator
-{
+auto ByteFlow<BytesSymbol<numBytes>>::end() const -> Iterator {
     return Iterator(const_cast<std::byte*>(_bytes.data()
                                            + countNumberOfWords() * numBytes));
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::countNumberOfWords(
-        ) const {
+std::size_t ByteFlow<BytesSymbol<numBytes>>::countNumberOfWords() const {
     return _bytes.size() / numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::bytesLeft() const {
+std::size_t ByteFlow<BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::getTailSize() const {
+std::uint8_t ByteFlow<BytesSymbol<numBytes>>::getTailSize() const {
     return _bytes.size() % numBytes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::Iterator(
+ByteFlow<BytesSymbol<numBytes>>::Iterator::Iterator(
         std::byte* ptr) : _ptr(ptr) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::Iterator(
-        const Iterator& other) : _ptr(other._ptr) {}
+ByteFlow<BytesSymbol<numBytes>>::Iterator::Iterator(const Iterator& other)
+    : _ptr(other._ptr) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator++(
-        ) -> Iterator& {
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator++() -> Iterator& {
     _ptr += numBytes;
     return *this;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator++(
-        int) -> Iterator {
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
     Iterator ret(*this);
     _ptr += numBytes;
     return ret;
@@ -261,8 +245,7 @@ ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator++(
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator+=(
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator+=(
         std::int64_t offset) -> Iterator& {
     _ptr += numBytes * offset;
     return *this;
@@ -270,16 +253,14 @@ ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator+=(
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator--() -> Iterator& {
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator--() -> Iterator& {
     _ptr -= numBytes;
     return *this;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
     Iterator ret(*this);
     _ptr -= numBytes;
     return ret;
@@ -288,16 +269,14 @@ ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 template <std::integral IntegralT>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator+(
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator+(
         IntegralT i) -> Iterator {
     return Iterator(_ptr + i * numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator-=(
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator-=(
         std::int64_t offset) -> Iterator& {
     _ptr -= numBytes * offset;
     return *this;
@@ -305,24 +284,25 @@ ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator-=(
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator==(
+bool ByteFlow<BytesSymbol<numBytes>>::Iterator::operator==(
         const Iterator& other) const {
     return _ptr == other._ptr;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator!=(
+bool ByteFlow<BytesSymbol<numBytes>>::Iterator::operator!=(
         const Iterator& other) const {
     return _ptr != other._ptr;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto
-ga::ByteFlow<ga::BytesSymbol<numBytes>>::Iterator::operator*(
+auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator*(
         ) const -> BytesSymbol<numBytes> {
     return BytesSymbol<numBytes>(_ptr);
 }
+
+}  // namespace ga
+
+#endif // BIT_FLOW_HPP

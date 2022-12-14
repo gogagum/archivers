@@ -80,19 +80,17 @@ private:
     const std::uint64_t _correctingConst;
 };
 
-}  // namespace ga
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-ga::ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
+ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _correctingConst(_computeCorrectingConst()),
           _symsData(_countSymsData()) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto ga::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
+auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     auto ret = Res();
 
     _serializeNumBytes(ret);
@@ -149,7 +147,7 @@ auto ga::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto ga::ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
+auto ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
     SymsData ret;
     MapSymTo<std::uint64_t> numFound;
     for (auto word : _symFlow) {
@@ -165,8 +163,7 @@ auto ga::ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto
-ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
+auto ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
         const Sym &word) -> CountT {
     assert(_symsData.cumulativeNumFound.contains(word));
     return _symsData.cumulativeNumFound[word];
@@ -175,8 +172,7 @@ ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto
-ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
+auto ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
         const Sym &word) -> CountT {
     assert(_symsData.cumulativeNumFound.contains(word));
     auto iter = _symsData.cumulativeNumFound.find(word);
@@ -190,14 +186,14 @@ ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void ga::ArithmeticCoder<FlowT, CountT>::_serializeNumBytes(Res& res) {
+void ArithmeticCoder<FlowT, CountT>::_serializeNumBytes(Res& res) {
     constexpr std::uint8_t numBytes = Sym::numBytes;
     res.putT<std::uint8_t>(numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void ga::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
+void ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
     auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
     res.putT<std::uint8_t>(tailSize);
 
@@ -209,7 +205,7 @@ void ga::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void ga::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
+void ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
     // Number of unique words
     res.putT<std::uint32_t>(_symsData.cumulativeNumFound.size());
 
@@ -226,7 +222,7 @@ void ga::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
 std::uint64_t
-ga::ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
+ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
     std::uint64_t correctingConst = 1;
     while (correctingConst * symsNum < (1ull << 40)) {
         correctingConst <<= 1;
@@ -234,5 +230,6 @@ ga::ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
     return correctingConst;
 }
 
+}  // namespace ga
 
 #endif // ARITHMETIC_CODER_HPP
