@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <boost/compute/algorithm/detail/binary_find.hpp>
 
 namespace ga::dict {
 
@@ -53,6 +54,10 @@ public:
      */
     std::uint64_t numUniqueWords() const;
 
+private:
+
+    std::uint64_t _getLowerCumulativeNumFound(std::uint64_t ord) const;
+
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
 };
@@ -72,34 +77,27 @@ BaseDictionary<WordT>::BaseDictionary(
 template <class WordT>
 WordT
 BaseDictionary<WordT>::getWord(std::uint64_t cumulativeNumFound) const {
-    auto it = _cumulativeNumFound.begin();
+    std::uint64_t it = 0;
     bool found = false;
 
     while (!found) {
-        std::ptrdiff_t offset = 1;
-        while ((it + offset * 2 - 1) < _cumulativeNumFound.end()
-               && *(it + offset * 2 - 1) <= cumulativeNumFound) {
+        std::size_t offset = 1;
+        while (it + offset * 2 - 1 < WordT::wordsCount
+               && _getLowerCumulativeNumFound(it + offset * 2 - 1) <= cumulativeNumFound) {
             offset *= 2;
         }
         it += (offset - 1);
         found = (offset == 1);
     }
-    assert(found && "Could not find symbol.");
 
-    std::uint64_t ord = it - _cumulativeNumFound.begin();
-    return WordT::byOrd(ord);
+    return WordT::byOrd(it);
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT>
 std::uint64_t
 BaseDictionary<WordT>::getLowerCumulativeNumFound(const WordT& word) const {
-    const std::uint64_t ord = WordT::ord(word);
-    if (ord == 0) {
-        return 0;
-    }
-
-    return _cumulativeNumFound[ord - 1];
+    return _getLowerCumulativeNumFound(WordT::ord(word));
 }
 
 //----------------------------------------------------------------------------//
@@ -125,6 +123,17 @@ std::uint64_t BaseDictionary<WordT>::numUniqueWords() const {
                                      prevCumulativeNumFound = count;
                                      return ret;
                                  });
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+std::uint64_t
+BaseDictionary<WordT>::_getLowerCumulativeNumFound(std::uint64_t ord) const {
+    if (ord == 0) {
+        return 0;
+    }
+
+    return _cumulativeNumFound[ord - 1];
 }
 
 }  // namespace ga::dict
