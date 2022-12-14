@@ -129,16 +129,11 @@ template <std::uint8_t numBytes>
 std::ostream& operator<<(std::ostream& os,
                          BytesSymbol<numBytes> sym);
 
-
-}  // namespace ga
-
-#endif // BIT_SYMBOL_HPP
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 std::uint64_t
-ga::BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
+BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
     std::uint64_t ret = 0;
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
     std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - numBytes);
@@ -147,27 +142,28 @@ ga::BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-auto ga::BytesSymbol<_numBytes>::byOrd(
-        std::uint64_t ord) -> ga::BytesSymbol<numBytes> {
+auto BytesSymbol<_numBytes>::byOrd(
+        std::uint64_t ord) -> BytesSymbol<numBytes> {
     static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
     const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
     std::array<std::byte, _numBytes> retBytes;
     std::copy(asBytesOrdArr.rend() - numBytes, asBytesOrdArr.rend(), retBytes.begin());
-    return ga::BytesSymbol<_numBytes>(retBytes.data());
+    return BytesSymbol<_numBytes>(retBytes.data());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ga::BytesSymbol<numBytes>::BytesSymbol(std::byte* ptr) {
+BytesSymbol<numBytes>::BytesSymbol(std::byte* ptr) {
     std::memcpy(_data.data(), ptr, numBytes);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool ga::BytesSymbol<numBytes>::Order::operator()(
-    const ga::BytesSymbol<numBytes>& s1,
-    const ga::BytesSymbol<numBytes>& s2) const {
+bool BytesSymbol<numBytes>::Order::operator()(
+        const BytesSymbol<numBytes>& s1,
+        const BytesSymbol<numBytes>& s2
+        ) const {
     for (auto [firstB, secondB] : boost::range::combine(s1._data, s2._data)) {
         std::uint8_t firstU = static_cast<std::uint8_t>(firstB);
         std::uint8_t secondU = static_cast<std::uint8_t>(secondB);
@@ -181,24 +177,28 @@ bool ga::BytesSymbol<numBytes>::Order::operator()(
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool ga::operator==(const ga::BytesSymbol<numBytes>& bs1,
-                    const ga::BytesSymbol<numBytes>& bs2) {
+bool operator==(const BytesSymbol<numBytes>& bs1,
+                const BytesSymbol<numBytes>& bs2) {
     return bs1._data == bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool ga::operator!=(const ga::BytesSymbol<numBytes>& bs1,
-                    const ga::BytesSymbol<numBytes>& bs2) {
+bool operator!=(const BytesSymbol<numBytes>& bs1,
+                const BytesSymbol<numBytes>& bs2) {
     return bs1._data != bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& ga::operator<<(std::ostream& os,
-                             ga::BytesSymbol<numBytes> sym) {
+std::ostream& operator<<(std::ostream& os,
+                             BytesSymbol<numBytes> sym) {
     for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
         os << *iter << ' ';
     }
     return os << *(sym._data.end() - 1);
 }
+
+}  // namespace ga
+
+#endif // BIT_SYMBOL_HPP

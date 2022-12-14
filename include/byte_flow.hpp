@@ -2,7 +2,6 @@
 #define BIT_FLOW_HPP
 
 #include "bytes_symbol.hpp"
-#include "i_sym_flow.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -19,14 +18,9 @@ class ByteFlow;
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
-class ByteFlow<BytesSymbol<numBytes>> : ISymFlow<ByteFlow<BytesSymbol<numBytes>>,
-                                                 BytesSymbol<numBytes>> {
-private:
-    using Super = ISymFlow<ByteFlow<BytesSymbol<numBytes>>,
-                           BytesSymbol<numBytes>>;
+class ByteFlow<BytesSymbol<numBytes>> {
 public:
-    using This = typename Super::This;
-    using Sym = typename Super::Sym;
+    using Sym = BytesSymbol<numBytes>;
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -158,14 +152,13 @@ public:  // ISymFlow
      * @brief getTailSize
      * @return
      */
-    virtual std::uint8_t getTailSize() const override;
+    std::uint8_t getTailSize() const;
 
     /**
      * @brief getTail
      * @return
      */
-    virtual boost::container::static_vector<std::byte, Sym::numBytes> getTail(
-            ) const override {
+    boost::container::static_vector<std::byte, Sym::numBytes> getTail() const {
         std::uint8_t tailSize = getTailSize();
         return boost::container::static_vector<std::byte, Sym::numBytes>(
             _bytes.end() - tailSize, _bytes.end());
