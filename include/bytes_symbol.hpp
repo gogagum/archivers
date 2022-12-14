@@ -141,7 +141,7 @@ std::uint64_t
 ga::BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
     std::uint64_t ret = 0;
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
-    std::copy(word._data.begin(), word._data.end(), asBytesArr.end() - numBytes);
+    std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - numBytes);
     return ret;
 }
 

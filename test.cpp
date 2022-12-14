@@ -265,8 +265,9 @@ TEST(ArithmeticDecoderDecoded, TakeBit) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticDecoderDecoded, TakeBits) {
-    std::vector<std::byte> testData{ std::byte{0b10100110}, std::byte{0b00110110} };
-                                               //|------|             //|------|
+    std::vector<std::byte> testData =
+        { std::byte{0b10100110}, std::byte{0b00110110} };
+                    //|------|             //|------|
 
     auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
 
@@ -356,3 +357,34 @@ TEST(UniformDict, OrdLongOrd) {
     EXPECT_EQ(dict.getWord(256 * 8 + 42), ga::BytesSymbol<2>(symBytes.data()));
 }
 
+//----------------------------------------------------------------------------//
+TEST(UniformDict, CumulativeNumFoundLow) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto symData = std::array<std::byte, 1>{std::byte{37}};
+    auto word = ga::BytesSymbol<1>(symData.data());
+    EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 37);
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, CumulativeNumFoundLowZero) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto symData = std::array<std::byte, 1>{std::byte{0}};
+    auto word = ga::BytesSymbol<1>(symData.data());
+    EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 0);
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, CumulativeNumFoundHigh) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto symData = std::array<std::byte, 1>{std::byte{37}};
+    auto word = ga::BytesSymbol<1>(symData.data());
+    EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 38);
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDict, CumulativeNumFoundHighZero) {
+    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto symData = std::array<std::byte, 1>{std::byte{0}};
+    auto word = ga::BytesSymbol<1>(symData.data());
+    EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 1);
+}
