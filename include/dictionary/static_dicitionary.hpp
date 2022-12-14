@@ -64,8 +64,9 @@ void StaticDictionary<WordT>::serialize(ArithmeticCoderEncoded& res) const {
 
     // Unique words and their counts
     for (std::size_t i = 0; i < this->_cumulativeNumFound.size(); ++i) {
-        res.putT(WordT::byOrd(i));
-        res.putT<CountT>(this->_cumulativeNumFound[i]);
+        auto w = WordT::byOrd(i);
+        res.putT<WordT>(w);
+        res.putT<CountT>(this->getLowerCumulativeNumFound(w));
     }
 
     // Total words count.
