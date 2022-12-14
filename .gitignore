@@ -75,3 +75,5 @@ Thumbs.db
 archievers.kdev4
 build/
 CMakeLists.txt.user
+.cache/
+
