@@ -34,6 +34,12 @@ public:
      * @return cumulative lower words count.
      */
     std::uint64_t getHigherCumulativeNumFound(const WordT& word);
+
+    /**
+     * @brief totalWordsCount
+     * @return
+     */
+    std::uint64_t totalWordsCount() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +61,12 @@ template <class WordT>
 std::uint64_t
 UniformDictionary<WordT>::getHigherCumulativeNumFound(const WordT& word) {
     return WordT::ord(word) + 1;
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+std::uint64_t UniformDictionary<WordT>::totalWordsCount() const {
+    return WordT::wordsCount;
 }
 
 }  // namespace ga::dict

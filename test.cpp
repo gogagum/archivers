@@ -395,7 +395,7 @@ TEST(UniformDict, CumulativeNumFoundHighZero) {
 //----------------------------------------------------------------------------//
 TEST(StaticDictionary, Construct) {
     auto freq = std::array<std::uint64_t, 256>{};
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq);
 }
 
 //----------------------------------------------------------------------------//
@@ -404,7 +404,7 @@ TEST(StaticDictionary, Ord2Bytes1) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{111}};
     auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
@@ -418,7 +418,7 @@ TEST(StaticDictionary, Ord2Bytes2) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
     auto wordBytes = std::array<std::byte, 2>{std::byte{0}, std::byte{41}};
     auto word = ga::BytesSymbol<2>(wordBytes.data());
@@ -432,7 +432,7 @@ TEST(StaticDictionary, CumulativeNumFoundLow) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{112}};
     auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
@@ -450,7 +450,7 @@ TEST(StaticDictionary, CumulativeNumFoundZero) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq);
 
     auto wordBytes = std::array<std::byte, 1>{std::byte{0}};
     auto word = ga::BytesSymbol<1>(wordBytes.data());
@@ -464,7 +464,7 @@ TEST(StaticDictionary, CumulativeNumFoundHigh) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq.begin(), freq.end());
+    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{111}};
     auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
