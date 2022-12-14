@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <boost/container/static_vector.hpp>
 
-namespace garchiever {
+namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IWordsFlow class

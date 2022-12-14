@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <ranges>
 
-namespace garchiever {
+namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoderEncoded class
@@ -69,45 +69,10 @@ private:
     bool _startedBits;
 };
 
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-garchiever::ArithmeticCoderEncoded::ArithmeticCoderEncoded()
-    : _currBitFlag{0b10000000},
-      _startedBits{false} {}
-
-//----------------------------------------------------------------------------//
-void garchiever::ArithmeticCoderEncoded::putBit(bool bit) {
-    _startedBits = true;
-    if (_currBitFlag == std::byte{0b10000000}) {
-        _data.push_back(std::byte{0b00000000});
-    }
-    if (bit) {
-        *_data.rbegin() |= _currBitFlag;
-    } else {
-        *_data.rbegin() &= ~_currBitFlag;
-    }
-    _moveBitFlag();
-}
-
-//----------------------------------------------------------------------------//
-void
-garchiever::ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
-    for (std::size_t i = 0; i < num; ++i) {
-        putBit(bit);
-    }
-}
-
-//----------------------------------------------------------------------------//
-void garchiever::ArithmeticCoderEncoded::putByte(std::byte b) {
-    assert(!_startedBits && "Can`t write bytes after bits.");
-    _data.push_back(b);
-}
-
-//----------------------------------------------------------------------------//
 template <class T>
-void garchiever::ArithmeticCoderEncoded::putT(T s) {
+void ArithmeticCoderEncoded::putT(T s) {
     using SizeTBytes = std::array<std::byte, sizeof(T)>;
 
     static_assert(sizeof(SizeTBytes) == sizeof(T), "Error with sizes.");
@@ -118,22 +83,8 @@ void garchiever::ArithmeticCoderEncoded::putT(T s) {
     }
 }
 
-//----------------------------------------------------------------------------//
-const std::byte* garchiever::ArithmeticCoderEncoded::data() const {
-    return _data.data();
-}
 
-//----------------------------------------------------------------------------//
-const std::size_t garchiever::ArithmeticCoderEncoded::bytesSize() const {
-    return _data.size();
-}
 
-//----------------------------------------------------------------------------//
-void garchiever::ArithmeticCoderEncoded::_moveBitFlag() {
-    _currBitFlag >>= 1;
-    if (_currBitFlag == std::byte{0b00000000}) {
-        _currBitFlag = std::byte{0b10000000};
-    }
-}
+} // namespace ga
 
 #endif // ARITHMETIC_CODER_ENCODED_HPP

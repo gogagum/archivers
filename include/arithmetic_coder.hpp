@@ -11,7 +11,7 @@
 
 #include "arithmetic_coder_encoded.hpp"
 
-namespace garchiever {
+namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
@@ -40,7 +40,7 @@ public:
 
 private:
 
-    constexpr static auto symsNum = static_cast<std::uint64_t>(Sym::maxNum);
+    constexpr static auto symsNum = static_cast<std::uint64_t>(Sym::wordsCount);
     constexpr static auto symsNum_2 = symsNum / 2;
     constexpr static auto symsNum_4 = symsNum / 4;
     constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
@@ -80,19 +80,19 @@ private:
     const std::uint64_t _correctingConst;
 };
 
-}  // namespace garchiever
+}  // namespace ga
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-garchiever::ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
+ga::ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _correctingConst(_computeCorrectingConst()),
           _symsData(_countSymsData()) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
+auto ga::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     auto ret = Res();
 
     _serializeNumBytes(ret);
@@ -149,7 +149,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::encode() -> Res {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-auto garchiever::ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
+auto ga::ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
     SymsData ret;
     MapSymTo<std::uint64_t> numFound;
     for (auto word : _symFlow) {
@@ -166,7 +166,7 @@ auto garchiever::ArithmeticCoder<FlowT, CountT>::_countSymsData() -> SymsData {
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
 auto
-garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
+ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
         const Sym &word) -> CountT {
     assert(_symsData.cumulativeNumFound.contains(word));
     return _symsData.cumulativeNumFound[word];
@@ -176,7 +176,7 @@ garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundLow(
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
 auto
-garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
+ga::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
         const Sym &word) -> CountT {
     assert(_symsData.cumulativeNumFound.contains(word));
     auto iter = _symsData.cumulativeNumFound.find(word);
@@ -190,14 +190,14 @@ garchiever::ArithmeticCoder<FlowT, CountT>::_getCumulativeNumFoundHigh(
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeNumBytes(Res& res) {
+void ga::ArithmeticCoder<FlowT, CountT>::_serializeNumBytes(Res& res) {
     constexpr std::uint8_t numBytes = Sym::numBytes;
     res.putT<std::uint8_t>(numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
+void ga::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
     auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
     res.putT<std::uint8_t>(tailSize);
 
@@ -209,7 +209,7 @@ void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
-void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
+void ga::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
     // Number of unique words
     res.putT<std::uint32_t>(_symsData.cumulativeNumFound.size());
 
@@ -226,7 +226,7 @@ void garchiever::ArithmeticCoder<FlowT, CountT>::_serializeAlphabet(Res& res) {
 //----------------------------------------------------------------------------//
 template <class FlowT, typename CountT>
 std::uint64_t
-garchiever::ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
+ga::ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
     std::uint64_t correctingConst = 1;
     while (correctingConst * symsNum < (1ull << 40)) {
         correctingConst <<= 1;

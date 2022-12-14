@@ -4,6 +4,8 @@ project(archiever_encoder LANGUAGES CXX)
 project(archiever_decoder LANGUAGES CXX)
 project(archiever_tests LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,12 +20,14 @@ if(Boost_FOUND)
     add_executable(archiever_encoder encoder.cpp
         include/arithmetic_coder.hpp
         include/arithmetic_coder_encoded.hpp
+        include/arithmetic_coder_encoded.cpp
         include/byte_flow.hpp
         include/bytes_symbol.hpp
-        )
+    )
     add_executable(archiever_decoder decoder.cpp
         include/arithmetic_decoder.hpp
         include/arithmetic_decoder_decoded.hpp
+        include/arithmetic_decoder_decoded.cpp
         include/bytes_symbol.hpp
     )
     install(TARGETS archiever_encoder archiever_decoder
@@ -39,7 +43,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(archiever_tests test.cpp)
+add_executable(archiever_tests test.cpp
+    include/arithmetic_coder_encoded.cpp
+    include/arithmetic_decoder_decoded.cpp
+)
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main)
 include(GoogleTest)

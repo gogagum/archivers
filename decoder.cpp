@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     fin.read(reinterpret_cast<char*>(finData.data()), finSize);
 
-    auto decoded = garchiever::ArithmeticDecoderDecoded(std::move(finData));
+    auto decoded = ga::ArithmeticDecoderDecoded(std::move(finData));
     std::uint8_t symByteLen = decoded.takeT<std::uint8_t>();
 
     std::cerr << "Word bytes length: "
@@ -46,22 +46,22 @@ int main(int argc, char* argv[]) {
 
     switch (symByteLen) {
     case 1: {
-            auto decoder = garchiever::ArithmeticDecoder<garchiever::BytesSymbol<1>>(std::move(decoded));
+            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<1>>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 2: {
-            auto decoder = garchiever::ArithmeticDecoder<garchiever::BytesSymbol<2>>(std::move(decoded));
+            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<2>>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 3: {
-            auto decoder = garchiever::ArithmeticDecoder<garchiever::BytesSymbol<3>>(std::move(decoded));
+            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<3>>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 4: {
-            auto decoder = garchiever::ArithmeticDecoder<garchiever::BytesSymbol<4>>(std::move(decoded));
+            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<4>>(std::move(decoded));
             res = decoder.decode();
         }
         break;

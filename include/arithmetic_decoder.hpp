@@ -14,7 +14,7 @@
 
 #include "arithmetic_decoder_decoded.hpp"
 
-namespace garchiever {
+namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
@@ -69,7 +69,7 @@ private:
         typename std::vector<SymInfo>::const_iterator findInfo(CountT aux) const;
     };
 
-    constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::maxNum);
+    constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::wordsCount);
     constexpr static auto symsNum_2 = symsNum / 2;
     constexpr static auto symsNum_4 = symsNum / 4;
     constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
@@ -94,14 +94,10 @@ private:
     const std::uint64_t _correctingConst;
 };
 
-}  // garchiever
-
-#endif // ARITHMETIC_DECODER_HPP
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-garchiever::ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
+ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
       _alphabet(_deserializeAlphabet()),
@@ -110,8 +106,7 @@ garchiever::ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-std::vector<std::byte>
-garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
+std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
     std::uint64_t value = 0;
     std::size_t valueBits = SymT::numBytes * 8 + _additionalBitsCnt;
     assert(valueBits < 64 && "`value must be placeble in 64 bits");
@@ -166,9 +161,9 @@ garchiever::ArithmeticDecoder<SymT, CountT>::decode() {
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
 auto
-garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
+ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
         const SymT &sym) -> CountT {
-    auto fakeInfo = SymInfo(sym, 0);
+    auto fakeInfo = SymInfo{ sym, 0 };
     auto iter = std::lower_bound(_alphabet.cumulativeNumFound.begin(),
                                  _alphabet.cumulativeNumFound.end(),
                                  fakeInfo, typename SymInfo::SymOrder());
@@ -180,10 +175,9 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundLow(
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-auto
-garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
+auto ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
         const SymT &sym) -> CountT {
-    auto fakeInfo = SymInfo(sym, 0);
+    auto fakeInfo = SymInfo{ sym, 0 };
     auto iter = std::lower_bound(_alphabet.cumulativeNumFound.begin(),
                                  _alphabet.cumulativeNumFound.end(),
                                  fakeInfo, typename SymInfo::SymOrder());
@@ -199,7 +193,7 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_getCumulativeNumFoundHigh(
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
 boost::container::static_vector<std::byte, SymT::numBytes>
-garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
+ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
     boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
     for (auto& tailByte: tail) {
@@ -210,14 +204,13 @@ garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
-        ) -> Alphabet {
+auto ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet() -> Alphabet {
     Alphabet ret;
     ret.numUniqueSyms = _source.takeT<std::uint32_t>();
     for (auto _ : boost::irange<std::uint64_t>(0, ret.numUniqueSyms)) {
         auto sym = _source.takeT<SymT>();
         auto numFound = _source.takeT<CountT>();
-        ret.cumulativeNumFound.emplace_back(sym, numFound);
+        ret.cumulativeNumFound.push_back({sym, numFound});
     }
     ret.totalSymsCount = _source.takeT<CountT>();
     return ret;
@@ -225,8 +218,8 @@ auto garchiever::ArithmeticDecoder<SymT, CountT>::_deserializeAlphabet(
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-std::uint8_t garchiever::ArithmeticDecoder<SymT, CountT>::_computeAdditionalBitsCnt(
-        ) const {
+std::uint8_t
+ArithmeticDecoder<SymT, CountT>::_computeAdditionalBitsCnt() const {
     std::uint8_t ret = 0;
     for (; (symsNum << ret) < (std::uint64_t{1} << 40); ++ret) {
     }
@@ -236,8 +229,7 @@ std::uint8_t garchiever::ArithmeticDecoder<SymT, CountT>::_computeAdditionalBits
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-auto
-garchiever::ArithmeticDecoder<SymT, CountT>::Alphabet::findInfo(
+auto ArithmeticDecoder<SymT, CountT>::Alphabet::findInfo(
         CountT aux) const -> typename std::vector<SymInfo>::const_iterator {
     auto it = cumulativeNumFound.begin();
     bool found = false;
@@ -258,10 +250,13 @@ garchiever::ArithmeticDecoder<SymT, CountT>::Alphabet::findInfo(
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-bool
-garchiever::ArithmeticDecoder<SymT, CountT>::SymInfo::SymOrder::operator() (
+bool ArithmeticDecoder<SymT, CountT>::SymInfo::SymOrder::operator() (
         const SymInfo& si1, const SymInfo& si2) const {
     const typename SymT::Order order;
     return order(si1.sym, si2.sym);
 }
+
+}  // ga
+
+#endif // ARITHMETIC_DECODER_HPP
 

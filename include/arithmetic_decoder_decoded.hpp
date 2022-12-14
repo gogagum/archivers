@@ -10,7 +10,7 @@
 #include <array>
 #include <ranges>
 
-namespace garchiever {
+namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoderDecoded class
@@ -70,43 +70,10 @@ private:
     std::byte _currBitFlag;
 };
 
-}  //
-
-#endif // ARITHMETIC_DECODER_DECODED_HPP
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-garchiever::ArithmeticDecoderDecoded::ArithmeticDecoderDecoded(
-        std::vector<std::byte>&& data)
-    : _data(std::move(data)),
-      _bytesRead{0},
-      _startedBits{false},
-      _currBitFlag{0b10000000} { }
-
-//----------------------------------------------------------------------------//
-std::byte garchiever::ArithmeticDecoderDecoded::takeByte() {
-    if (_startedBits) {
-        throw BytesAfterBitsException();
-    }
-    std::byte ret = _data[_bytesRead];
-    ++_bytesRead;
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-bool garchiever::ArithmeticDecoderDecoded::takeBit() {
-    _startedBits = true;
-    if (_bytesRead == _data.size()) {
-        return false;
-    }
-    bool ret = (_data[_bytesRead] & _currBitFlag) != std::byte{0};
-    _moveBitFlag();
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
 template <class T>
-T garchiever::ArithmeticDecoderDecoded::takeT() {
+T ArithmeticDecoderDecoded::takeT() {
     using TBytes = std::array<std::byte, sizeof(T)>;
 
     static_assert(sizeof(TBytes) == sizeof(T), "Error with sizes.");
@@ -119,16 +86,6 @@ T garchiever::ArithmeticDecoderDecoded::takeT() {
     return ret;
 }
 
-//----------------------------------------------------------------------------//
-void garchiever::ArithmeticDecoderDecoded::_moveBitFlag() {
-    _currBitFlag >>= 1;
-    if (_currBitFlag == std::byte{0b00000000}) {
-        _currBitFlag = std::byte{0b10000000};
-        ++_bytesRead;
-    }
-}
+}  // namespace ga
 
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-garchiever::ArithmeticDecoderDecoded::BytesAfterBitsException::BytesAfterBitsException(
-        ) : std::runtime_error("Can`t write bytes after bits.") { }
+#endif  // ARITHMETIC_DECODER_DECODED_HPP
