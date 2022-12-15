@@ -20,6 +20,11 @@ protected:
     constexpr static auto symsNum_4 = symsNum / 4;
     constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
     constexpr static auto correctingConst = _computeCorrectingConst();
+    constexpr static auto correctedSymsNum = symsNum * correctingConst;
+    constexpr static auto correctedSymsNum_2 = symsNum_2 * correctingConst;
+    constexpr static auto correctedSymsNum_4 = symsNum_4 * correctingConst;
+    constexpr static auto correctedSymsNum_3to4 = symsNum_3to4 * correctingConst;
+
 public:
 
     struct Range {

@@ -56,10 +56,10 @@ private:
     };
 
     using RangesCalc<SymT>::symsNum;
-    using RangesCalc<SymT>::symsNum_2;
-    using RangesCalc<SymT>::symsNum_4;
-    using RangesCalc<SymT>::symsNum_3to4;
-    using RangesCalc<SymT>::correctingConst;
+    using RangesCalc<SymT>::correctedSymsNum;
+    using RangesCalc<SymT>::correctedSymsNum_2;
+    using RangesCalc<SymT>::correctedSymsNum_4;
+    using RangesCalc<SymT>::correctedSymsNum_3to4;
 
 private:
 
@@ -96,9 +96,7 @@ std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
         value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
-    auto currRange = typename RangesCalc<SymT>::Range {
-        0, symsNum * correctingConst
-    };
+    auto currRange = typename RangesCalc<SymT>::Range { 0, correctedSymsNum };
 
     std::vector<SymT> syms;
 
@@ -115,16 +113,16 @@ std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
         };
 
         while (true) {
-            if (currRange.high <= symsNum_2 * correctingConst) {
+            if (currRange.high <= correctedSymsNum_2) {
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (currRange.low >= symsNum_2 * correctingConst) {
+            } else if (currRange.low >= correctedSymsNum_2) {
                 bool bit = _source.takeBit();
-                value = value * 2 - symsNum * correctingConst + (bit ? 1 : 0);
-            } else if (currRange.low >= symsNum_4 * correctingConst
-                       && currRange.high <= symsNum_3to4 * correctingConst) {
+                value = value * 2 - correctedSymsNum + (bit ? 1 : 0);
+            } else if (currRange.low >= correctedSymsNum_4
+                       && currRange.high <= correctedSymsNum_3to4) {
                 bool bit = _source.takeBit();
-                value = value * 2 - symsNum_2 * correctingConst + (bit ? 1 : 0);
+                value = value * 2 - correctedSymsNum_2 + (bit ? 1 : 0);
             } else {
                 break;
             }

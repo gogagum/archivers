@@ -28,11 +28,10 @@ public:
 
     using Res = ArithmeticCoderEncoded;
 
-    using RangesCalc<Sym>::symsNum;
-    using RangesCalc<Sym>::symsNum_2;
-    using RangesCalc<Sym>::symsNum_4;
-    using RangesCalc<Sym>::symsNum_3to4;
-    using RangesCalc<Sym>::correctingConst;
+    using RangesCalc<Sym>::correctedSymsNum;
+    using RangesCalc<Sym>::correctedSymsNum_2;
+    using RangesCalc<Sym>::correctedSymsNum_4;
+    using RangesCalc<Sym>::correctedSymsNum_3to4;
 
 public:
 
@@ -56,8 +55,6 @@ private:
 
     void _serializeTail(Res& res);
 
-    std::uint64_t _computeCorrectingConst() const;
-
 private:
     FlowT _symFlow;
     dict::StaticDictionary<Sym> _dict;
@@ -79,9 +76,7 @@ auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     _serializeTail(ret);
     _dict.template serialize<CountT>(ret);
 
-    auto currRange = typename RangesCalc<Sym>::Range {
-        0, RangesCalc<Sym>::symsNum * correctingConst
-    };
+    auto currRange = typename RangesCalc<Sym>::Range { 0, correctedSymsNum };
 
     std::size_t btf = 0;
 
@@ -97,14 +92,14 @@ auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         };
 
         while (true) {
-            if (currRange.high <= symsNum_2 * correctingConst) {
+            if (currRange.high <= correctedSymsNum_2) {
                 ret.putBit(false);
                 ret.putBitsRepeatWithReset(true, btf);
-            } else if (currRange.low >= symsNum_2 * correctingConst) {
+            } else if (currRange.low >= correctedSymsNum_2) {
                 ret.putBit(true);
                 ret.putBitsRepeatWithReset(false, btf);
-            } else if (currRange.low >= symsNum_4 * correctingConst
-                       && currRange.high <= symsNum_3to4 * correctingConst) {
+            } else if (currRange.low >= correctedSymsNum_4
+                       && currRange.high <= correctedSymsNum_3to4) {
                 ++btf;
             } else {
                 break;
@@ -113,7 +108,7 @@ auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
         }
     }
 
-    if (currRange.low < symsNum_4 * correctingConst) {
+    if (currRange.low < correctedSymsNum_4) {
         ret.putBit(false);
         ret.putBitsRepeat(true, btf + 1);
     } else {
@@ -158,17 +153,6 @@ void ArithmeticCoder<FlowT, CountT>::_serializeTail(Res& res) {
     for (auto tailByte : tail) {
         res.putByte(tailByte);
     }
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, typename CountT>
-std::uint64_t
-ArithmeticCoder<FlowT, CountT>::_computeCorrectingConst() const {
-    std::uint64_t correctingConst = 1;
-    while (correctingConst * symsNum < (1ull << 40)) {
-        correctingConst <<= 1;
-    }
-    return correctingConst;
 }
 
 }  // namespace ga
