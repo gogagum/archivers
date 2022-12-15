@@ -18,6 +18,8 @@
 
 namespace ga {
 
+namespace bc = boost::container;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
@@ -49,7 +51,7 @@ private:
 
 private:
 
-    boost::container::static_vector<std::byte, SymT::numBytes> _deserializeTail();
+    bc::static_vector<std::byte, SymT::numBytes> _deserializeTail();
 
     std::vector<std::uint64_t> _deserializeDict();
 
@@ -126,7 +128,7 @@ std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
-boost::container::static_vector<std::byte, SymT::numBytes>
+bc::static_vector<std::byte, SymT::numBytes>
 ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
     boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
