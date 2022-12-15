@@ -406,7 +406,7 @@ TEST(StaticDictionary, Ord2Bytes1) {
 
     auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
-    auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{111}};
+    auto word1Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{112}};
     auto word1 = ga::BytesSymbol<2>(word1Bytes.data());
 
     EXPECT_EQ(dict.getWord(37), word1);
@@ -420,7 +420,7 @@ TEST(StaticDictionary, Ord2Bytes2) {
 
     auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
 
-    auto wordBytes = std::array<std::byte, 2>{std::byte{0}, std::byte{41}};
+    auto wordBytes = std::array<std::byte, 2>{std::byte{0}, std::byte{42}};
     auto word = ga::BytesSymbol<2>(wordBytes.data());
 
     EXPECT_EQ(dict.getWord(36), word);

@@ -54,22 +54,6 @@ private:
         };
     };
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The Alphabet class
-    ///
-    //struct Alphabet {
-    //    std::vector<SymInfo> cumulativeNumFound;
-    //    std::uint64_t numUniqueSyms;
-    //    CountT totalSymsCount;
-
-    //    /**
-    //     * @brief findInfo
-    //     * @param aux
-    //     * @return
-    //     */
-    //    typename std::vector<SymInfo>::const_iterator findInfo(CountT aux) const;
-    //};
-
     constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::wordsCount);
     constexpr static auto symsNum_2 = symsNum / 2;
     constexpr static auto symsNum_4 = symsNum / 4;
@@ -77,13 +61,7 @@ private:
 
 private:
 
-    //CountT _getCumulativeNumFoundLow(const SymT& sym);
-
-    //CountT _getCumulativeNumFoundHigh(const SymT& sym);
-
     boost::container::static_vector<std::byte, SymT::numBytes> _deserializeTail();
-
-    //Alphabet _deserializeAlphabet();
 
     std::vector<std::uint64_t> _deserializeDict();
 
@@ -92,7 +70,6 @@ private:
 private:
     Source _source;
     const boost::container::static_vector<std::byte, SymT::numBytes> _tail;
-    //const Alphabet _alphabet;
     const dict::StaticDictionary<SymT> _dict;
     const std::uint8_t _additionalBitsCnt;
     const std::uint64_t _correctingConst;

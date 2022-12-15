@@ -63,8 +63,6 @@ private:
 
 private:
 
-    SymsData _countSymsData();
-
     std::vector<std::uint64_t> _countSyms();
 
     void _serializeNumBytes(Res& res);
@@ -95,8 +93,6 @@ auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     _serializeNumBytes(ret);
     _serializeTail(ret);
     _dict.template serialize<CountT>(ret);
-
-    std::cerr << "Num unique words: " << _dict.numUniqueWords() << std::endl;
 
     std::uint64_t low = 0;
     std::uint64_t high = symsNum * _correctingConst;

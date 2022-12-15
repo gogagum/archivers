@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
-#include <boost/compute/algorithm/detail/binary_find.hpp>
+#include <ranges>
 
 namespace ga::dict {
 
@@ -54,10 +54,6 @@ public:
      */
     std::uint64_t numUniqueWords() const;
 
-private:
-
-    std::uint64_t _getLowerCumulativeNumFound(std::uint64_t ord) const;
-
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
 };
@@ -77,27 +73,19 @@ BaseDictionary<WordT>::BaseDictionary(
 template <class WordT>
 WordT
 BaseDictionary<WordT>::getWord(std::uint64_t cumulativeNumFound) const {
-    std::uint64_t it = 0;
-    bool found = false;
-
-    while (!found) {
-        std::size_t offset = 1;
-        while (it + offset * 2 - 1 < WordT::wordsCount
-               && _getLowerCumulativeNumFound(it + offset * 2 - 1) <= cumulativeNumFound) {
-            offset *= 2;
-        }
-        it += (offset - 1);
-        found = (offset == 1);
-    }
-
-    return WordT::byOrd(it);
+    auto it = std::ranges::upper_bound(_cumulativeNumFound, cumulativeNumFound);
+    return WordT::byOrd(it - _cumulativeNumFound.begin());
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT>
 std::uint64_t
 BaseDictionary<WordT>::getLowerCumulativeNumFound(const WordT& word) const {
-    return _getLowerCumulativeNumFound(WordT::ord(word));
+    if (std::uint64_t ord = WordT::ord(word); ord == 0) {
+        return 0;
+    } else {
+        return _cumulativeNumFound[ord - 1];
+    }
 }
 
 //----------------------------------------------------------------------------//
@@ -123,17 +111,6 @@ std::uint64_t BaseDictionary<WordT>::numUniqueWords() const {
                                      prevCumulativeNumFound = count;
                                      return ret;
                                  });
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t
-BaseDictionary<WordT>::_getLowerCumulativeNumFound(std::uint64_t ord) const {
-    if (ord == 0) {
-        return 0;
-    }
-
-    return _cumulativeNumFound[ord - 1];
 }
 
 }  // namespace ga::dict
