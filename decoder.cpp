@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -7,7 +8,16 @@
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/bytes_symbol.hpp"
+#include "include/dictionary/static_dictionary.hpp"
+#include "include/dictionary/uniform_dictionary.hpp"
+#include "include/dictionary/adaptive_dictionary.hpp"
 
+template <std::uint8_t numBytes>
+using Decoder = ga::ArithmeticDecoder<
+    ga::BytesSymbol<numBytes>,
+    ga::dict::AdaptiveDictionary<ga::BytesSymbol<numBytes>>>;
+
+//----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
     /**
     assert(argc == 3 && "Wrong number of arguments.");
@@ -46,22 +56,22 @@ int main(int argc, char* argv[]) {
 
     switch (symByteLen) {
     case 1: {
-            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<1>>(std::move(decoded));
+            auto decoder = Decoder<1>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 2: {
-            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<2>>(std::move(decoded));
+            auto decoder = Decoder<2>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 3: {
-            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<3>>(std::move(decoded));
+            auto decoder = Decoder<3>(std::move(decoded));
             res = decoder.decode();
         }
         break;
     case 4: {
-            auto decoder = ga::ArithmeticDecoder<ga::BytesSymbol<4>>(std::move(decoded));
+            auto decoder = Decoder<4>(std::move(decoded));
             res = decoder.decode();
         }
         break;

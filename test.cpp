@@ -4,7 +4,7 @@
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/bytes_symbol.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
-#include "include/dictionary/static_dicitionary.hpp"
+#include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////

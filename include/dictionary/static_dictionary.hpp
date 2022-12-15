@@ -1,5 +1,5 @@
-#ifndef STATIC_DICITIONARY_HPP
-#define STATIC_DICITIONARY_HPP
+#ifndef STATIC_DICTIONARY_HPP
+#define STATIC_DICTIONARY_HPP
 
 #include <boost/range/irange.hpp>
 
@@ -15,6 +15,8 @@ template <class WordT>
 class StaticDictionary : public BaseDictionary<WordT> {
 public:
     static constexpr bool supportsIncrease = false;
+    static constexpr bool requireSymsCounts = true;
+    static constexpr bool constructsFromNoArgs = false;
 
 public:
 
@@ -74,4 +76,4 @@ void StaticDictionary<WordT>::serialize(ArithmeticCoderEncoded& res) const {
 
 }  // namespace ga::dict
 
-#endif // STATIC_DICITIONARY_HPP
+#endif // STATIC_DICTIONARY_HPP

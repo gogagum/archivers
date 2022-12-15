@@ -5,6 +5,9 @@
 
 #include "include/arithmetic_coder.hpp"
 #include "include/byte_flow.hpp"
+#include "include/dictionary/static_dictionary.hpp"
+#include "include/dictionary/uniform_dictionary.hpp"
+#include "include/dictionary/adaptive_dictionary.hpp"
 
 int main(int argc, char* argv[]) {
     /**
@@ -37,9 +40,11 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = ga::ByteFlow<ga::BytesSymbol<1>>(
+    auto byteFlow = ga::ByteFlow<ga::BytesSymbol<3>>(
             reinterpret_cast<const std::byte*>(finData.data()), finData.size());
-    auto coder = ga::ArithmeticCoder(std::move(byteFlow));
+    auto coder = ga::ArithmeticCoder<
+                     ga::ByteFlow<ga::BytesSymbol<3>>,
+                     ga::dict::AdaptiveDictionary<ga::BytesSymbol<3>>>(std::move(byteFlow));
     auto encoded = coder.encode();
 
     std::ofstream fout;
