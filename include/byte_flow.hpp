@@ -138,7 +138,7 @@ public:
      * @brief countNumberOfWords.
      * @return number of words.
      */
-    std::size_t countNumberOfWords() const;
+    std::size_t getNumberOfWords() const;
 
     /**
      * @brief bytesLeft returns number of bytes left.
@@ -189,12 +189,12 @@ auto ByteFlow<BytesSymbol<numBytes>>::begin() const -> Iterator
 template<std::uint8_t numBytes>
 auto ByteFlow<BytesSymbol<numBytes>>::end() const -> Iterator {
     return Iterator(const_cast<std::byte*>(_bytes.data()
-                                           + countNumberOfWords() * numBytes));
+                                           + getNumberOfWords() * numBytes));
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t ByteFlow<BytesSymbol<numBytes>>::countNumberOfWords() const {
+std::size_t ByteFlow<BytesSymbol<numBytes>>::getNumberOfWords() const {
     return _bytes.size() / numBytes;
 }
 

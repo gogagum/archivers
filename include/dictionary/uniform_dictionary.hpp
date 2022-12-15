@@ -11,7 +11,10 @@ namespace ga::dict {
 template <class WordT>
 class UniformDictionary {
 public:
-    static constexpr bool supportsAddition = false;
+    static constexpr bool supportsIncrease = false;
+    static constexpr bool requireSymsCounts = false;
+    static constexpr bool constructsFromNoArgs = true;
+
 public:
 
     /**

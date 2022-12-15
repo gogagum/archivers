@@ -21,6 +21,9 @@ if(Boost_FOUND)
         include/arithmetic_coder.hpp
         include/arithmetic_coder_encoded.hpp
         include/arithmetic_coder_encoded.cpp
+        include/dictionary/uniform_dictionary.hpp
+        include/dictionary/static_dictionary.hpp
+        include/dictionary/adaptive_dictionary.hpp
         include/byte_flow.hpp
         include/bytes_symbol.hpp
     )
@@ -28,6 +31,9 @@ if(Boost_FOUND)
         include/arithmetic_decoder.hpp
         include/arithmetic_decoder_decoded.hpp
         include/arithmetic_decoder_decoded.cpp
+        include/dictionary/uniform_dictionary.hpp
+        include/dictionary/static_dictionary.hpp
+        include/dictionary/adaptive_dictionary.hpp
         include/bytes_symbol.hpp
     )
     install(TARGETS archiever_encoder archiever_decoder

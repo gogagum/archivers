@@ -16,6 +16,8 @@ template <class WordT>
 class AdaptiveDictionary : public BaseDictionary<WordT> {
 public:
     static constexpr bool supportsIncrease = true;
+    static constexpr bool requireSymsCounts = false;
+    static constexpr bool constructsFromNoArgs = true;
 public:
     AdaptiveDictionary();
 

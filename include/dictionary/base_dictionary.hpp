@@ -16,6 +16,10 @@ namespace ga::dict {
 template <class WordT>
 class BaseDictionary {
 protected:
+
+    struct RequireSymsCountsTag {};
+
+protected:
     BaseDictionary();
 
     BaseDictionary(std::vector<std::uint64_t>&& cumulativeNumFound);
