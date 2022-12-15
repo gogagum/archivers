@@ -30,6 +30,13 @@ void ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
 }
 
 //----------------------------------------------------------------------------//
+void
+ArithmeticCoderEncoded::putBitsRepeatWithReset(bool bit, std::size_t& num) {
+    putBitsRepeat(bit, num);
+    num = 0;
+}
+
+//----------------------------------------------------------------------------//
 void ArithmeticCoderEncoded::putByte(std::byte b) {
     assert(!_startedBits && "Can`t write bytes after bits.");
     _data.push_back(b);

@@ -35,6 +35,13 @@ public:
     void putBitsRepeat(bool bit, std::size_t num);
 
     /**
+     * @brief putBitsRepeatWithReset
+     * @param bit
+     * @param num
+     */
+    void putBitsRepeatWithReset(bool bit, std::size_t& num);
+
+    /**
      * @brief putByte - add byte in the end
      * @param b - byte
      */
@@ -74,8 +81,6 @@ private:
 template <class T>
 void ArithmeticCoderEncoded::putT(T s) {
     using SizeTBytes = std::array<std::byte, sizeof(T)>;
-
-    static_assert(sizeof(SizeTBytes) == sizeof(T), "Error with sizes.");
 
     auto& bytes = reinterpret_cast<SizeTBytes&>(s);
     for (auto byte: boost::adaptors::reverse(bytes)) {

@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include "arithmetic_decoder_decoded.hpp"
+#include "ranges_calc.hpp"
 #include "dictionary/static_dicitionary.hpp"
 
 namespace ga {
@@ -21,7 +22,7 @@ namespace ga {
 /// \brief The ArithmeticDecoder class
 ///
 template <class SymT, typename CountT = std::uint32_t>
-class ArithmeticDecoder{
+class ArithmeticDecoder : RangesCalc<SymT> {
 public:
     using Source = ArithmeticDecoderDecoded;
 public:
@@ -54,10 +55,11 @@ private:
         };
     };
 
-    constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::wordsCount);
-    constexpr static auto symsNum_2 = symsNum / 2;
-    constexpr static auto symsNum_4 = symsNum / 4;
-    constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
+    using RangesCalc<SymT>::symsNum;
+    using RangesCalc<SymT>::symsNum_2;
+    using RangesCalc<SymT>::symsNum_4;
+    using RangesCalc<SymT>::symsNum_3to4;
+    using RangesCalc<SymT>::correctingConst;
 
 private:
 
@@ -72,7 +74,6 @@ private:
     const boost::container::static_vector<std::byte, SymT::numBytes> _tail;
     const dict::StaticDictionary<SymT> _dict;
     const std::uint8_t _additionalBitsCnt;
-    const std::uint64_t _correctingConst;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,8 +83,7 @@ ArithmeticDecoder<SymT,  CountT>::ArithmeticDecoder(Source&& source)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
       _dict(_deserializeDict()),
-      _additionalBitsCnt(_computeAdditionalBitsCnt()),
-      _correctingConst(std::uint64_t{1} << _additionalBitsCnt) {}
+      _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
 
 //----------------------------------------------------------------------------//
 template <class SymT, typename CountT>
@@ -96,41 +96,39 @@ std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
         value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
-    std::uint64_t low = 0;
-    std::uint64_t high = symsNum * _correctingConst;
+    auto currRange = typename RangesCalc<SymT>::Range {
+        0, symsNum * correctingConst
+    };
 
     std::vector<SymT> syms;
 
     for (std::uint64_t i = 0; i < _dict.totalWordsCount(); ++i) {
-        std::uint64_t range = high - low;
-        std::uint64_t aux = ((value - low + 1) * _dict.totalWordsCount() - 1) / range;
+        std::uint64_t range = currRange.high - currRange.low;
+        std::uint64_t aux = ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);
         syms.push_back(sym);
 
-        high = low + (range * _dict.getHigherCumulativeNumFound(sym)) / _dict.totalWordsCount();
-        low = low + (range * _dict.getLowerCumulativeNumFound(sym)) / _dict.totalWordsCount();
+        currRange = typename RangesCalc<SymT>::Range {
+            currRange.low + (range * _dict.getLowerCumulativeNumFound(sym)) / _dict.totalWordsCount(),
+            currRange.low + (range * _dict.getHigherCumulativeNumFound(sym)) / _dict.totalWordsCount()
+        };
 
         while (true) {
-            if (high <= symsNum_2 * _correctingConst) {
-                high = high * 2;
-                low = low * 2;
+            if (currRange.high <= symsNum_2 * correctingConst) {
                 bool bit = _source.takeBit();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (low >= symsNum_2 * _correctingConst) {
-                high = high * 2 - symsNum * _correctingConst;
-                low = low * 2 - symsNum * _correctingConst;
+            } else if (currRange.low >= symsNum_2 * correctingConst) {
                 bool bit = _source.takeBit();
-                value = value * 2 - symsNum * _correctingConst + (bit ? 1 : 0);
-            } else if (low >= symsNum_4 * _correctingConst
-                       && high <= symsNum_3to4 * _correctingConst) {
-                high = high * 2 - symsNum_2 * _correctingConst;
-                low = low * 2 - symsNum_2 * _correctingConst;
+                value = value * 2 - symsNum * correctingConst + (bit ? 1 : 0);
+            } else if (currRange.low >= symsNum_4 * correctingConst
+                       && currRange.high <= symsNum_3to4 * correctingConst) {
                 bool bit = _source.takeBit();
-                value = value * 2 - symsNum_2 * _correctingConst + (bit ? 1 : 0);
+                value = value * 2 - symsNum_2 * correctingConst + (bit ? 1 : 0);
             } else {
                 break;
             }
+            currRange = RangesCalc<SymT>::recalcRange(currRange);
         }
     }
     std::vector<std::byte> ret(syms.size() * SymT::numBytes);

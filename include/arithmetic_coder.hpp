@@ -13,6 +13,7 @@
 
 #include "arithmetic_coder_encoded.hpp"
 #include "dictionary/static_dicitionary.hpp"
+#include "ranges_calc.hpp"
 
 namespace ga {
 
@@ -20,12 +21,18 @@ namespace ga {
 /// \brief The ArithmeticCoder class
 ///
 template <class FlowT, typename CountT = std::uint32_t>
-class ArithmeticCoder {
+class ArithmeticCoder : RangesCalc<typename FlowT::Sym> {
 public:
 
     using Sym = typename FlowT::Sym;
 
     using Res = ArithmeticCoderEncoded;
+
+    using RangesCalc<Sym>::symsNum;
+    using RangesCalc<Sym>::symsNum_2;
+    using RangesCalc<Sym>::symsNum_4;
+    using RangesCalc<Sym>::symsNum_3to4;
+    using RangesCalc<Sym>::correctingConst;
 
 public:
 
@@ -43,13 +50,6 @@ public:
 
 private:
 
-    constexpr static auto symsNum = static_cast<std::uint64_t>(Sym::wordsCount);
-    constexpr static auto symsNum_2 = symsNum / 2;
-    constexpr static auto symsNum_4 = symsNum / 4;
-    constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
-
-private:
-
     std::vector<std::uint64_t> _countSyms();
 
     void _serializeNumBytes(Res& res);
@@ -61,7 +61,6 @@ private:
 private:
     FlowT _symFlow;
     dict::StaticDictionary<Sym> _dict;
-    const std::uint64_t _correctingConst;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +68,6 @@ private:
 template <class FlowT, typename CountT>
 ArithmeticCoder<FlowT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
-          _correctingConst(_computeCorrectingConst()),
           _dict(_countSyms()) {}
 
 //----------------------------------------------------------------------------//
@@ -81,44 +79,41 @@ auto ArithmeticCoder<FlowT, CountT>::encode() -> Res {
     _serializeTail(ret);
     _dict.template serialize<CountT>(ret);
 
-    std::uint64_t low = 0;
-    std::uint64_t high = symsNum * _correctingConst;
+    auto currRange = typename RangesCalc<Sym>::Range {
+        0, RangesCalc<Sym>::symsNum * correctingConst
+    };
+
     std::size_t btf = 0;
 
     for (auto sym : _symFlow) {
-        std::uint64_t range = high - low;
+        std::uint64_t range = currRange.high - currRange.low;
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
 
-        high = low + (range * h) / _dict.totalWordsCount();
-        low = low + (range * l) / _dict.totalWordsCount();
+        currRange = typename RangesCalc<Sym>::Range{
+            currRange.low + (range * l) / _dict.totalWordsCount(),
+            currRange.low + (range * h) / _dict.totalWordsCount()
+        };
 
         while (true) {
-            if (high <= symsNum_2 * _correctingConst) {
+            if (currRange.high <= symsNum_2 * correctingConst) {
                 ret.putBit(false);
-                ret.putBitsRepeat(true, btf);
-                btf = 0;
-                high = high * 2;
-                low = low * 2;
-            } else if (low >= symsNum_2 * _correctingConst) {
+                ret.putBitsRepeatWithReset(true, btf);
+            } else if (currRange.low >= symsNum_2 * correctingConst) {
                 ret.putBit(true);
-                ret.putBitsRepeat(false, btf);
-                btf = 0;
-                high = high * 2 - symsNum * _correctingConst;
-                low = low * 2 - symsNum * _correctingConst;
-            } else if (low >= symsNum_4 * _correctingConst
-                       && high <= symsNum_3to4 * _correctingConst) {
-                high = high * 2 - symsNum_2 * _correctingConst;
-                low = low * 2 - symsNum_2 * _correctingConst;
+                ret.putBitsRepeatWithReset(false, btf);
+            } else if (currRange.low >= symsNum_4 * correctingConst
+                       && currRange.high <= symsNum_3to4 * correctingConst) {
                 ++btf;
             } else {
                 break;
             }
+            currRange = RangesCalc<Sym>::recalcRange(currRange);
         }
     }
 
-    if (low < symsNum_4 * _correctingConst) {
+    if (currRange.low < symsNum_4 * correctingConst) {
         ret.putBit(false);
         ret.putBitsRepeat(true, btf + 1);
     } else {
