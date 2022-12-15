@@ -50,19 +50,6 @@ private:
 
 private:
 
-    template <class Value>
-    using MapSymTo = std::map<Sym, Value, typename Sym::Order>;
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The SymsData class
-    ///
-    struct SymsData {
-        MapSymTo<CountT> cumulativeNumFound;
-        CountT totalSymsCount;
-    };
-
-private:
-
     std::vector<std::uint64_t> _countSyms();
 
     void _serializeNumBytes(Res& res);

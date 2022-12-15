@@ -49,7 +49,13 @@ public:
      * @brief BytesSymbol bytes symbol constructor from pointer to data.
      * @param ptr - pointer to data.
      */
-    BytesSymbol(std::byte* ptr);
+    BytesSymbol(const std::byte* ptr);
+
+    /**
+     * @brief BytesSymbol constructor from array.
+     * @param bytes
+     */
+    BytesSymbol(const std::array<std::byte, numBytes>& bytes);
 
 private:
     std::array<std::byte, numBytes> _data;  // data of the word
@@ -151,11 +157,17 @@ auto BytesSymbol<_numBytes>::byOrd(
     return BytesSymbol<_numBytes>(retBytes.data());
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesSymbol<numBytes>::BytesSymbol(std::byte* ptr) {
+BytesSymbol<numBytes>::BytesSymbol(const std::byte* ptr) {
     std::memcpy(_data.data(), ptr, numBytes);
 }
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t _numBytes>
+BytesSymbol<_numBytes>::BytesSymbol(const std::array<std::byte, numBytes>& arr)
+    : BytesSymbol(arr.data()) {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
