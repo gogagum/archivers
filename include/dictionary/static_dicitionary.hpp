@@ -1,6 +1,8 @@
 #ifndef STATIC_DICITIONARY_HPP
 #define STATIC_DICITIONARY_HPP
 
+#include <boost/range/irange.hpp>
+
 #include "base_dictionary.hpp"
 #include "../arithmetic_coder_encoded.hpp"
 
@@ -63,14 +65,11 @@ void StaticDictionary<WordT>::serialize(ArithmeticCoderEncoded& res) const {
     res.putT<std::uint32_t>(this->numUniqueWords());
 
     // Unique words and their counts
-    for (std::size_t i = 0; i < this->_cumulativeNumFound.size(); ++i) {
+    for (auto i : boost::irange<std::size_t>(0, this->_cumulativeNumFound.size())) {
         auto w = WordT::byOrd(i);
         res.putT<WordT>(w);
-        res.putT<CountT>(this->getLowerCumulativeNumFound(w));
+        res.putT<CountT>(this->_cumulativeNumFound[i]);
     }
-
-    // Total words count.
-    res.putT<CountT>(this->totalWordsCount());
 }
 
 }  // namespace ga::dict

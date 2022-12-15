@@ -108,7 +108,7 @@ public:
         BytesSymbol<numBytes> operator*() const;
 
     private:
-        std::byte* _ptr;
+        const std::byte* _ptr;
     private:
         friend class ByteFlow;
     };

@@ -153,41 +153,13 @@ ArithmeticDecoder<SymT, CountT>::_deserializeTail() {
 
 template <class SymT, typename CountT>
 std::vector<std::uint64_t> ArithmeticDecoder<SymT, CountT>::_deserializeDict() {
-    std::vector<std::uint64_t> ret(SymT::wordsCount, 0);
+    std::vector<std::uint64_t> ret(SymT::wordsCount);
     CountT numUniqueSyms = _source.takeT<std::uint32_t>();
 
-    if (numUniqueSyms != 0) {
+    for (auto _ : boost::irange<CountT>(0, numUniqueSyms)) {
         auto sym = _source.takeT<SymT>();
         auto numFound = _source.takeT<CountT>();
-        if (auto ord = SymT::ord(sym); ord == 0) {
-            assert(numFound == 0);
-        } else {
-            ret[ord - 1] = numFound;
-        }
-    }
-
-    for (auto _ : boost::irange<CountT>(1, numUniqueSyms - 1)) {
-        auto sym = _source.takeT<SymT>();
-        auto numFound = _source.takeT<CountT>();
-        ret[SymT::ord(sym) - 1] = numFound;
-    }
-
-    if (numUniqueSyms != 0) {
-        auto sym = _source.takeT<SymT>();
-        auto numFound = _source.takeT<CountT>();
-
-        ret[SymT::ord(sym) - 1] = numFound;
-        ret[SymT::wordsCount - 1] = _source.takeT<CountT>(); // unique syms
-    }
-
-    std::uint64_t currCnt = *ret.rbegin();
-    for (auto iter = ret.rbegin() + 1; iter < ret.rend(); ++iter) {
-        if (auto val = *iter; val == 0) {
-            *iter = currCnt;
-        } else {
-            assert(val <= currCnt);
-            currCnt = val;
-        }
+        ret[SymT::ord(sym)] = numFound;
     }
 
     return ret;

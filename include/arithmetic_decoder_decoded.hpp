@@ -76,8 +76,6 @@ template <class T>
 T ArithmeticDecoderDecoded::takeT() {
     using TBytes = std::array<std::byte, sizeof(T)>;
 
-    static_assert(sizeof(TBytes) == sizeof(T), "Error with sizes.");
-
     auto ret = T();
     auto& bytes = reinterpret_cast<TBytes&>(ret);
     for (auto& byte: boost::adaptors::reverse(bytes)) {

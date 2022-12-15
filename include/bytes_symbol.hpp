@@ -203,8 +203,7 @@ bool operator!=(const BytesSymbol<numBytes>& bs1,
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os,
-                             BytesSymbol<numBytes> sym) {
+std::ostream& operator<<(std::ostream& os, BytesSymbol<numBytes> sym) {
     for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
         os << *iter << ' ';
     }
