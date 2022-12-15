@@ -15,6 +15,7 @@ private:
     constexpr static std::uint64_t _computeCorrectingConst();
 
 protected:
+
     constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::wordsCount);
     constexpr static auto symsNum_2 = symsNum / 2;
     constexpr static auto symsNum_4 = symsNum / 4;

@@ -40,20 +40,6 @@ public:
     std::vector<std::byte> decode();
 
 private:
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The SymInfo class
-    ///
-    struct SymInfo {
-        SymT sym;
-        CountT count;
-
-        ////////////////////////////////////////////////////////////////////////
-        /// \brief The SymOrder class
-        ///
-        struct SymOrder {
-            bool operator()(const SymInfo& si1, const SymInfo& si2) const;
-        };
-    };
 
     using RangesCalc<SymT>::symsNum;
     using RangesCalc<SymT>::correctedSymsNum;
@@ -107,9 +93,12 @@ std::vector<std::byte> ArithmeticDecoder<SymT, CountT>::decode() {
         auto sym = _dict.getWord(aux);
         syms.push_back(sym);
 
+        auto h = _dict.getHigherCumulativeNumFound(sym);
+        auto l = _dict.getLowerCumulativeNumFound(sym);
+
         currRange = typename RangesCalc<SymT>::Range {
-            currRange.low + (range * _dict.getLowerCumulativeNumFound(sym)) / _dict.totalWordsCount(),
-            currRange.low + (range * _dict.getHigherCumulativeNumFound(sym)) / _dict.totalWordsCount()
+            currRange.low + (range * l) / _dict.totalWordsCount(),
+            currRange.low + (range * h) / _dict.totalWordsCount()
         };
 
         while (true) {
@@ -169,15 +158,6 @@ ArithmeticDecoder<SymT, CountT>::_computeAdditionalBitsCnt() const {
     for (; (symsNum << ret) < (std::uint64_t{1} << 40); ++ret) {
     }
     return ret;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <class SymT, typename CountT>
-bool ArithmeticDecoder<SymT, CountT>::SymInfo::SymOrder::operator() (
-        const SymInfo& si1, const SymInfo& si2) const {
-    const typename SymT::Order order;
-    return order(si1.sym, si2.sym);
 }
 
 }  // ga

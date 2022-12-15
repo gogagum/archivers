@@ -28,6 +28,7 @@ public:
 
     using Res = ArithmeticCoderEncoded;
 
+private:
     using RangesCalc<Sym>::correctedSymsNum;
     using RangesCalc<Sym>::correctedSymsNum_2;
     using RangesCalc<Sym>::correctedSymsNum_4;
