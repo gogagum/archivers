@@ -99,7 +99,7 @@ std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
     assert(valueBits < 64 && "`value must be placeble in 64 bits");
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
-        value = (value << 1) + (_source.takeBit() ? 1 : 0);
+        value = (value << 1ull) + (_source.takeBit() ? 1ull : 0ull);
     }
 
     auto currRange = typename RangesCalc<SymT>::Range { 0, correctedSymsNum };
@@ -188,7 +188,7 @@ template <class SymT, class DictT, typename CountT>
 std::uint8_t
 ArithmeticDecoder<SymT, DictT, CountT>::_computeAdditionalBitsCnt() const {
     std::uint8_t ret = 0;
-    for (; (symsNum << ret) < (std::uint64_t{1} << 40); ++ret) {
+    for (; (symsNum << static_cast<std::uint64_t>(ret)) < (1ull << 33); ++ret) {
     }
     return ret;
 }

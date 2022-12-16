@@ -44,8 +44,8 @@ public:
 template <class SymT>
 constexpr std::uint64_t RangesCalc<SymT>::_computeCorrectingConst() {
     std::uint64_t correctingConst = 1;
-    while (correctingConst * symsNum < (1ull << 40)) {
-        correctingConst <<= 1;
+    while (correctingConst * symsNum < (1ull << 33)) {
+        correctingConst <<= 1ull;
     }
     return correctingConst;
 }

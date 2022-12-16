@@ -15,7 +15,9 @@
 template <std::uint8_t numBytes>
 using Decoder = ga::ArithmeticDecoder<
     ga::BytesSymbol<numBytes>,
-    ga::dict::AdaptiveDictionary<ga::BytesSymbol<numBytes>>>;
+    ga::dict::AdaptiveDictionary<ga::BytesSymbol<numBytes>>,
+    std::uint64_t
+>;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
