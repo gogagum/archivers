@@ -24,6 +24,7 @@ if(Boost_FOUND)
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
+        include/dictionary/integer_random_access_iterator.hpp
         include/byte_flow.hpp
         include/bytes_symbol.hpp
     )
@@ -34,6 +35,7 @@ if(Boost_FOUND)
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
+        include/dictionary/integer_random_access_iterator.hpp
         include/bytes_symbol.hpp
     )
     install(TARGETS archiever_encoder archiever_decoder

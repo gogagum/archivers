@@ -40,11 +40,11 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = ga::ByteFlow<ga::BytesSymbol<2>>(
+    auto byteFlow = ga::ByteFlow<ga::BytesSymbol<3>>(
             reinterpret_cast<const std::byte*>(finData.data()), finData.size());
     auto coder = ga::ArithmeticCoder<
-                     ga::ByteFlow<ga::BytesSymbol<2>>,
-                     ga::dict::AdaptiveDictionary<ga::BytesSymbol<2>>,
+                     ga::ByteFlow<ga::BytesSymbol<3>>,
+                     ga::dict::AdaptiveDictionary<ga::BytesSymbol<3>>,
                      std::uint64_t>(std::move(byteFlow));
     auto encoded = coder.encode();
 

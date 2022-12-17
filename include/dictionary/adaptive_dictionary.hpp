@@ -7,14 +7,11 @@
 #include <cstdint>
 #include <vector>
 #include <ranges>
+#include <iterator>
 
 #include <boost/icl/interval_map.hpp>
-#include <boost/concept_check.hpp>
-#include <boost/range/concepts.hpp>
 #include <boost/range/iterator_range.hpp>
-#include <boost/range/adaptor/transformed.hpp>
-#include <boost/range/algorithm/upper_bound.hpp>
-#include <boost/fusion/view/transform_view.hpp>
+#include <boost/range/irange.hpp>
 
 namespace ga::dict {
 
@@ -73,27 +70,19 @@ template <class WordT>
 AdaptiveDictionary<WordT>::AdaptiveDictionary() {}
 
 //----------------------------------------------------------------------------//
-template <class WordT, std::unt8_t baseRatio = 1>
+template <class WordT>
 WordT
 AdaptiveDictionary<WordT>::getWord(std::uint64_t cumulativeNumFound) const {
-    auto beg = misc::IntegerRandomAccessIterator<std::uint64_t>(0);
-    auto end = misc::IntegerRandomAccessIterator<std::uint64_t>(WordT::wordsCount);
-
-    auto indexes = boost::make_iterator_range(beg, end);
-
-    static_assert(std::ranges::random_access_range<decltype(indexes)>);
-
-    auto cumulativeNumFoundRng =
-            std::ranges::views::transform(
-                indexes,
-                [this](std::uint64_t index) -> std::uint64_t {
-                    return this->_additionalCounts(index) + index + 1;
-                });
-
-    auto it = std::ranges::upper_bound(cumulativeNumFoundRng, cumulativeNumFound);
-    static_assert(sizeof(decltype(it - cumulativeNumFoundRng.begin())) == 8);
-
-    return WordT::byOrd(it - cumulativeNumFoundRng.begin());
+    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+    // TODO: replace
+    //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
+    const auto getLowerCumulNumFound_ = [this](std::uint64_t index) {
+        return this->_additionalCounts(index) + index + 1;
+    };
+    auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
+                                       getLowerCumulNumFound_);
+    return WordT::byOrd(it - idxs.begin());
 }
 
 //----------------------------------------------------------------------------//
