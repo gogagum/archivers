@@ -13,25 +13,31 @@
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 template <std::uint8_t numBytes>
-using Decoder = ga::ArithmeticDecoder<
-    ga::BytesSymbol<numBytes>,
-    ga::dict::AdaptiveDictionary<ga::BytesSymbol<numBytes>>,
-    std::uint64_t
->;
+using Sym = ga::BytesSymbol<numBytes>;
+
+template <std::uint8_t numBytes>
+using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 4>;
+
+template <std::uint8_t numBytes>
+using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
-    /**
     assert(argc == 3 && "Wrong number of arguments.");
+
+    if (argc < 3) {
+        std::cout << "Usage: " << argv[0] << " <decoded> <result>" << std::endl;
+        return 0;
+    }
 
     std::string fileIn = argv[1];
     std::string fileOut = argv[2];
-    */
-
-    std::string fileIn = "fout.txt";
-    std::string fileOut = "small2_decoded.png";
 
     std::ifstream fin{fileIn, std::ifstream::ate | std::ifstream::binary};
+    if (!fin.is_open()) {
+        std::cout << "Could not open file: " << fileIn << std::endl;
+        return 0;
+    }
 
     fin.unsetf(std::ios::skipws);
 
@@ -40,7 +46,7 @@ int main(int argc, char* argv[]) {
 
     fin.seekg(0, std::ios::end);
     finSize = fin.tellg();
-    std::cerr << "File size: " << finSize << std::endl;
+    std::cerr << "File size: " << finSize << "." << std::endl;
     fin.seekg(0, std::ios::beg);
 
     std::vector<std::byte> finData;
@@ -84,6 +90,10 @@ int main(int argc, char* argv[]) {
 
     std::ofstream fout;
     fout.open(fileOut, std::ios::binary | std::ios::out);
+    if (!fout.is_open()) {
+        std::cout << "Could not open file: " << fileOut << "." << std::endl;
+        return 0;
+    }
     fout.write(reinterpret_cast<const char*>(res.data()), res.size());
     fout.close();
 
