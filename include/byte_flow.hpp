@@ -116,11 +116,11 @@ public:
 public:
 
     /**
-     * @brief ByteFlow constructor from pointer and bytes count.
-     * @param ptr - pointer to data.
-     * @param size - bytes count.
+     * @brief ByteFlow
+     * @param ptr
+     * @param size
      */
-    ByteFlow(const std::byte* ptr, std::size_t size);
+    ByteFlow(const void* ptr, std::size_t size);
 
     /**
      * @brief begin - beginning iterator getter.
@@ -172,7 +172,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ByteFlow<BytesSymbol<numBytes>>::ByteFlow(const std::byte* ptr, std::size_t size)
+ByteFlow<BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
         : _currOffset(0) {
     _bytes.resize(size);
     std::memcpy(_bytes.data(), ptr, size);
