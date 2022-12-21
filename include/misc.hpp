@@ -7,7 +7,7 @@
 #include <bitset>
 #include <cstddef>
 
-namespace ga {
+namespace ga::w {
 //----------------------------------------------------------------------------//
 std::ostream& operator<< (std::ostream& os, std::byte b);
 

@@ -1,0 +1,4 @@
+#ifndef INT_RANGE_WORD_HPP
+#define INT_RANGE_WORD_HPP
+
+#endif // INT_RANGE_WORD_HPP
