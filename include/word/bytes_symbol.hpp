@@ -11,9 +11,9 @@
 #include <ostream>
 #include <boost/range/combine.hpp>
 
-#include "misc.hpp"
+#include "../misc.hpp"
 
-namespace ga {
+namespace ga::w {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
@@ -111,8 +111,8 @@ private:
 /// \return
 ///
 template <std::uint8_t numBytes>
-bool operator==(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2);
+bool operator==(const w::BytesSymbol<numBytes>& bs1,
+                const w::BytesSymbol<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator !=
@@ -121,9 +121,8 @@ bool operator==(const BytesSymbol<numBytes>& bs1,
 /// \return
 ///
 template <std::uint8_t numBytes>
-bool operator!=(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2);
-
+bool operator!=(const w::BytesSymbol<numBytes>& bs1,
+                const w::BytesSymbol<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
@@ -133,7 +132,7 @@ bool operator!=(const BytesSymbol<numBytes>& bs1,
 ///
 template <std::uint8_t numBytes>
 std::ostream& operator<<(std::ostream& os,
-                         BytesSymbol<numBytes> sym);
+                         w::BytesSymbol<numBytes> sym);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -189,27 +188,29 @@ bool BytesSymbol<numBytes>::Order::operator()(
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool operator==(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2) {
+bool operator==(const w::BytesSymbol<numBytes>& bs1,
+                const w::BytesSymbol<numBytes>& bs2) {
     return bs1._data == bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool operator!=(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2) {
+bool operator!=(const w::BytesSymbol<numBytes>& bs1,
+                const w::BytesSymbol<numBytes>& bs2) {
     return bs1._data != bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, BytesSymbol<numBytes> sym) {
+std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym) {
     for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
         os << *iter << ' ';
     }
     return os << *(sym._data.end() - 1);
 }
 
-}  // namespace ga
+}  // namespace ga::w
+
+
 
 #endif // BIT_SYMBOL_HPP

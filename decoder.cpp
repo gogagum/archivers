@@ -7,13 +7,13 @@
 
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/arithmetic_decoder.hpp"
-#include "include/bytes_symbol.hpp"
+#include "include/word/bytes_symbol.hpp"
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 template <std::uint8_t numBytes>
-using Sym = ga::BytesSymbol<numBytes>;
+using Sym = ga::w::BytesSymbol<numBytes>;
 
 template <std::uint8_t numBytes>
 using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 4>;

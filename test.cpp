@@ -2,7 +2,8 @@
 
 #include "include/arithmetic_coder_encoded.hpp"
 #include "include/arithmetic_decoder_decoded.hpp"
-#include "include/bytes_symbol.hpp"
+#include "include/word/bytes_symbol.hpp"
+#include "include/word/int_range_word.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
@@ -117,19 +118,19 @@ TEST(ArithmeticCoderEncodedTest, PutUInt32) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, Construct) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::BytesSymbol<5>(testData.data());
+    [[maybe_unused]] auto sym = ga::w::BytesSymbol<5>(testData.data());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, ConstructFromArray) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::BytesSymbol<5>(testData);
+    [[maybe_unused]] auto sym = ga::w::BytesSymbol<5>(testData);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsOrder1) {
     using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::BytesSymbol<2>;
+    using SymT = ga::w::BytesSymbol<2>;
 
     SymDataT testData1 = { std::byte{0b00000000}, std::byte{0b11111111} };
     SymDataT testData2 = { std::byte{0b11111111}, std::byte{0b11111111} };
@@ -145,7 +146,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder1) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsOrder2) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::BytesSymbol<1>;
+    using SymT = ga::w::BytesSymbol<1>;
 
     SymDataT testData1 = { std::byte{0b00000111} };
     SymDataT testData2 = { std::byte{0b00001111} };
@@ -161,7 +162,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder2) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsOrder3) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::BytesSymbol<1>;
+    using SymT = ga::w::BytesSymbol<1>;
 
     SymDataT testData1 = { std::byte{0b00001111} };
     SymDataT testData2 = { std::byte{0b00000111} };
@@ -177,7 +178,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder3) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsOrder4) {
     using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::BytesSymbol<2>;
+    using SymT = ga::w::BytesSymbol<2>;
 
     SymDataT testData1 = { std::byte{0b10000000}, std::byte{0b00000000} };
     SymDataT testData2 = { std::byte{0b00001111}, std::byte{0b11111111} };
@@ -193,7 +194,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder4) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsInMap) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::BytesSymbol<1>;
+    using SymT = ga::w::BytesSymbol<1>;
     using MapToInt64 = std::map<SymT, std::int64_t, SymT::Order>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
@@ -216,7 +217,7 @@ TEST(BytesSymbolTest, BytesSymbolsInMap) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::BytesSymbol<1>;
+    using SymT = ga::w::BytesSymbol<1>;
     using MapToInt64 = std::map<SymT, std::int64_t, SymT::Order>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
@@ -236,6 +237,57 @@ TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 
     EXPECT_EQ(m.lower_bound(sym2)->second, 42);
     EXPECT_EQ(m.upper_bound(sym2)->second, 42);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Construct) {
+    [[maybe_unused]] auto word = ga::w::IntegerWord<int, 0, 56>(42);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, IncorrectOrdConstruct) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    EXPECT_THROW(auto word = TestedWord(73),
+                 TestedWord::IncorrectOrd);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Eq1) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(34);
+    EXPECT_TRUE(w1 == w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Eq2) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(23);
+    EXPECT_FALSE(w1 == w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Neq) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(23);
+    EXPECT_TRUE(w1 != w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Ord) {
+    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    auto w1 = TestedWord(42);
+    EXPECT_EQ(TestedWord::ord(w1), 5);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, ByOrd) {
+    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    auto w1 = TestedWord(42);
+    EXPECT_EQ(TestedWord::byOrd(5), w1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -340,60 +392,60 @@ TEST(ArithmeticDecoderDecoded, UInt16T) {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(UniformDict, Construct) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<2>>();
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, Ord2Bytes) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<2>>();
     auto symBytes = std::array{std::byte{0x00}, std::byte{0x02}};
-    EXPECT_EQ(dict.getWord(2), ga::BytesSymbol<2>(symBytes));
+    EXPECT_EQ(dict.getWord(2), ga::w::BytesSymbol<2>(symBytes));
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, Ord3Bytes) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<3>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<3>>();
     auto symBytes =
         std::array{std::byte{0x00}, std::byte{0x00}, std::byte{0x1A}};
-    EXPECT_EQ(dict.getWord(26), ga::BytesSymbol<3>(symBytes));
+    EXPECT_EQ(dict.getWord(26), ga::w::BytesSymbol<3>(symBytes));
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, OrdLongOrd) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<2>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<2>>();
     auto symBytes = std::array{ std::byte{8}, std::byte{42} };
-    EXPECT_EQ(dict.getWord(256 * 8 + 42), ga::BytesSymbol<2>(symBytes));
+    EXPECT_EQ(dict.getWord(256 * 8 + 42), ga::w::BytesSymbol<2>(symBytes));
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, CumulativeNumFoundLow) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{37}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 37);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, CumulativeNumFoundLowZero) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{0}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, CumulativeNumFoundHigh) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{37}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 38);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDict, CumulativeNumFoundHighZero) {
-    auto dict = ga::dict::UniformDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::UniformDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{0}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 1);
 }
 
@@ -401,7 +453,7 @@ TEST(UniformDict, CumulativeNumFoundHighZero) {
 //----------------------------------------------------------------------------//
 TEST(StaticDictionary, Construct) {
     auto freq = std::array<std::uint64_t, 256>{};
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<1>>(freq);
 }
 
 //----------------------------------------------------------------------------//
@@ -410,10 +462,10 @@ TEST(StaticDictionary, Ord2Bytes1) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array{std::byte{0}, std::byte{112}};
-    auto word1 = ga::BytesSymbol<2>(word1Bytes);
+    auto word1 = ga::w::BytesSymbol<2>(word1Bytes);
 
     EXPECT_EQ(dict.getWord(37), word1);
 }
@@ -424,10 +476,10 @@ TEST(StaticDictionary, Ord2Bytes2) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<2>>(freq);
 
     auto wordBytes = std::array{std::byte{0}, std::byte{42}};
-    auto word = ga::BytesSymbol<2>(wordBytes);
+    auto word = ga::w::BytesSymbol<2>(wordBytes);
 
     EXPECT_EQ(dict.getWord(36), word);
 }
@@ -438,13 +490,13 @@ TEST(StaticDictionary, CumulativeNumFoundLow) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array{std::byte{0}, std::byte{112}};
-    auto word1 = ga::BytesSymbol<2>(word1Bytes);
+    auto word1 = ga::w::BytesSymbol<2>(word1Bytes);
 
     auto word2Bytes = std::array<std::byte, 2>{std::byte{0}, std::byte{113}};
-    auto word2 = ga::BytesSymbol<2>(word2Bytes);
+    auto word2 = ga::w::BytesSymbol<2>(word2Bytes);
 
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word1), 37);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word2), 42);
@@ -456,10 +508,10 @@ TEST(StaticDictionary, CumulativeNumFoundZero) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<1>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<1>>(freq);
 
     auto wordBytes = std::array<std::byte, 1>{std::byte{0}};
-    auto word = ga::BytesSymbol<1>(wordBytes);
+    auto word = ga::w::BytesSymbol<1>(wordBytes);
 
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 0);
 }
@@ -470,13 +522,13 @@ TEST(StaticDictionary, CumulativeNumFoundHigh) {
     std::fill(freq.begin() + 42, freq.begin() + 112, 37);
     std::fill(freq.begin() + 112, freq.end(), 42);
 
-    auto dict = ga::dict::StaticDictionary<ga::BytesSymbol<2>>(freq);
+    auto dict = ga::dict::StaticDictionary<ga::w::BytesSymbol<2>>(freq);
 
     auto word1Bytes = std::array{std::byte{0}, std::byte{111}};
-    auto word1 = ga::BytesSymbol<2>(word1Bytes);
+    auto word1 = ga::w::BytesSymbol<2>(word1Bytes);
 
     auto word2Bytes = std::array{std::byte{0}, std::byte{112}};
-    auto word2 = ga::BytesSymbol<2>(word2Bytes);
+    auto word2 = ga::w::BytesSymbol<2>(word2Bytes);
 
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word1), 37);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word2), 42);
@@ -485,48 +537,48 @@ TEST(StaticDictionary, CumulativeNumFoundHigh) {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, Construct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<2>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<2>>();
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, LowerAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{37}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 37);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, LowerZeroAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array<std::byte, 1>{std::byte{0}};
-    auto word = ga::BytesSymbol<1>(symData.data());
+    auto word = ga::w::BytesSymbol<1>(symData.data());
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, HigherZeroAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto symData = std::array{std::byte{42}};
-    auto word = ga::BytesSymbol<1>(symData);
+    auto word = ga::w::BytesSymbol<1>(symData);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 43);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, Increase) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto increasedWordData = std::array{std::byte{12}};
-    dict.increaseWordCount(ga::BytesSymbol<1>(increasedWordData));
+    dict.increaseWordCount(ga::w::BytesSymbol<1>(increasedWordData));
     auto symData = std::array{std::byte{42}};
-    auto word = ga::BytesSymbol<1>(symData.data());
+    auto word = ga::w::BytesSymbol<1>(symData.data());
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 43);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, IncreaseExactTheSame) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto increasedWordData = std::array{std::byte{12}};
-    auto increasedWord = ga::BytesSymbol<1>(increasedWordData);
+    auto increasedWord = ga::w::BytesSymbol<1>(increasedWordData);
     dict.increaseWordCount(increasedWord);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(increasedWord), 12);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(increasedWord), 14);
@@ -534,9 +586,9 @@ TEST(DynamicDictionary, IncreaseExactTheSame) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, IncreaseZero) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::BytesSymbol<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesSymbol<1>>();
     auto increasedWordData = std::array{std::byte{0}};
-    auto increasedWord = ga::BytesSymbol<1>(increasedWordData);
+    auto increasedWord = ga::w::BytesSymbol<1>(increasedWordData);
     dict.increaseWordCount(increasedWord);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(increasedWord), 0);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(increasedWord), 2);

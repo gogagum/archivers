@@ -1,7 +1,7 @@
 #ifndef BIT_FLOW_HPP
 #define BIT_FLOW_HPP
 
-#include "bytes_symbol.hpp"
+#include "word/bytes_symbol.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -18,9 +18,9 @@ class ByteFlow;
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
-class ByteFlow<BytesSymbol<numBytes>> {
+class ByteFlow<w::BytesSymbol<numBytes>> {
 public:
-    using Sym = BytesSymbol<numBytes>;
+    using Sym = w::BytesSymbol<numBytes>;
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ public:
          * @brief operator * get a symbol.
          * @return symbol.
          */
-        BytesSymbol<numBytes> operator*() const;
+        w::BytesSymbol<numBytes> operator*() const;
 
     private:
         const std::byte* _ptr;
@@ -172,7 +172,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ByteFlow<BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
+ByteFlow<w::BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
         : _currOffset(0) {
     _bytes.resize(size);
     std::memcpy(_bytes.data(), ptr, size);
@@ -180,57 +180,57 @@ ByteFlow<BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::begin() const -> Iterator
+auto ByteFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator
 {
     return Iterator(const_cast<std::byte*>(_bytes.data()));
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::end() const -> Iterator {
+auto ByteFlow<w::BytesSymbol<numBytes>>::end() const -> Iterator {
     return Iterator(const_cast<std::byte*>(_bytes.data()
                                            + getNumberOfWords() * numBytes));
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t ByteFlow<BytesSymbol<numBytes>>::getNumberOfWords() const {
+std::size_t ByteFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
     return _bytes.size() / numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t ByteFlow<BytesSymbol<numBytes>>::bytesLeft() const {
+std::size_t ByteFlow<w::BytesSymbol<numBytes>>::bytesLeft() const {
     return _bytes.size() - _currOffset;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t ByteFlow<BytesSymbol<numBytes>>::getTailSize() const {
+std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::getTailSize() const {
     return _bytes.size() % numBytes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ByteFlow<BytesSymbol<numBytes>>::Iterator::Iterator(
+ByteFlow<w::BytesSymbol<numBytes>>::Iterator::Iterator(
         std::byte* ptr) : _ptr(ptr) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ByteFlow<BytesSymbol<numBytes>>::Iterator::Iterator(const Iterator& other)
+ByteFlow<w::BytesSymbol<numBytes>>::Iterator::Iterator(const Iterator& other)
     : _ptr(other._ptr) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator++() -> Iterator& {
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator++() -> Iterator& {
     _ptr += numBytes;
     return *this;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
     Iterator ret(*this);
     _ptr += numBytes;
     return ret;
@@ -238,7 +238,7 @@ auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator+=(
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator+=(
         std::int64_t offset) -> Iterator& {
     _ptr += numBytes * offset;
     return *this;
@@ -246,14 +246,14 @@ auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator+=(
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator--() -> Iterator& {
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator--() -> Iterator& {
     _ptr -= numBytes;
     return *this;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
     Iterator ret(*this);
     _ptr -= numBytes;
     return ret;
@@ -262,14 +262,14 @@ auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 template <std::integral IntegralT>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator+(
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator+(
         IntegralT i) -> Iterator {
     return Iterator(_ptr + i * numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator-=(
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator-=(
         std::int64_t offset) -> Iterator& {
     _ptr -= numBytes * offset;
     return *this;
@@ -277,23 +277,23 @@ auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator-=(
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool ByteFlow<BytesSymbol<numBytes>>::Iterator::operator==(
+bool ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator==(
         const Iterator& other) const {
     return _ptr == other._ptr;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool ByteFlow<BytesSymbol<numBytes>>::Iterator::operator!=(
+bool ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator!=(
         const Iterator& other) const {
     return _ptr != other._ptr;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<BytesSymbol<numBytes>>::Iterator::operator*(
-        ) const -> BytesSymbol<numBytes> {
-    return BytesSymbol<numBytes>(_ptr);
+auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator*(
+        ) const -> w::BytesSymbol<numBytes> {
+    return w::BytesSymbol<numBytes>(_ptr);
 }
 
 }  // namespace ga
