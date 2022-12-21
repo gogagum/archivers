@@ -16,7 +16,7 @@ template <std::uint8_t numBytes>
 using Sym = ga::w::BytesSymbol<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 4>;
+using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 3>;
 
 template <std::uint8_t numBytes>
 using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
