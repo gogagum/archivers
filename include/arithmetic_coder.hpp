@@ -59,7 +59,7 @@ private:
 
     std::vector<std::uint64_t> _countSyms();
 
-    void _serializeNumBytes(Res& res);
+    void _serializeNumBits(Res& res);
 
     void _serializeTail(Res& res);
 
@@ -92,7 +92,7 @@ template <class FlowT, class DictT, typename CountT>
 auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     auto ret = Res();
 
-    _serializeNumBytes(ret);
+    _serializeNumBits(ret);
     _serializeTail(ret);
     _serializeFileWordsCount(ret);
 
@@ -166,9 +166,8 @@ std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBytes(Res& res) {
-    constexpr std::uint8_t numBytes = Sym::numBytes;
-    res.putT<std::uint8_t>(numBytes);
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
+    res.putT<std::uint16_t>(Sym::numBits);
 }
 
 //----------------------------------------------------------------------------//

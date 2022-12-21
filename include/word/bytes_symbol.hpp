@@ -22,8 +22,8 @@ template <std::uint8_t _numBytes>
 class BytesSymbol {
 public:
 
-    constexpr static std::uint8_t numBytes = _numBytes;
-    constexpr static std::uint64_t wordsCount = 1ull << (8 * numBytes);
+    constexpr static std::uint16_t numBits = _numBytes * 8;
+    constexpr static std::uint64_t wordsCount = 1ull << numBits;
 
 public:
 
@@ -32,14 +32,14 @@ public:
      * @param word
      * @return
      */
-    static std::uint64_t ord(const BytesSymbol<numBytes>& word);
+    static std::uint64_t ord(const BytesSymbol<_numBytes>& word);
 
     /**
      * @brief byOrd
      * @param ord
      * @return
      */
-    static BytesSymbol<numBytes> byOrd(std::uint64_t ord);
+    static BytesSymbol<_numBytes> byOrd(std::uint64_t ord);
 
 public:
 
@@ -55,10 +55,10 @@ public:
      * @brief BytesSymbol constructor from array.
      * @param bytes
      */
-    BytesSymbol(const std::array<std::byte, numBytes>& bytes);
+    BytesSymbol(const std::array<std::byte, _numBytes>& bytes);
 
 private:
-    std::array<std::byte, numBytes> _data;  // data of the word
+    std::array<std::byte, _numBytes> _data;  // data of the word
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -71,8 +71,8 @@ public:
          * @param second
          * @return
          */
-        bool operator()(const BytesSymbol<numBytes>& s1,
-                        const BytesSymbol<numBytes>& s2) const;
+        bool operator()(const BytesSymbol<_numBytes>& s1,
+                        const BytesSymbol<_numBytes>& s2) const;
     };
 
 private:
@@ -138,21 +138,21 @@ std::ostream& operator<<(std::ostream& os,
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 std::uint64_t
-BytesSymbol<_numBytes>::ord(const BytesSymbol<numBytes>& word) {
+BytesSymbol<_numBytes>::ord(const BytesSymbol<_numBytes>& word) {
     std::uint64_t ret = 0;
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
-    std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - numBytes);
+    std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - _numBytes);
     return ret;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 auto BytesSymbol<_numBytes>::byOrd(
-        std::uint64_t ord) -> BytesSymbol<numBytes> {
+        std::uint64_t ord) -> BytesSymbol<_numBytes> {
     static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
     const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
     std::array<std::byte, _numBytes> retBytes;
-    std::copy(asBytesOrdArr.rend() - numBytes, asBytesOrdArr.rend(), retBytes.begin());
+    std::copy(asBytesOrdArr.rend() - _numBytes, asBytesOrdArr.rend(), retBytes.begin());
     return BytesSymbol<_numBytes>(retBytes.data());
 }
 
@@ -165,15 +165,15 @@ BytesSymbol<numBytes>::BytesSymbol(const std::byte* ptr) {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-BytesSymbol<_numBytes>::BytesSymbol(const std::array<std::byte, numBytes>& arr)
+BytesSymbol<_numBytes>::BytesSymbol(const std::array<std::byte, _numBytes>& arr)
     : BytesSymbol(arr.data()) {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-bool BytesSymbol<numBytes>::Order::operator()(
-        const BytesSymbol<numBytes>& s1,
-        const BytesSymbol<numBytes>& s2
+template <std::uint8_t _numBytes>
+bool BytesSymbol<_numBytes>::Order::operator()(
+        const BytesSymbol<_numBytes>& s1,
+        const BytesSymbol<_numBytes>& s2
         ) const {
     for (auto [firstB, secondB] : boost::range::combine(s1._data, s2._data)) {
         std::uint8_t firstU = static_cast<std::uint8_t>(firstB);

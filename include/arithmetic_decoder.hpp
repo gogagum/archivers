@@ -55,7 +55,7 @@ private:
 
 private:
 
-    bc::static_vector<std::byte, SymT::numBytes> _deserializeTail();
+    bc::static_vector<std::byte, SymT::numBits / 8> _deserializeTail();
 
     std::vector<std::uint64_t> _deserializeDict();
 
@@ -65,7 +65,7 @@ private:
 
 private:
     Source _source;
-    const boost::container::static_vector<std::byte, SymT::numBytes> _tail;
+    const boost::container::static_vector<std::byte, SymT::numBits / 8> _tail;
     CountT _fileWordsCount;
     DictT _dict;
     const std::uint8_t _additionalBitsCnt;
@@ -95,7 +95,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
 template <class SymT, class DictT, typename CountT>
 std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
     std::uint64_t value = 0;
-    std::size_t valueBits = SymT::numBytes * 8 + _additionalBitsCnt;
+    std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
     assert(valueBits < 64 && "`value must be placeble in 64 bits");
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
@@ -144,18 +144,18 @@ std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
             currRange = RangesCalc<SymT>::recalcRange(currRange);
         }
     }
-    std::vector<std::byte> ret(syms.size() * SymT::numBytes);
-    std::memcpy(ret.data(), syms.data(), syms.size() * SymT::numBytes);
+    std::vector<std::byte> ret(syms.size() * (SymT::numBits / 8));
+    std::memcpy(ret.data(), syms.data(), syms.size() * (SymT::numBits / 8));
     boost::range::insert(ret, ret.end(), _tail);
     return ret;
 }
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-bc::static_vector<std::byte, SymT::numBytes>
+bc::static_vector<std::byte, SymT::numBits / 8>
 ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
-    boost::container::static_vector<std::byte, SymT::numBytes> tail(tailSize);
+    boost::container::static_vector<std::byte, SymT::numBits / 8> tail(tailSize);
     for (auto& tailByte: tail) {
         tailByte = _source.takeByte();
     }
