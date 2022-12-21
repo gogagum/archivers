@@ -3,6 +3,7 @@
 #include "include/arithmetic_coder_encoded.hpp"
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/word/bytes_symbol.hpp"
+#include "include/word/int_range_word.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
@@ -236,6 +237,57 @@ TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 
     EXPECT_EQ(m.lower_bound(sym2)->second, 42);
     EXPECT_EQ(m.upper_bound(sym2)->second, 42);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Construct) {
+    [[maybe_unused]] auto word = ga::w::IntegerWord<int, 0, 56>(42);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, IncorrectOrdConstruct) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    EXPECT_THROW(auto word = TestedWord(73),
+                 TestedWord::IncorrectOrd);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Eq1) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(34);
+    EXPECT_TRUE(w1 == w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Eq2) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(23);
+    EXPECT_FALSE(w1 == w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Neq) {
+    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    auto w1 = TestedWord(34);
+    auto w2 = TestedWord(23);
+    EXPECT_TRUE(w1 != w2);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, Ord) {
+    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    auto w1 = TestedWord(42);
+    EXPECT_EQ(TestedWord::ord(w1), 5);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeWord, ByOrd) {
+    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    auto w1 = TestedWord(42);
+    EXPECT_EQ(TestedWord::byOrd(5), w1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

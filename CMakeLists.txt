@@ -26,7 +26,7 @@ if(Boost_FOUND)
         include/dictionary/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
         include/byte_flow.hpp
-        include/bytes_symbol.hpp
+        include/word/bytes_symbol.hpp
     )
     add_executable(archiever_decoder decoder.cpp
         include/arithmetic_decoder.hpp
@@ -36,7 +36,7 @@ if(Boost_FOUND)
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
-        include/bytes_symbol.hpp
+        include/word/bytes_symbol.hpp
     )
     install(TARGETS archiever_encoder archiever_decoder
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -53,6 +53,8 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 add_executable(archiever_tests test.cpp
     include/arithmetic_coder_encoded.cpp
+    include/word/bytes_symbol.hpp
+    include/word/int_range_word.hpp
     include/arithmetic_decoder_decoded.cpp
 )
 
