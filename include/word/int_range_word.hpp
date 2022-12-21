@@ -99,6 +99,7 @@ IntegerWord<I, low, _numBits>::IncorrectOrd::IncorrectOrd(I v)
 template <class I, I low, std::uint8_t _numBits>
 std::ostream& operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word) {
     os << "Word(" << word._value - low << ")";
+    return os;
 }
 
 //----------------------------------------------------------------------------//
