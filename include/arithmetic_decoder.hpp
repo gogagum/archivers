@@ -27,6 +27,13 @@ template <class SymT, class DictT, typename CountT = std::uint32_t>
 class ArithmeticDecoder : RangesCalc<SymT> {
 public:
     using Source = ArithmeticDecoderDecoded;
+    using Tail = bc::static_vector<std::byte, SymT::numBits / 8>;
+
+    struct DecodeRet {
+        std::vector<SymT> syms;
+        Tail tail;
+    };
+
 public:
 
     /**
@@ -43,7 +50,7 @@ public:
      * @brief decode - decode source as a vector of bytes.
      * @return
      */
-    std::vector<std::byte> decode();
+    DecodeRet decode();
 
 private:
 
@@ -55,7 +62,7 @@ private:
 
 private:
 
-    bc::static_vector<std::byte, SymT::numBits / 8> _deserializeTail();
+    Tail _deserializeTail();
 
     std::vector<std::uint64_t> _deserializeDict();
 
@@ -65,7 +72,7 @@ private:
 
 private:
     Source _source;
-    const boost::container::static_vector<std::byte, SymT::numBits / 8> _tail;
+    const Tail _tail;
     CountT _fileWordsCount;
     DictT _dict;
     const std::uint8_t _additionalBitsCnt;
@@ -93,7 +100,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
+auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
     std::uint64_t value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
     assert(valueBits < 64 && "`value must be placeble in 64 bits");
@@ -104,7 +111,8 @@ std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
 
     auto currRange = typename RangesCalc<SymT>::Range { 0, correctedSymsNum };
 
-    std::vector<SymT> syms;
+    DecodeRet ret;
+    ret.tail = _tail;
 
     for (std::uint64_t i = 0; i < _fileWordsCount; ++i) {
         std::cerr << i << std::endl;
@@ -113,7 +121,7 @@ std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
         std::uint64_t aux = ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);
-        syms.push_back(sym);
+        ret.syms.push_back(sym);
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
@@ -144,18 +152,14 @@ std::vector<std::byte> ArithmeticDecoder<SymT, DictT, CountT>::decode() {
             currRange = RangesCalc<SymT>::recalcRange(currRange);
         }
     }
-    std::vector<std::byte> ret(syms.size() * (SymT::numBits / 8));
-    std::memcpy(ret.data(), syms.data(), syms.size() * (SymT::numBits / 8));
-    boost::range::insert(ret, ret.end(), _tail);
     return ret;
 }
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-bc::static_vector<std::byte, SymT::numBits / 8>
-ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() {
+auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
     std::uint8_t tailSize = _source.takeT<std::uint8_t>();
-    boost::container::static_vector<std::byte, SymT::numBits / 8> tail(tailSize);
+    Tail tail(tailSize);
     for (auto& tailByte: tail) {
         tailByte = _source.takeByte();
     }
