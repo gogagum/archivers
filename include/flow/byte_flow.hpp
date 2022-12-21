@@ -1,7 +1,7 @@
 #ifndef BIT_FLOW_HPP
 #define BIT_FLOW_HPP
 
-#include "word/bytes_symbol.hpp"
+#include "../word/bytes_symbol.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <boost/container/static_vector.hpp>
 
-namespace ga {
+namespace ga::fl {
 
 template <class WordT>
 class ByteFlow;
@@ -52,40 +52,6 @@ public:
          * @return copy of self before incrementing.
          */
         Iterator operator++(int);
-
-        /**
-         * @brief operator +=
-         * @param offset - number of words to move.
-         * @return reference to self after move.
-         */
-        Iterator& operator+=(std::int64_t offset);
-
-        /**
-         * @brief operator --
-         * @return reference to self (after decrementing).
-         */
-        Iterator& operator--();
-
-        /**
-         * @brief operator --
-         * @return copy of self before decrementing.
-         */
-        Iterator operator--(int);
-
-        /**
-         * @brief operator +
-         * @param integral
-         * @return
-         */
-        template<std::integral IntegralT>
-        Iterator operator+(IntegralT integral);
-
-        /**
-         * @brief operator -=
-         * @param offset - number of words to move.
-         * @return reference to self after move.
-         */
-        Iterator& operator-=(std::int64_t offset);
 
         /**
          * @brief operator ==
@@ -141,14 +107,6 @@ public:
     std::size_t getNumberOfWords() const;
 
     /**
-     * @brief bytesLeft returns number of bytes left.
-     * @return number of bytes left.
-     */
-    std::size_t bytesLeft() const;
-
-public:  // ISymFlow
-
-    /**
      * @brief getTailSize
      * @return
      */
@@ -200,12 +158,6 @@ std::size_t ByteFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t ByteFlow<w::BytesSymbol<numBytes>>::bytesLeft() const {
-    return _bytes.size() - _currOffset;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
 std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::getTailSize() const {
     return _bytes.size() % numBytes;
 }
@@ -234,45 +186,6 @@ auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
     Iterator ret(*this);
     _ptr += numBytes;
     return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator+=(
-        std::int64_t offset) -> Iterator& {
-    _ptr += numBytes * offset;
-    return *this;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator--() -> Iterator& {
-    _ptr -= numBytes;
-    return *this;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator--(int) -> Iterator {
-    Iterator ret(*this);
-    _ptr -= numBytes;
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-template <std::integral IntegralT>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator+(
-        IntegralT i) -> Iterator {
-    return Iterator(_ptr + i * numBytes);
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator-=(
-        std::int64_t offset) -> Iterator& {
-    _ptr -= numBytes * offset;
-    return *this;
 }
 
 //----------------------------------------------------------------------------//
