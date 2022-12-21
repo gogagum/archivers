@@ -14,6 +14,7 @@ template <class I, I low, I high>
 class IntegerWord {
 public:
 
+    constexpr static std::uint8_t numBytes = sizeof(I);
     constexpr static std::uint64_t wordsCount = static_cast<std::uint64_t>(high - low);
 
 public:
