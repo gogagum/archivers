@@ -65,22 +65,38 @@ int main(int argc, char* argv[]) {
     switch (symBitLen) {
     case 8: {
             auto decoder = Decoder<1>(std::move(decoded));
-            res = decoder.decode();
+            auto ret = decoder.decode();
+            auto symsSize = ret.syms.size();
+            res.resize(symsSize + ret.tail.size());
+            std::memcpy(res.data(), ret.syms.data(), symsSize);
+            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
         }
         break;
     case 16: {
             auto decoder = Decoder<2>(std::move(decoded));
-            res = decoder.decode();
+            auto ret = decoder.decode();
+            auto symsSize = ret.syms.size() * 2;
+            res.resize(symsSize + ret.tail.size());
+            std::memcpy(res.data(), ret.syms.data(), symsSize);
+            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
         }
         break;
     case 24: {
             auto decoder = Decoder<3>(std::move(decoded));
-            res = decoder.decode();
+            auto ret = decoder.decode();
+            auto symsSize = ret.syms.size() * 3;
+            res.resize(symsSize + ret.tail.size());
+            std::memcpy(res.data(), ret.syms.data(), symsSize);
+            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
         }
         break;
     case 32: {
             auto decoder = Decoder<4>(std::move(decoded));
-            res = decoder.decode();
+            auto ret = decoder.decode();
+            auto symsSize = ret.syms.size() * 3;
+            res.resize(symsSize + ret.tail.size());
+            std::memcpy(res.data(), ret.syms.data(), symsSize);
+            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
         }
         break;
     default:
