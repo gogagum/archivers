@@ -47,6 +47,8 @@ public:
 public:
     IntegerWord(I value);
 
+    I getValue() const { return _value + low; }
+
 private:
     I _value;
 
