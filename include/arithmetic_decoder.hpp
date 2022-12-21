@@ -114,8 +114,13 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
     DecodeRet ret;
     ret.tail = _tail;
 
+    int lastPercent = -1;
+
     for (std::uint64_t i = 0; i < _fileWordsCount; ++i) {
-        std::cerr << i << std::endl;
+        if (int currPercent = (100 * i) / _fileWordsCount; currPercent != lastPercent) {
+            std::cerr << currPercent << '%' << std::endl;
+            lastPercent = currPercent;
+        }
 
         std::uint64_t range = currRange.high - currRange.low;
         std::uint64_t aux = ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
@@ -152,6 +157,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
             currRange = RangesCalc<SymT>::recalcRange(currRange);
         }
     }
+
+    std::cerr << "100%" << std::endl;
     return ret;
 }
 
