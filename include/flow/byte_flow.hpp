@@ -116,11 +116,7 @@ public:
      * @brief getTail
      * @return
      */
-    boost::container::static_vector<std::byte, Sym::numBytes> getTail() const {
-        std::uint8_t tailSize = getTailSize();
-        return boost::container::static_vector<std::byte, Sym::numBytes>(
-            _bytes.end() - tailSize, _bytes.end());
-    }
+    boost::container::static_vector<std::byte, numBytes> getTail() const;
 
 private:
     std::vector<std::byte> _bytes;
@@ -207,6 +203,15 @@ template <std::uint8_t numBytes>
 auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator*(
         ) const -> w::BytesSymbol<numBytes> {
     return w::BytesSymbol<numBytes>(_ptr);
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
+boost::container::static_vector<std::byte, numBytes>
+ByteFlow<w::BytesSymbol<numBytes>>::getTail() const {
+    std::uint8_t tailSize = getTailSize();
+    return boost::container::static_vector<std::byte, numBytes>(
+        _bytes.end() - tailSize, _bytes.end());
 }
 
 }  // namespace ga

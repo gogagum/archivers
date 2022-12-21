@@ -2,6 +2,7 @@
 #define INT_RANGE_WORD_FLOW_HPP
 
 #include <vector>
+#include <boost/container/static_vector.hpp>
 
 #include "../word/int_range_word.hpp"
 
@@ -60,6 +61,19 @@ public:
      */
     std::size_t getNumberOfWords() const;
 
+    /**
+     * @brief getTailSize
+     * @return
+     */
+    std::uint8_t getTailSize() const;
+
+    /**
+     * @brief getTail
+     * @return
+     */
+    boost::container::static_vector<std::byte, Sym::numBytes> getTail() const {
+        return boost::container::static_vector<std::byte, Sym::numBytes>();
+    }
 
 private:
     std::vector<I> _ints;
@@ -88,6 +102,11 @@ std::size_t IntegerWordFlow<I, low, high>::getNumberOfWords() const {
     return _ints.size();
 }
 
+//----------------------------------------------------------------------------//
+template <class I, I low, I high>
+std::uint8_t IntegerWordFlow<I, low, high>::getTailSize() const {
+    return 0;
+}
 
 }  // namespace ga::fl
 
