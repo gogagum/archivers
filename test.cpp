@@ -243,19 +243,19 @@ TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, Construct) {
-    [[maybe_unused]] auto word = ga::w::IntegerWord<int, 0, 56>(42);
+    [[maybe_unused]] auto word = ga::w::IntegerWord<int, 0, 2>(42);
 }
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, IncorrectOrdConstruct) {
-    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
-    EXPECT_THROW(auto word = TestedWord(73),
+    using TestedWord = ga::w::IntegerWord<int, 0, 1>;
+    EXPECT_THROW(auto word = TestedWord(260),
                  TestedWord::IncorrectOrd);
 }
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, Eq1) {
-    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    using TestedWord = ga::w::IntegerWord<int, 0, 3>;
     auto w1 = TestedWord(34);
     auto w2 = TestedWord(34);
     EXPECT_TRUE(w1 == w2);
@@ -263,7 +263,7 @@ TEST(IntRangeWord, Eq1) {
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, Eq2) {
-    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    using TestedWord = ga::w::IntegerWord<int, 0, 2>;
     auto w1 = TestedWord(34);
     auto w2 = TestedWord(23);
     EXPECT_FALSE(w1 == w2);
@@ -271,7 +271,7 @@ TEST(IntRangeWord, Eq2) {
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, Neq) {
-    using TestedWord = ga::w::IntegerWord<int, 0, 56>;
+    using TestedWord = ga::w::IntegerWord<int, 0, 2>;
     auto w1 = TestedWord(34);
     auto w2 = TestedWord(23);
     EXPECT_TRUE(w1 != w2);
@@ -279,14 +279,14 @@ TEST(IntRangeWord, Neq) {
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, Ord) {
-    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    using TestedWord = ga::w::IntegerWord<int, 37, 2>;
     auto w1 = TestedWord(42);
     EXPECT_EQ(TestedWord::ord(w1), 5);
 }
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeWord, ByOrd) {
-    using TestedWord = ga::w::IntegerWord<int, 37, 56>;
+    using TestedWord = ga::w::IntegerWord<int, 37, 2>;
     auto w1 = TestedWord(42);
     EXPECT_EQ(TestedWord::byOrd(5), w1);
 }
@@ -599,20 +599,20 @@ TEST(DynamicDictionary, IncreaseZero) {
 //----------------------------------------------------------------------------//
 TEST(IntRangeFlow, construct) {
     auto vec = std::vector<int>{3, 7, 2};
-    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 2>(std::move(vec));
 }
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeFlow, numWords) {
     auto vec = std::vector<int>{3, 7, 2};
-    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 1>(std::move(vec));
     EXPECT_EQ(flow.getNumberOfWords(), 3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(IntRangeFlow, iterate) {
     auto vec = std::vector<int>{3, 7, 2};
-    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 2>(std::move(vec));
 
     for (auto word: flow) {
 

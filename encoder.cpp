@@ -10,7 +10,7 @@
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 using Sym = ga::w::BytesSymbol<3>;
-using Dict = ga::dict::AdaptiveDictionary<Sym, 4>;
+using Dict = ga::dict::AdaptiveDictionary<Sym, 3>;
 using Coder = ga::ArithmeticCoder<ga::fl::ByteFlow<Sym>, Dict, std::uint64_t>;
 
 int main(int argc, char* argv[]) {
