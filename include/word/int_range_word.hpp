@@ -15,7 +15,8 @@ class IntegerWord {
 public:
 
     constexpr static std::uint8_t numBytes = _numBytes;
-    constexpr static std::uint64_t wordsCount = 1ull << (8 * _numBytes);
+    constexpr static std::uint16_t numBits = _numBytes * 8;
+    constexpr static std::uint64_t wordsCount = 1ull << numBits;
     constexpr static std::int64_t high = low + wordsCount;
 
 public:

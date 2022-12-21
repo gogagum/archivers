@@ -55,30 +55,30 @@ int main(int argc, char* argv[]) {
     fin.read(reinterpret_cast<char*>(finData.data()), finSize);
 
     auto decoded = ga::ArithmeticDecoderDecoded(std::move(finData));
-    std::uint8_t symByteLen = decoded.takeT<std::uint8_t>();
+    std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
     std::cerr << "Word bytes length: "
-              << static_cast<unsigned int>(symByteLen) << std::endl;
+              << static_cast<unsigned int>(symBitLen) << std::endl;
 
     std::vector<std::byte> res;
 
-    switch (symByteLen) {
-    case 1: {
+    switch (symBitLen) {
+    case 8: {
             auto decoder = Decoder<1>(std::move(decoded));
             res = decoder.decode();
         }
         break;
-    case 2: {
+    case 16: {
             auto decoder = Decoder<2>(std::move(decoded));
             res = decoder.decode();
         }
         break;
-    case 3: {
+    case 24: {
             auto decoder = Decoder<3>(std::move(decoded));
             res = decoder.decode();
         }
         break;
-    case 4: {
+    case 32: {
             auto decoder = Decoder<4>(std::move(decoded));
             res = decoder.decode();
         }
