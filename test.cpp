@@ -7,6 +7,7 @@
 #include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
+#include "include/flow/int_range_word_flow.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -592,4 +593,28 @@ TEST(DynamicDictionary, IncreaseZero) {
     dict.increaseWordCount(increasedWord);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(increasedWord), 0);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(increasedWord), 2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(IntRangeFlow, construct) {
+    auto vec = std::vector<int>{3, 7, 2};
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeFlow, numWords) {
+    auto vec = std::vector<int>{3, 7, 2};
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+    EXPECT_EQ(flow.getNumberOfWords(), 3);
+}
+
+//----------------------------------------------------------------------------//
+TEST(IntRangeFlow, iterate) {
+    auto vec = std::vector<int>{3, 7, 2};
+    auto flow = ga::fl::IntegerWordFlow<int, -5, 13>(std::move(vec));
+
+    for (auto word: flow) {
+
+    }
 }
