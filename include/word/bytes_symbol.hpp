@@ -106,9 +106,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator ==
-/// \param bs1
-/// \param bs2
-/// \return
+/// \param bs1 - first compared byte symbol.
+/// \param bs2 - second compared byte symbol.
+/// \return `true if symbols are equal, else `false.
 ///
 template <std::uint8_t numBytes>
 bool operator==(const w::BytesSymbol<numBytes>& bs1,
@@ -116,9 +116,9 @@ bool operator==(const w::BytesSymbol<numBytes>& bs1,
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator !=
-/// \param bs1
-/// \param bs2
-/// \return
+/// \param bs1 - first compared byte symbol.
+/// \param bs2 - second compared byte symbol.
+/// \return `true if symbols are not equal, else `false.
 ///
 template <std::uint8_t numBytes>
 bool operator!=(const w::BytesSymbol<numBytes>& bs1,
@@ -126,13 +126,12 @@ bool operator!=(const w::BytesSymbol<numBytes>& bs1,
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
-/// \param os
-/// \param sym
+/// \param os stream to write to.
+/// \param sym ounput symbol.
 /// \return
 ///
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os,
-                         w::BytesSymbol<numBytes> sym);
+std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

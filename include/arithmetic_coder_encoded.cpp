@@ -1,3 +1,5 @@
+#include <boost/range/irange.hpp>
+
 #include "arithmetic_coder_encoded.hpp"
 
 namespace ga {
@@ -24,7 +26,7 @@ void ArithmeticCoderEncoded::putBit(bool bit) {
 
 //----------------------------------------------------------------------------//
 void ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
-    for (std::size_t i = 0; i < num; ++i) {
+    for ([[maybe_unused]] auto _ : boost::irange<std::size_t>(0, num)) {
         putBit(bit);
     }
 }

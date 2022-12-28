@@ -1,6 +1,7 @@
 #ifndef INT_RANGE_WORD_HPP
 #define INT_RANGE_WORD_HPP
 
+#include <concepts>
 #include <ostream>
 #include <cassert>
 #include <cstdint>
@@ -10,7 +11,7 @@ namespace ga::w {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IntegerWord class
 ///
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 class IntegerWord {
 public:
 
@@ -45,43 +46,54 @@ public:
     };
 
 public:
+
+    /**
+     * @brief IntegerWord - constructor from value.
+     * @param value
+     */
     IntegerWord(I value);
 
+    /**
+     * @brief getValue
+     * @return value of word.
+     */
     I getValue() const { return _value + low; }
 
 private:
-    I _value;
+
+    const I _value;
 
 private:
-    template <class _I, _I _low, std::uint8_t __numBits>
+    template <std::integral _I, _I _low, std::uint8_t __numBits>
     friend bool operator==(const IntegerWord<_I, _low, __numBits>& iw1,
                            const IntegerWord<_I, _low, __numBits>& iw2);
 
 
-    template <class _I, _I _low, std::uint8_t __numBits>
+    template <std::integral _I, _I _low, std::uint8_t __numBits>
     friend bool operator!=(const IntegerWord<_I, _low, __numBits>& iw1,
                            const IntegerWord<_I, _low, __numBits>& iw2);
 
-
-    friend std::ostream& operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word);
+    template <std::integral _I, _I _low, std::uint8_t __numBits>
+    friend std::ostream& operator<<(std::ostream& os,
+                                    IntegerWord<I, low, _numBits>& word);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 std::uint64_t IntegerWord<I, low, _numBits>::ord(const IntegerWord<I, low, _numBits>& word) {
     return static_cast<std::uint64_t>(word._value - low);
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 IntegerWord<I, low, _numBits> IntegerWord<I, low, _numBits>::byOrd(std::uint64_t ord) {
     return IntegerWord<I, low, _numBits>(static_cast<I>(ord + low));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 IntegerWord<I, low, _numBits>::IntegerWord(I value) : _value(value) {
     if (_value < low || _value >= high) {
         throw IncorrectOrd(_value);
@@ -90,7 +102,7 @@ IntegerWord<I, low, _numBits>::IntegerWord(I value) : _value(value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 IntegerWord<I, low, _numBits>::IncorrectOrd::IncorrectOrd(I v)
     : std::runtime_error("low: " + std::to_string(low)
                          + " high: " + std::to_string(high)
@@ -98,21 +110,21 @@ IntegerWord<I, low, _numBits>::IncorrectOrd::IncorrectOrd(I v)
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint8_t _numBits>
 std::ostream& operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word) {
     os << "Word(" << word._value - low << ")";
     return os;
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBytes>
+template <std::integral I, I low, std::uint8_t _numBytes>
 bool operator==(const IntegerWord<I, low, _numBytes>& iw1,
                 const IntegerWord<I, low, _numBytes>& iw2) {
     return iw1._value == iw2._value;
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t _numBytes>
+template <std::integral I, I low, std::uint8_t _numBytes>
 bool operator!=(const IntegerWord<I, low, _numBytes>& iw1,
                 const IntegerWord<I, low, _numBytes>& iw2) {
     return iw1._value != iw2._value;

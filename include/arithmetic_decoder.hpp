@@ -4,7 +4,6 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/container/static_vector.hpp>
-#include <boost/range/algorithm_ext/insert.hpp>
 #include <boost/range/irange.hpp>
 #include <iostream>
 #include <map>
@@ -59,6 +58,7 @@ private:
     using RangesCalc<SymT>::correctedSymsNum_2;
     using RangesCalc<SymT>::correctedSymsNum_4;
     using RangesCalc<SymT>::correctedSymsNum_3to4;
+    using OrdRange = typename RangesCalc<SymT>::Range;
 
 private:
 
@@ -109,21 +109,23 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
         value = (value << 1ull) + (_source.takeBit() ? 1ull : 0ull);
     }
 
-    auto currRange = typename RangesCalc<SymT>::Range { 0, correctedSymsNum };
+    auto currRange = OrdRange { 0, correctedSymsNum };
 
     DecodeRet ret;
     ret.tail = _tail;
 
     int lastPercent = -1;
 
-    for (std::uint64_t i = 0; i < _fileWordsCount; ++i) {
-        if (int currPercent = (100 * i) / _fileWordsCount; currPercent != lastPercent) {
+    for (auto i : boost::irange<CountT>(0, _fileWordsCount)) {
+        if (int currPercent = (100 * i) / _fileWordsCount;
+                currPercent != lastPercent) {
             std::cerr << currPercent << '%' << std::endl;
             lastPercent = currPercent;
         }
 
         std::uint64_t range = currRange.high - currRange.low;
-        std::uint64_t aux = ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
+        std::uint64_t aux =
+                ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);
         ret.syms.push_back(sym);
@@ -131,7 +133,7 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
 
-        currRange = typename RangesCalc<SymT>::Range {
+        currRange = OrdRange {
             currRange.low + (range * l) / _dict.totalWordsCount(),
             currRange.low + (range * h) / _dict.totalWordsCount()
         };
@@ -199,8 +201,7 @@ template <class SymT, class DictT, typename CountT>
 std::uint8_t
 ArithmeticDecoder<SymT, DictT, CountT>::_computeAdditionalBitsCnt() const {
     std::uint8_t ret = 0;
-    for (; (symsNum << static_cast<std::uint64_t>(ret)) < (1ull << 33); ++ret) {
-    }
+    for (; (symsNum << ret) < (1ull << 33); ++ret) {}
     return ret;
 }
 

@@ -53,12 +53,6 @@ public:
     template <class T>
     T takeT();
 
-    /**
-     * @brief getSymNumBytes
-     * @return
-     */
-    uint8_t getSymNumBytes() const;
-
 private:
 
     void _moveBitFlag();

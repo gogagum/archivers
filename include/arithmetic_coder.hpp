@@ -32,7 +32,7 @@ private:
     using RangesCalc<Sym>::correctedSymsNum_2;
     using RangesCalc<Sym>::correctedSymsNum_4;
     using RangesCalc<Sym>::correctedSymsNum_3to4;
-
+    using OrdRange = typename RangesCalc<Sym>::Range;
 public:
 
     /**
@@ -100,7 +100,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
         _dict.template serialize<CountT>(ret);
     }
 
-    auto currRange = typename RangesCalc<Sym>::Range { 0, correctedSymsNum };
+    auto currRange = OrdRange { 0, correctedSymsNum };
 
     std::size_t btf = 0;
 
@@ -110,7 +110,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
 
-        currRange = typename RangesCalc<Sym>::Range{
+        currRange = OrdRange {
             currRange.low + (range * l) / _dict.totalWordsCount(),
             currRange.low + (range * h) / _dict.totalWordsCount()
         };
@@ -173,10 +173,9 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
-    auto tailSize = static_cast<uint8_t>(_symFlow.getTailSize());
-    res.putT<std::uint8_t>(tailSize);
-
     auto tail = _symFlow.getTail();
+    res.putT<std::uint8_t>(tail.size());
+
     for (auto tailByte : tail) {
         res.putByte(tailByte);
     }

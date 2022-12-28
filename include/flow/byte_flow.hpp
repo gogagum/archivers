@@ -107,18 +107,17 @@ public:
     std::size_t getNumberOfWords() const;
 
     /**
-     * @brief getTailSize
-     * @return
-     */
-    std::uint8_t getTailSize() const;
-
-    /**
      * @brief getTail
      * @return
      */
     boost::container::static_vector<std::byte, numBytes> getTail() const;
 
 private:
+
+    std::uint8_t _getTailSize() const;
+
+private:
+
     std::vector<std::byte> _bytes;
     std::size_t _currOffset;
 };
@@ -154,8 +153,17 @@ std::size_t ByteFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::getTailSize() const {
+std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::_getTailSize() const {
     return _bytes.size() % numBytes;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t numBytes>
+boost::container::static_vector<std::byte, numBytes>
+ByteFlow<w::BytesSymbol<numBytes>>::getTail() const {
+    std::uint8_t tailSize = _getTailSize();
+    return boost::container::static_vector<std::byte, numBytes>(
+        _bytes.end() - tailSize, _bytes.end());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,15 +211,6 @@ template <std::uint8_t numBytes>
 auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator*(
         ) const -> w::BytesSymbol<numBytes> {
     return w::BytesSymbol<numBytes>(_ptr);
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-boost::container::static_vector<std::byte, numBytes>
-ByteFlow<w::BytesSymbol<numBytes>>::getTail() const {
-    std::uint8_t tailSize = getTailSize();
-    return boost::container::static_vector<std::byte, numBytes>(
-        _bytes.end() - tailSize, _bytes.end());
 }
 
 }  // namespace ga

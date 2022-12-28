@@ -11,10 +11,11 @@ namespace ga::fl {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IntegerWordFlow class
 ///
-template <class I, I low, std::uint8_t numBits>
+template <class I, I low, std::uint16_t numBits>
 class IntegerWordFlow {
 public:
     using Sym = w::IntegerWord<I, low, numBits>;
+    static constexpr std::uint8_t numBytes = (numBits - 1) / 8 + 1;
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -26,13 +27,13 @@ public:
          * @brief Iterator
          * @param iter
          */
-        Iterator(typename std::vector<I>::const_iterator iter) : _iter{ iter } {};
+        Iterator(typename std::vector<I>::const_iterator iter);
     public:
-        Iterator& operator++() { ++_iter; return *this; };
-        Iterator operator++(int) { auto ret = Iterator(_iter); ++_iter; return ret; }
+        Iterator& operator++();
+        Iterator operator++(int);
         bool operator==(const Iterator& other) const = default;
         bool operator!=(const Iterator& other) const = default;
-        w::IntegerWord<I,  low, numBits> operator*() const { return w::IntegerWord<I,  low, numBits>(*_iter); }
+        w::IntegerWord<I,  low, numBits> operator*() const;
     private:
         typename std::vector<I>::const_iterator _iter;
     private:
@@ -62,18 +63,10 @@ public:
     std::size_t getNumberOfWords() const;
 
     /**
-     * @brief getTailSize
-     * @return
-     */
-    std::uint8_t getTailSize() const;
-
-    /**
      * @brief getTail
      * @return
      */
-    boost::container::static_vector<std::byte, Sym::numBits / 8> getTail() const {
-        return boost::container::static_vector<std::byte, Sym::numBits / 8>();
-    }
+    const boost::container::static_vector<std::byte, numBytes>& getTail() const;
 
 private:
     std::vector<I> _ints;
@@ -81,31 +74,62 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t numBits>
-IntegerWordFlow<I, low, numBits>::IntegerWordFlow(std::vector<I>&& ints) : _ints(std::move(ints)) {}
+template <class I, I low, std::uint16_t numBits>
+IntegerWordFlow<I, low, numBits>::IntegerWordFlow(std::vector<I>&& ints)
+    : _ints(std::move(ints)) {}
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t numBits>
+template <class I, I low, std::uint16_t numBits>
 auto IntegerWordFlow<I, low, numBits>::begin() const -> Iterator {
     return Iterator(_ints.begin());
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t numBits>
+template <class I, I low, std::uint16_t numBits>
 auto IntegerWordFlow<I, low, numBits>::end() const -> Iterator {
     return Iterator(_ints.end());
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t numBits>
+template <class I, I low, std::uint16_t numBits>
 std::size_t IntegerWordFlow<I, low, numBits>::getNumberOfWords() const {
     return _ints.size();
 }
 
 //----------------------------------------------------------------------------//
-template <class I, I low, std::uint8_t numBits>
-std::uint8_t IntegerWordFlow<I, low, numBits>::getTailSize() const {
-    return 0;
+template <class I, I low, std::uint16_t numBits>
+auto IntegerWordFlow<I, low, numBits>::getTail() const
+        -> const boost::container::static_vector<std::byte, numBytes>& {
+    return {};
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+template <class I, I low, std::uint16_t numBits>
+IntegerWordFlow<I, low, numBits>::Iterator::Iterator(
+        typename std::vector<I>::const_iterator iter) : _iter{ iter } {};
+
+//----------------------------------------------------------------------------//
+template <class I, I low, std::uint16_t numBits>
+auto IntegerWordFlow<I, low, numBits>::Iterator::operator++() -> Iterator& {
+    ++_iter;
+    return *this;
+};
+
+//----------------------------------------------------------------------------//
+template <class I, I low, std::uint16_t numBits>
+auto IntegerWordFlow<I, low, numBits>::Iterator::operator++(int) -> Iterator {
+    auto ret = Iterator(_iter);
+    ++_iter;
+    return ret;
+}
+
+//----------------------------------------------------------------------------//
+template <class I, I low, std::uint16_t numBits>
+w::IntegerWord<I,  low, numBits>
+IntegerWordFlow<I, low, numBits>::Iterator::operator*() const {
+    return w::IntegerWord<I,  low, numBits>(*_iter);
 }
 
 }  // namespace ga::fl
