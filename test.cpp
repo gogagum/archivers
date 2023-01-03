@@ -4,6 +4,7 @@
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/word/bytes_symbol.hpp"
 #include "include/word/int_range_word.hpp"
+#include "include/word/word_ord_comp.hpp"
 #include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
@@ -205,7 +206,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder1) {
     auto sym1 = SymT(testData1.data());
     auto sym2 = SymT(testData2.data());
 
-    auto comp = SymT::Order();
+    auto comp = ga::w::WordOrdComp<SymT>();
 
     ASSERT_TRUE(comp(sym1, sym2));
 }
@@ -221,7 +222,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder2) {
     auto sym1 = SymT(testData1.data());
     auto sym2 = SymT(testData2.data());
 
-    auto comp = SymT::Order();
+    auto comp = ga::w::WordOrdComp<SymT>();
 
     ASSERT_TRUE(comp(sym1, sym2));
 }
@@ -237,7 +238,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder3) {
     auto sym1 = SymT(testData1);
     auto sym2 = SymT(testData2);
 
-    auto comp = SymT::Order();
+    auto comp = ga::w::WordOrdComp<SymT>();
 
     ASSERT_FALSE(comp(sym1, sym2));
 }
@@ -253,7 +254,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder4) {
     auto sym1 = SymT(testData1);
     auto sym2 = SymT(testData2);
 
-    auto comp = SymT::Order();
+    auto comp = ga::w::WordOrdComp<SymT>();
 
     ASSERT_FALSE(comp(sym1, sym2));
 }
@@ -262,7 +263,7 @@ TEST(BytesSymbolTest, BytesSymbolsOrder4) {
 TEST(BytesSymbolTest, BytesSymbolsInMap) {
     using SymDataT = std::array<std::byte, 1>;
     using SymT = ga::w::BytesSymbol<1>;
-    using MapToInt64 = std::map<SymT, std::int64_t, SymT::Order>;
+    using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
     SymDataT testData2 = { std::byte{0b11111111} };
@@ -285,7 +286,7 @@ TEST(BytesSymbolTest, BytesSymbolsInMap) {
 TEST(BytesSymbolTest, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
     using SymDataT = std::array<std::byte, 1>;
     using SymT = ga::w::BytesSymbol<1>;
-    using MapToInt64 = std::map<SymT, std::int64_t, SymT::Order>;
+    using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
     SymDataT testData2 = { std::byte{0b00001111} };

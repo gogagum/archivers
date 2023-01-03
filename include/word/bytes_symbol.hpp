@@ -70,21 +70,6 @@ public:
 
 private:
     std::array<std::byte, _numBytes> _data;  // data of the word
-public:
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The Order class
-    ///
-    struct Order {
-        /**
-         * @brief operator ()
-         * @param first
-         * @param second
-         * @return
-         */
-        bool operator()(const BytesSymbol<_numBytes>& s1,
-                        const BytesSymbol<_numBytes>& s2) const;
-    };
 
 private:
 
@@ -188,23 +173,6 @@ void BytesSymbol<_numBytes>::bitsOut(IterT outIter) const {
             ++outIter;
         }
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes>
-bool BytesSymbol<_numBytes>::Order::operator()(
-        const BytesSymbol<_numBytes>& s1,
-        const BytesSymbol<_numBytes>& s2
-        ) const {
-    for (auto [firstB, secondB] : boost::range::combine(s1._data, s2._data)) {
-        std::uint8_t firstU = static_cast<std::uint8_t>(firstB);
-        std::uint8_t secondU = static_cast<std::uint8_t>(secondB);
-        if (firstU != secondU) {
-            return firstU < secondU;
-        }
-    }
-    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

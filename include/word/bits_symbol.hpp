@@ -58,13 +58,6 @@ public:
 private:
     std::array<bool, numBits> _bits;
 
-public:
-
-    struct Order {
-
-
-    };
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////
