@@ -13,6 +13,7 @@
 #include <algorithm>
 
 #include "arithmetic_decoder_decoded.hpp"
+//#include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
@@ -26,9 +27,14 @@ template <class SymT, class DictT, typename CountT = std::uint32_t>
 class ArithmeticDecoder : RangesCalc<SymT> {
 public:
     using Source = ArithmeticDecoderDecoded;
-    using Tail = bc::static_vector<std::byte, SymT::numBits / 8>;
+    using Tail = bc::static_vector<bool, SymT::numBits>;
 
-    struct DecodeRet {
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The Ret class
+    ///
+    struct Ret {
         std::vector<SymT> syms;
         Tail tail;
     };
@@ -49,7 +55,7 @@ public:
      * @brief decode - decode source as a vector of bytes.
      * @return
      */
-    DecodeRet decode();
+    Ret decode();
 
 private:
 
@@ -100,7 +106,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
+auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
     std::uint64_t value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
     assert(valueBits < 64 && "`value must be placeble in 64 bits");
@@ -111,8 +117,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
 
     auto currRange = OrdRange { 0, correctedSymsNum };
 
-    DecodeRet ret;
-    ret.tail = _tail;
+    Ret ret;
+    ret.tail = _deserializeTail();
 
     int lastPercent = -1;
 
@@ -167,17 +173,18 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> DecodeRet {
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
 auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
-    std::uint8_t tailSize = _source.takeT<std::uint8_t>();
+    std::uint16_t tailSize = _source.takeT<std::uint16_t>();
     Tail tail(tailSize);
-    for (auto& tailByte: tail) {
-        tailByte = _source.takeByte();
+    for (auto& tailBit: tail) {
+        tailBit = _source.takeBit();
     }
     return tail;
 }
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-std::vector<std::uint64_t> ArithmeticDecoder<SymT, DictT, CountT>::_deserializeDict() {
+std::vector<std::uint64_t>
+ArithmeticDecoder<SymT, DictT, CountT>::_deserializeDict() {
     std::vector<std::uint64_t> ret(SymT::wordsCount);
     CountT numUniqueSyms = _source.takeT<std::uint32_t>();
 

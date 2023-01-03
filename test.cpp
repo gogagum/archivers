@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "include/arithmetic_coder_encoded.hpp"
+#include "include/byte_data_constructor.hpp"
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/word/bytes_symbol.hpp"
 #include "include/word/int_range_word.hpp"
@@ -8,30 +8,96 @@
 #include "include/dictionary/static_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 #include "include/flow/int_range_word_flow.hpp"
+#include "include/misc.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(BitsIterator, Construct) {
+    std::uint64_t num;
+    auto iter = ga::impl::BitsIterator(num, 3);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIterator, Deref) {
+    std::uint64_t num = 0;
+    auto iter = ga::impl::BitsIterator(num, 3);
+    EXPECT_FALSE(*iter);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIterator, Deref2) {
+    auto num = std::byte{0b11110000};
+    auto iter = ga::impl::BitsIterator(num, 2);
+    EXPECT_TRUE(*iter);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIterator, Deref3) {
+    auto num = std::byte{0b11110000};
+    auto iter = ga::impl::BitsIterator(num, 7);
+    EXPECT_FALSE(*iter);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+TEST(BitsIteratorRange, Construct) {
+    auto num = 42;
+    ga::impl::make_bits_iterator_range(num);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIteratorRange, Size) {
+    std::uint32_t num = 42;
+    auto rng = ga::impl::make_bits_iterator_range(num);
+    EXPECT_EQ(std::size(rng), 32);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIteratorRange, Iterate) {
+    std::uint32_t num = 42;
+    std::size_t cnt = 0;
+    for ([[maybe_unused]] bool bit : ga::impl::make_bits_iterator_range(num)) {
+        ++cnt;
+    }
+    EXPECT_EQ(cnt, 32);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIteratorRange, BoolVec) {
+    std::uint32_t num = 0xFF00A5C3;  // 1111 1111 0000 0000 1100 0101 1010 0011
+    auto bitsRng = ga::impl::make_bits_iterator_range(num);
+    auto vec = std::vector(bitsRng.begin(), bitsRng.end());
+    EXPECT_EQ(vec[4], true);
+    EXPECT_EQ(vec[7], true);
+    EXPECT_EQ(vec[9], false);
+    EXPECT_EQ(vec[12], false);
+    EXPECT_EQ(vec[16], true);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, Consruct) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
 }
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutBitFalse) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putBit(false);
     EXPECT_EQ(encoded.data()[0], std::byte{0b00000000});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutBitTrue) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putBit(true);
     EXPECT_EQ(encoded.data()[0], std::byte{0b10000000});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutBits) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putBit(true);
     encoded.putBit(false);
     encoded.putBit(false);
@@ -41,7 +107,7 @@ TEST(ArithmeticCoderEncodedTest, PutBits) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutBits2) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putBit(true);
     encoded.putBit(false);
     encoded.putBit(false);
@@ -57,14 +123,14 @@ TEST(ArithmeticCoderEncodedTest, PutBits2) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutByte) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putByte(std::byte{42});
     EXPECT_EQ(encoded.data()[0], std::byte{42});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutBitAfterByte) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putByte(std::byte{42});
     encoded.putBit(true);
     EXPECT_EQ(encoded.data()[0], std::byte{42});
@@ -73,7 +139,7 @@ TEST(ArithmeticCoderEncodedTest, PutBitAfterByte) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutByte2) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     encoded.putByte(std::byte{42});
     encoded.putByte(std::byte{37});
     encoded.putByte(std::byte{73});
@@ -84,7 +150,7 @@ TEST(ArithmeticCoderEncodedTest, PutByte2) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutInt64) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     std::int64_t tested =
             0b0000000000100000100000000000100000000000000000100000000000100000;
             //0000000011111111222222223333333344444444555555556666666677777777
@@ -103,7 +169,7 @@ TEST(ArithmeticCoderEncodedTest, PutInt64) {
 
 //----------------------------------------------------------------------------//
 TEST(ArithmeticCoderEncodedTest, PutUInt32) {
-    auto encoded = ga::ArithmeticCoderEncoded();
+    auto encoded = ga::ByteDataConstructor();
     std::uint32_t tested = 0b00000000001000001000000000001000;
                            //00000000111111112222222233333333
 

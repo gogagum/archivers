@@ -3,7 +3,7 @@
 
 #include <boost/range/irange.hpp>
 
-#include "../arithmetic_coder_encoded.hpp"
+#include "../byte_data_constructor.hpp"
 
 namespace ga::dict {
 
@@ -67,7 +67,7 @@ public:
     std::uint64_t numUniqueWords() const;
 
     template <class CountT>
-    void serialize(ArithmeticCoderEncoded& res) const;
+    void serialize(ByteDataConstructor& res) const;
 
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
@@ -142,7 +142,7 @@ std::uint64_t StaticDictionary<WordT>::numUniqueWords() const {
 //----------------------------------------------------------------------------//
 template <class WordT>
 template <class CountT>
-void StaticDictionary<WordT>::serialize(ArithmeticCoderEncoded& res) const {
+void StaticDictionary<WordT>::serialize(ByteDataConstructor& res) const {
     res.putT<std::uint32_t>(this->numUniqueWords());
 
     // Unique words and their counts

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <array>
+#include <concepts>
 #include <cassert>
 #include <cstring>
 #include <ostream>
@@ -28,7 +29,7 @@ public:
 public:
 
     /**
-     * @brief ord
+     * @brief ord - 
      * @param word
      * @return
      */
@@ -43,6 +44,9 @@ public:
 
 public:
 
+    /**
+     * Default constructor. Constructs a symbol filled with zeros,
+     */
     BytesSymbol() = default;
 
     /**
@@ -56,6 +60,13 @@ public:
      * @param bytes
      */
     BytesSymbol(const std::array<std::byte, _numBytes>& bytes);
+
+    /**
+     * @brief toBits transform to bits
+     * @return bits array
+     */
+    template <std::output_iterator<bool> IterT>
+    void bitsOut(IterT outIter) const;
 
 private:
     std::array<std::byte, _numBytes> _data;  // data of the word
@@ -166,6 +177,18 @@ BytesSymbol<numBytes>::BytesSymbol(const std::byte* ptr) {
 template <std::uint8_t _numBytes>
 BytesSymbol<_numBytes>::BytesSymbol(const std::array<std::byte, _numBytes>& arr)
     : BytesSymbol(arr.data()) {};
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t _numBytes>
+template <std::output_iterator<bool> IterT>
+void BytesSymbol<_numBytes>::bitsOut(IterT outIter) const {
+    for (auto byte: _data) {
+        for (auto bit: ga::impl::make_bits_iterator_range(byte)) {
+            *outIter = bit;
+            ++outIter;
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

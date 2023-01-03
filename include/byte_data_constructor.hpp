@@ -13,13 +13,29 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoderEncoded class
 ///
-class ArithmeticCoderEncoded {
+class ByteDataConstructor {
+public:
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The BitBackInserter class
+    ///
+    class BitBackInserter {
+    public:
+        BitBackInserter(ByteDataConstructor& owner) : _owner(owner) {};
+        void operator++() const { }
+        void operator++(int) const { }
+        void operator=(bool bit) { _owner.putBit(bit); }
+        BitBackInserter& operator*() { return *this; }
+    private:
+        ByteDataConstructor& _owner;
+    };
+
 public:
 
     /**
      * @brief ArithmeticCoderEncoded - enpty encoded constructor
      */
-    ArithmeticCoderEncoded();
+    ByteDataConstructor();
 
     /**
      * @brief putBit - add single bit in the end.
@@ -51,8 +67,7 @@ public:
      * @brief putT - put object as a byte sequence
      * @param s - object
      */
-    template <class T>
-    void putT(T s);
+    void putT(auto s);
 
     /**
      * @brief data - get data pointer
@@ -66,6 +81,13 @@ public:
      */
     const std::size_t bytesSize() const;
 
+    /**
+     * @brief getBitBackInserter returns bit insert iterator to add bits at
+     * the end.
+     * @return bit insert iterator.
+     */
+    BitBackInserter getBitBackInserter();
+
 private:
 
     void _moveBitFlag();
@@ -78,9 +100,8 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class T>
-void ArithmeticCoderEncoded::putT(T s) {
-    using SizeTBytes = std::array<std::byte, sizeof(T)>;
+void ByteDataConstructor::putT(auto s) {
+    using SizeTBytes = std::array<std::byte, sizeof(s)>;
 
     auto& bytes = reinterpret_cast<SizeTBytes&>(s);
     for (auto byte: boost::adaptors::reverse(bytes)) {

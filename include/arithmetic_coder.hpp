@@ -11,7 +11,7 @@
 #include <bitset>
 #include <boost/range/combine.hpp>
 
-#include "arithmetic_coder_encoded.hpp"
+#include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
@@ -25,7 +25,7 @@ public:
 
     using Sym = typename FlowT::Sym;
 
-    using Res = ArithmeticCoderEncoded;
+    using Res = ByteDataConstructor;
 
 private:
     using RangesCalc<Sym>::correctedSymsNum;
@@ -176,8 +176,8 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
     auto tail = _symFlow.getTail();
     res.putT<std::uint8_t>(tail.size());
 
-    for (auto tailByte : tail) {
-        res.putByte(tailByte);
+    for (auto tailBit : tail) {
+        res.putBit(tailBit);
     }
 }
 
@@ -186,7 +186,6 @@ template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeFileWordsCount(Res& res) {
     res.putT<CountT>(_fileWordsCount);
 }
-
 
 }  // namespace ga
 

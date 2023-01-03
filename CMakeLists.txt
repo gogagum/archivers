@@ -19,8 +19,8 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(archiever_encoder encoder.cpp
         include/arithmetic_coder.hpp
-        include/arithmetic_coder_encoded.hpp
-        include/arithmetic_coder_encoded.cpp
+        include/byte_data_constructor.hpp
+        include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
@@ -52,9 +52,9 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_executable(archiever_tests test.cpp
-    include/arithmetic_coder_encoded.cpp
     include/word/bytes_symbol.hpp
     include/word/int_range_word.hpp
+    include/byte_data_constructor.cpp
     include/arithmetic_decoder_decoded.cpp
     include/flow/int_range_word_flow.hpp
 )

@@ -7,6 +7,9 @@
 #include <cstddef>
 #include <cstring>
 #include <cstddef>
+#include <boost/iterator/iterator_categories.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/container/static_vector.hpp>
 
 namespace ga::fl {
@@ -21,64 +24,10 @@ template <std::uint8_t numBytes>
 class ByteFlow<w::BytesSymbol<numBytes>> {
 public:
     using Sym = w::BytesSymbol<numBytes>;
+    constexpr static std::uint16_t numBits = Sym::numBits;
+    using Tail = boost::container::static_vector<bool, numBits>;
 public:
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The Iterator class
-    ///
-    class Iterator {
-    private:
-        /**
-         * @brief Iterator constructor from pointer.
-         * @param ptr.
-         */
-        Iterator(std::byte* ptr);
-    public:
-
-        /**
-         * @brief Iterator copy constructor.
-         * @param other
-         */
-        Iterator(const Iterator& other);
-
-        /**
-         * @brief operator ++
-         * @return reference to self (after incrementing).
-         */
-        Iterator& operator++();
-
-        /**
-         * @brief operator ++
-         * @return copy of self before incrementing.
-         */
-        Iterator operator++(int);
-
-        /**
-         * @brief operator ==
-         * @param other - other iterator to compare.
-         * @return `true if iterators are equal.
-         */
-        bool operator==(const Iterator& other) const;
-
-        /**
-         * @brief operator !=
-         * @param other - other iterator to compare.
-         * @return `true if iterators are not equal.
-         */
-        bool operator!=(const Iterator& other) const;
-
-        /**
-         * @brief operator * get a symbol.
-         * @return symbol.
-         */
-        w::BytesSymbol<numBytes> operator*() const;
-
-    private:
-        const std::byte* _ptr;
-    private:
-        friend class ByteFlow;
-    };
-
+    class Iterator;
 public:
 
     /**
@@ -110,11 +59,11 @@ public:
      * @brief getTail
      * @return
      */
-    boost::container::static_vector<std::byte, numBytes> getTail() const;
+    Tail getTail() const;
 
 private:
 
-    std::uint8_t _getTailSize() const;
+    std::uint8_t _getTailBytesSize() const;
 
 private:
 
@@ -133,16 +82,14 @@ ByteFlow<w::BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator
-{
-    return Iterator(const_cast<std::byte*>(_bytes.data()));
+auto ByteFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator {
+    return Iterator(_bytes.data());
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
 auto ByteFlow<w::BytesSymbol<numBytes>>::end() const -> Iterator {
-    return Iterator(const_cast<std::byte*>(_bytes.data()
-                                           + getNumberOfWords() * numBytes));
+    return Iterator(_bytes.data() + getNumberOfWords() * numBytes);
 }
 
 //----------------------------------------------------------------------------//
@@ -153,65 +100,51 @@ std::size_t ByteFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::_getTailSize() const {
+std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::_getTailBytesSize() const {
     return _bytes.size() % numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-boost::container::static_vector<std::byte, numBytes>
-ByteFlow<w::BytesSymbol<numBytes>>::getTail() const {
-    std::uint8_t tailSize = _getTailSize();
-    return boost::container::static_vector<std::byte, numBytes>(
-        _bytes.end() - tailSize, _bytes.end());
-}
+auto ByteFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
+    Tail ret;
+    auto bytesRng =
+            boost::make_iterator_range(_bytes.end() - _getTailBytesSize(),
+                                       _bytes.end());
+    for (auto tailByte: bytesRng) {
+        ret.insert(ret.end(),
+                   ga::impl::bits_begin(tailByte),
+                   ga::impl::bits_end(tailByte));
+    }
 
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-ByteFlow<w::BytesSymbol<numBytes>>::Iterator::Iterator(
-        std::byte* ptr) : _ptr(ptr) {}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-ByteFlow<w::BytesSymbol<numBytes>>::Iterator::Iterator(const Iterator& other)
-    : _ptr(other._ptr) {}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator++() -> Iterator& {
-    _ptr += numBytes;
-    return *this;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator++(int) -> Iterator {
-    Iterator ret(*this);
-    _ptr += numBytes;
     return ret;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template <std::uint8_t numBytes>
-bool ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator==(
-        const Iterator& other) const {
-    return _ptr == other._ptr;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-bool ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator!=(
-        const Iterator& other) const {
-    return _ptr != other._ptr;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::Iterator::operator*(
-        ) const -> w::BytesSymbol<numBytes> {
-    return w::BytesSymbol<numBytes>(_ptr);
-}
+class ByteFlow<w::BytesSymbol<numBytes>>::Iterator
+        : public boost::iterator_facade<
+            Iterator,
+            Sym,
+            boost::incrementable_traversal_tag,
+            Sym> {
+public:
+    using type = Iterator;
+public:
+    //------------------------------------------------------------------------//
+    Iterator(const std::byte* ptr) : _ptr(ptr) {};
+protected:
+    //------------------------------------------------------------------------//
+    Sym dereference() const             { return {_ptr}; };
+    //------------------------------------------------------------------------//
+    bool equal(const type& other) const { return _ptr == other._ptr; };
+    //------------------------------------------------------------------------//
+    void increment()                    { _ptr += numBytes; };
+private:
+    const std::byte* _ptr;
+private:
+    friend class boost::iterators::iterator_core_access;
+};
 
 }  // namespace ga
 

@@ -8,15 +8,15 @@
 #include "include/arithmetic_decoder_decoded.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_symbol.hpp"
-#include "include/dictionary/static_dictionary.hpp"
-#include "include/dictionary/uniform_dictionary.hpp"
+//#include "include/dictionary/static_dictionary.hpp"
+//#include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 template <std::uint8_t numBytes>
 using Sym = ga::w::BytesSymbol<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 3>;
+using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>>;
 
 template <std::uint8_t numBytes>
 using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;

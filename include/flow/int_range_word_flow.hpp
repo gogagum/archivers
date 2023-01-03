@@ -14,6 +14,7 @@ namespace ga::fl {
 template <class I, I low, std::uint16_t numBits>
 class IntegerWordFlow {
 public:
+    using Tail = boost::container::static_vector<bool, numBits>;
     using Sym = w::IntegerWord<I, low, numBits>;
     static constexpr std::uint8_t numBytes = (numBits - 1) / 8 + 1;
 public:
@@ -66,7 +67,7 @@ public:
      * @brief getTail
      * @return
      */
-    const boost::container::static_vector<std::byte, numBytes>& getTail() const;
+    Tail getTail() const;
 
 private:
     std::vector<I> _ints;
@@ -98,11 +99,9 @@ std::size_t IntegerWordFlow<I, low, numBits>::getNumberOfWords() const {
 
 //----------------------------------------------------------------------------//
 template <class I, I low, std::uint16_t numBits>
-auto IntegerWordFlow<I, low, numBits>::getTail() const
-        -> const boost::container::static_vector<std::byte, numBytes>& {
+auto IntegerWordFlow<I, low, numBits>::getTail() const -> Tail {
     return {};
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
