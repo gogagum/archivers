@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "include/byte_data_constructor.hpp"
-#include "include/arithmetic_decoder_decoded.hpp"
+#include "include/data_parser.hpp"
 #include "include/word/bytes_symbol.hpp"
 #include "include/word/int_range_word.hpp"
 #include "include/word/word_ord_comp.hpp"
@@ -364,7 +364,7 @@ TEST(ArithmeticDecoderDecoded, Construct) {
     std::vector<std::byte> testData{
         static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
         std::byte{17}, std::byte{11} };
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 }
 
 //----------------------------------------------------------------------------//
@@ -373,7 +373,7 @@ TEST(ArithmeticDecoderDecoded, NumBytes) {
         static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
         std::byte{17}, std::byte{11} };
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_EQ(decoded.takeT<std::uint8_t>(), 2);
     EXPECT_EQ(decoded.takeByte(), std::byte(25));
@@ -386,7 +386,7 @@ TEST(ArithmeticDecoderDecoded, TakeBit) {
     std::vector<std::byte> testData{ std::byte{0b10100110} };
                                                //|------|
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_TRUE(decoded.takeBit());
 }
@@ -397,7 +397,7 @@ TEST(ArithmeticDecoderDecoded, TakeBits) {
         { std::byte{0b10100110}, std::byte{0b00110110} };
                     //|------|             //|------|
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_TRUE(decoded.takeBit());
     EXPECT_FALSE(decoded.takeBit());
@@ -417,7 +417,7 @@ TEST(ArithmeticDecoderDecoded, BitAfterByte1) {
     std::vector<std::byte> testData{
         std::byte{2}, std::byte{0b10100110} };
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
     EXPECT_TRUE(decoded.takeBit());
@@ -428,7 +428,7 @@ TEST(ArithmeticDecoderDecoded, BitAfterByte2) {
     std::vector<std::byte> testData{
         std::byte{2}, std::byte{0b00100110} };
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
     EXPECT_FALSE(decoded.takeBit());
@@ -439,11 +439,11 @@ TEST(ArithmeticDecoderDecoded, ByteAfterBit) {
     std::vector<std::byte> testData{
         std::byte{0b00000010}, std::byte{0b00100110} };
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     decoded.takeBit();
     EXPECT_THROW(decoded.takeByte(),
-                 ga::ArithmeticDecoderDecoded::BytesAfterBitsException);
+                 ga::DataParser::BytesAfterBitsException);
 }
 
 //----------------------------------------------------------------------------//
@@ -451,7 +451,7 @@ TEST(ArithmeticDecoderDecoded, UInt16T) {
     std::vector<std::byte> testData{
         std::byte{0b01100010}, std::byte{0b00100110} };
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(testData));
+    auto decoded = ga::DataParser(std::move(testData));
 
     EXPECT_EQ(decoded.takeT<std::uint16_t>(),
               std::uint16_t{0b0110001000100110});

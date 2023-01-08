@@ -1,7 +1,5 @@
-#pragma once
-
-#ifndef BIT_SYMBOL_HPP
-#define BIT_SYMBOL_HPP
+#ifndef BYTES_SYMBOL_HPP
+#define BYTES_SYMBOL_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -94,10 +92,12 @@ private:
     /**
      * @brief operator << for debug output.
      * @param os - output stream.
+     * @param word - printed word.
      * @return output stream reference.
      */
     template <std::uint8_t __numBytes>
-    friend std::ostream& operator<<(std::ostream& os, BytesSymbol<__numBytes>);
+    friend std::ostream& operator<<(std::ostream& os,
+                                    BytesSymbol<__numBytes> word);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +107,8 @@ private:
 /// \return `true if symbols are equal, else `false.
 ///
 template <std::uint8_t numBytes>
-bool operator==(const w::BytesSymbol<numBytes>& bs1,
-                const w::BytesSymbol<numBytes>& bs2);
+bool operator==(const BytesSymbol<numBytes>& bs1,
+                const BytesSymbol<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator !=
@@ -117,17 +117,17 @@ bool operator==(const w::BytesSymbol<numBytes>& bs1,
 /// \return `true if symbols are not equal, else `false.
 ///
 template <std::uint8_t numBytes>
-bool operator!=(const w::BytesSymbol<numBytes>& bs1,
-                const w::BytesSymbol<numBytes>& bs2);
+bool operator!=(const BytesSymbol<numBytes>& bs1,
+                const BytesSymbol<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
-/// \param os stream to write to.
-/// \param sym ounput symbol.
-/// \return
+/// \param os - stream to write to.
+/// \param sym - ounput symbol.
+/// \return reference to os.
 ///
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym);
+std::ostream& operator<<(std::ostream& os, BytesSymbol<numBytes> sym);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -203,4 +203,4 @@ std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym) {
 
 
 
-#endif // BIT_SYMBOL_HPP
+#endif // BYTES_SYMBOL_HPP

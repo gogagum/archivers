@@ -15,7 +15,7 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoderDecoded class
 ///
-class ArithmeticDecoderDecoded {
+class DataParser {
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ public:
      * @brief ArithmeticDecoderDecoded
      * @param data
      */
-    ArithmeticDecoderDecoded(std::vector<std::byte>&& data);
+    DataParser(std::vector<std::byte>&& data);
 
     /**
      * @brief takeByte
@@ -67,7 +67,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class T>
-T ArithmeticDecoderDecoded::takeT() {
+T DataParser::takeT() {
     using TBytes = std::array<std::byte, sizeof(T)>;
 
     auto ret = T();

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-#include "include/arithmetic_decoder_decoded.hpp"
+#include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_symbol.hpp"
 //#include "include/dictionary/static_dictionary.hpp"
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
     fin.read(reinterpret_cast<char*>(finData.data()), finSize);
 
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(finData));
+    auto decoded = ga::DataParser(std::move(finData));
     std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
     std::cerr << "Word bytes length: "

@@ -12,7 +12,7 @@
 #include <cstring>
 #include <algorithm>
 
-#include "arithmetic_decoder_decoded.hpp"
+#include "data_parser.hpp"
 //#include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
@@ -26,7 +26,7 @@ namespace bc = boost::container;
 template <class SymT, class DictT, typename CountT = std::uint32_t>
 class ArithmeticDecoder : RangesCalc<SymT> {
 public:
-    using Source = ArithmeticDecoderDecoded;
+    using Source = DataParser;
     using Tail = bc::static_vector<bool, SymT::numBits>;
 
 public:

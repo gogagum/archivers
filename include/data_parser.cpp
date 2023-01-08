@@ -1,9 +1,9 @@
-#include "arithmetic_decoder_decoded.hpp"
+#include "data_parser.hpp"
 
 namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-ArithmeticDecoderDecoded::ArithmeticDecoderDecoded(
+DataParser::DataParser(
         std::vector<std::byte>&& data)
     : _data(std::move(data)),
       _bytesRead{0},
@@ -11,7 +11,7 @@ ArithmeticDecoderDecoded::ArithmeticDecoderDecoded(
       _currBitFlag{0b10000000} { }
 
 //----------------------------------------------------------------------------//
-std::byte ArithmeticDecoderDecoded::takeByte() {
+std::byte DataParser::takeByte() {
     if (_startedBits) {
         throw BytesAfterBitsException();
     }
@@ -21,7 +21,7 @@ std::byte ArithmeticDecoderDecoded::takeByte() {
 }
 
 //----------------------------------------------------------------------------//
-bool ArithmeticDecoderDecoded::takeBit() {
+bool DataParser::takeBit() {
     _startedBits = true;
     if (_bytesRead == _data.size()) {
         return false;
@@ -32,7 +32,7 @@ bool ArithmeticDecoderDecoded::takeBit() {
 }
 
 //----------------------------------------------------------------------------//
-void ArithmeticDecoderDecoded::_moveBitFlag() {
+void DataParser::_moveBitFlag() {
     _currBitFlag >>= 1;
     if (_currBitFlag == std::byte{0b00000000}) {
         _currBitFlag = std::byte{0b10000000};
@@ -42,7 +42,7 @@ void ArithmeticDecoderDecoded::_moveBitFlag() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-ArithmeticDecoderDecoded::BytesAfterBitsException::BytesAfterBitsException(
+DataParser::BytesAfterBitsException::BytesAfterBitsException(
         ) : std::runtime_error("Can`t write bytes after bits.") { }
 
 }  // namespace ga
