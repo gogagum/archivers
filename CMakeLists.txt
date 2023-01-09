@@ -51,12 +51,22 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(archiever_tests test.cpp
+add_executable(archiever_tests
+    test/bits_iterator.cpp
+    test/byte_data_constructor.cpp
+    test/bytes_symbol.cpp
+    test/data_parser.cpp
+    test/dynamic_dictionary.cpp
+    test/integer_word.cpp
+    test/integer_word_flow.cpp
+    test/static_dictionary.cpp
+    test/uniform_dictionary.cpp
     include/word/bytes_symbol.hpp
     include/word/int_range_word.hpp
     include/byte_data_constructor.cpp
     include/data_parser.cpp
     include/flow/int_range_word_flow.hpp
+    include/misc.hpp
 )
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main)

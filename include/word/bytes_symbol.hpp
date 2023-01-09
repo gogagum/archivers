@@ -1,16 +1,17 @@
 #ifndef BYTES_SYMBOL_HPP
 #define BYTES_SYMBOL_HPP
 
+#include <array>
+#include <bitset>
 #include <cstdint>
 #include <cstddef>
-#include <array>
 #include <concepts>
 #include <cassert>
 #include <cstring>
 #include <ostream>
 #include <boost/range/combine.hpp>
 
-#include "../misc.hpp"
+#include "../bits_iterator.hpp"
 
 namespace ga::w {
 
@@ -194,13 +195,11 @@ bool operator!=(const w::BytesSymbol<numBytes>& bs1,
 template <std::uint8_t numBytes>
 std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym) {
     for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
-        os << *iter << ' ';
+        os << std::bitset<8>(std::to_integer<std::uint8_t>(*iter)) << ' ';
     }
-    return os << *(sym._data.end() - 1);
+    return os << std::bitset<8>(std::to_integer<std::uint8_t>(*sym._data.rbegin()));
 }
 
 }  // namespace ga::w
-
-
 
 #endif // BYTES_SYMBOL_HPP

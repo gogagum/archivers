@@ -1,26 +1,10 @@
-#pragma once
-
-#ifndef MISC_HPP
-#define MISC_HPP
+#ifndef BITS_ITERATOR_HPP
+#define BITS_ITERATOR_HPP
 
 #include <array>
-#include <ostream>
-#include <bitset>
-#include <cstddef>
-#include <boost/range/iterator_range.hpp>
+
 #include <boost/iterator/iterator_facade.hpp>
-
-namespace ga::w {
-//----------------------------------------------------------------------------//
-std::ostream& operator<< (std::ostream& os, std::byte b);
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-std::ostream& operator<< (std::ostream& os, std::byte b) {
-   return os << std::bitset<8>(std::to_integer<int>(b));
-}
-
-}  // namespace ga
+#include <boost/range/iterator_range.hpp>
 
 namespace ga::impl {
 
@@ -115,6 +99,4 @@ bool BitsIterator<T>::equal(const type& other) const {
 
 }  // namespace ga::impl
 
-#endif // MISC_HPP
-
-
+#endif // BITS_ITERATOR_HPP
