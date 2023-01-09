@@ -8,7 +8,6 @@
 #include <ostream>
 #include <concepts>
 #include <cstdint>
-#include <boost/range/adaptor/reversed.hpp>
 
 namespace ga::w{
 
@@ -50,7 +49,7 @@ public:
      * @param inputIter - input iterator to take bits form.
      */
     template <std::input_iterator IterT>
-    BitsWord(IterT& inputIter);
+    BitsWord(IterT inputIter);
 
     /**
      * @brief bitsOut - give bits of a word out.
@@ -125,9 +124,9 @@ std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw);
 template <std::uint16_t _numBits>
 std::uint64_t BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) {
     auto ret = std::uint64_t{0};
-    for (auto bit : boost::adaptors::reverse(bw._bits)) {
-        ret |= bit ? std::uint64_t{1} : std::uint64_t{0};
+    for (auto bit : bw._bits) {
         ret <<= 1;
+        ret |= bit ? std::uint64_t{1} : std::uint64_t{0};
     }
     return ret;
 }
@@ -146,7 +145,7 @@ BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT& iter) {
+BitsWord<_numBits>::BitsWord(IterT iter) {
     for (auto& bit : _bits) {
         bit = *iter;
         ++iter;
