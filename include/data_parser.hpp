@@ -18,16 +18,6 @@ namespace ga {
 class DataParser {
 public:
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The BytesAfterBitsException class
-    ///
-    class BytesAfterBitsException : public std::runtime_error {
-    public:
-        BytesAfterBitsException();
-    };
-
-public:
-
     /**
      * @brief ArithmeticDecoderDecoded
      * @param data
@@ -60,7 +50,6 @@ private:
 private:
     std::vector<std::byte> _data;
     std::size_t _bytesRead;
-    bool _startedBits;
     std::byte _currBitFlag;
 };
 

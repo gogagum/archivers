@@ -24,7 +24,6 @@ TEST(DataParser, NumBytes) {
     EXPECT_EQ(decoded.takeByte(), std::byte(17));
 }
 
-
 //----------------------------------------------------------------------------//
 TEST(DataParser, TakeBit) {
     std::vector<std::byte> testData{ std::byte{0b10100110} };
@@ -86,8 +85,7 @@ TEST(DataParser, ByteAfterBit) {
     auto decoded = ga::DataParser(std::move(testData));
 
     decoded.takeBit();
-    EXPECT_THROW(decoded.takeByte(),
-                 ga::DataParser::BytesAfterBitsException);
+    EXPECT_EQ(decoded.takeByte(), std::byte{0b00000100});
 }
 
 //----------------------------------------------------------------------------//
