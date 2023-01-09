@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+#include <array>
+#include <cstddef>
+#include <vector>
+#include <boost/range/combine.hpp>
 
 #include "../include/word/bytes_symbol.hpp"
 #include "../include/word/word_ord_comp.hpp"
@@ -126,4 +130,26 @@ TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 
     EXPECT_EQ(m.lower_bound(sym2)->second, 42);
     EXPECT_EQ(m.upper_bound(sym2)->second, 42);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BytesSymbol, BitsOut) {
+    using SymDataT = std::array<std::byte, 1>;
+    using SymT = ga::w::BytesSymbol<1>;
+    SymDataT testData = { std::byte{0b00001111} };
+    auto sym = SymT(testData);
+
+    std::vector<bool> bits;
+    auto bitsInserter = std::back_inserter(bits);
+
+    sym.bitsOut(bitsInserter);
+    EXPECT_EQ(bits.size(), 8);
+
+    auto combinedTestAndTested =
+            boost::range::combine(bits,
+                                  ga::impl::make_bits_iterator_range(testData));
+
+    for (const auto& [dataI, bitI] : combinedTestAndTested) {
+        EXPECT_EQ(dataI, bitI);
+    }
 }

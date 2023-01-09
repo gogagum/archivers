@@ -159,6 +159,28 @@ void BitsWord<_numBits>::bitsOut(IterT outIter) const {
     std::ranges::copy(_bits, outIter);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+template <std::uint16_t _numBits>
+bool operator==(const BitsWord<_numBits>& bw1, const BitsWord<_numBits>& bw2) {
+    return bw1._bits == bw2._bits;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint16_t _numBits>
+bool operator!=(const BitsWord<_numBits>& bw1, const BitsWord<_numBits>& bw2) {
+    return bw1._bits != bw2._bits;
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint16_t numBits>
+std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw) {
+    for (auto bit: bw._bits) {
+        os << bit;
+    }
+    return os;
+}
+
 }
 
 #endif // BITS_SYMBOL_HPP

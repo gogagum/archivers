@@ -64,6 +64,8 @@ add_executable(archiever_tests
     test/uniform_dictionary.cpp
     include/word/bytes_symbol.hpp
     include/word/int_range_word.hpp
+    include/word/bits_word.hpp
+    include/word/word_ord_comp.hpp
     include/byte_data_constructor.cpp
     include/data_parser.cpp
     include/flow/int_range_word_flow.hpp
