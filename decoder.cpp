@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
     fin.read(reinterpret_cast<char*>(finData.data()), finSize);
 
-    auto decoded = ga::DataParser(std::move(finData));
+    auto decoded = ga::DataParser(finData);
     std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
     std::cerr << "Word bytes length: "

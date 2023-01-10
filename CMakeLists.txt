@@ -54,6 +54,7 @@ enable_testing()
 add_executable(archiever_tests
     test/bits_iterator.cpp
     test/bits_word.cpp
+    test/bits_word_flow.cpp
     test/byte_data_constructor.cpp
     test/bytes_symbol.cpp
     test/bytes_word_flow.cpp
