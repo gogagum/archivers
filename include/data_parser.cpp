@@ -4,17 +4,16 @@
 namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-DataParser::DataParser(
-        std::vector<std::byte>&& data)
-    : _data(std::move(data)),
-      _bytesRead{0},
+DataParser::DataParser(std::span<std::byte> data)
+    : _data(data),
+      _dataIter{_data.begin()},
       _currBitFlag{0b10000000} { }
 
 //----------------------------------------------------------------------------//
 std::byte DataParser::takeByte() {
     if (_currBitFlag == std::byte{0b10000000}) {
-        std::byte ret = _data[_bytesRead];
-        ++_bytesRead;
+        std::byte ret = *_dataIter;
+        ++_dataIter;
         return ret;
     }
     auto ret = std::byte{0};
@@ -27,10 +26,10 @@ std::byte DataParser::takeByte() {
 
 //----------------------------------------------------------------------------//
 bool DataParser::takeBit() {
-    if (_bytesRead == _data.size()) {
+    if (_dataIter == _data.end()) {
         return false;
     }
-    bool ret = (_data[_bytesRead] & _currBitFlag) != std::byte{0};
+    bool ret = (*_dataIter & _currBitFlag) != std::byte{0};
     _moveBitFlag();
     return ret;
 }
@@ -40,8 +39,27 @@ void DataParser::_moveBitFlag() {
     _currBitFlag >>= 1;
     if (_currBitFlag == std::byte{0b00000000}) {
         _currBitFlag = std::byte{0b10000000};
-        ++_bytesRead;
+        ++_dataIter;
     }
+}
+
+//----------------------------------------------------------------------------//
+std::size_t DataParser::getNumBytes() const {
+    return _data.size();
+}
+
+//----------------------------------------------------------------------------//
+void DataParser::seek(std::size_t bitsOffset) {
+    _dataIter = _data.begin() + bitsOffset / 8;
+    const auto inByteOffset = bitsOffset % 8;
+    _currBitFlag = std::byte{0b10000000} >> inByteOffset;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+bool operator==(const DataParser& dp1, const DataParser& dp2) {
+    return dp1._data.data() == dp2._data.data()
+            && dp1._dataIter == dp2._dataIter;
 }
 
 }  // namespace ga

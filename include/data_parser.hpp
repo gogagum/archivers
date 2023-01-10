@@ -3,12 +3,13 @@
 #ifndef ARITHMETIC_DECODER_DECODED_HPP
 #define ARITHMETIC_DECODER_DECODED_HPP
 
-#include <boost/range/adaptor/reversed.hpp>
-#include <vector>
-#include <cstddef>
-#include <stdexcept>
 #include <array>
+#include <cstddef>
 #include <ranges>
+#include <span>
+#include <vector>
+
+#include <boost/range/adaptor/reversed.hpp>
 
 namespace ga {
 
@@ -22,7 +23,7 @@ public:
      * @brief ArithmeticDecoderDecoded
      * @param data
      */
-    DataParser(std::vector<std::byte>&& data);
+    explicit DataParser(std::span<std::byte> data);
 
     /**
      * @brief takeByte
@@ -43,15 +44,36 @@ public:
     template <class T>
     T takeT();
 
+    /**
+     * @brief getNumBytes - get number of bytes parsed.
+     * @return number of bytes.
+     */
+    std::size_t getNumBytes() const;
+
+    /**
+     * @brief seek move to bitsOffset position.
+     * @param bitsOffset - position to move to.
+     */
+    void seek(std::size_t bitsOffset);
+
 private:
 
     void _moveBitFlag();
 
 private:
-    std::vector<std::byte> _data;
-    std::size_t _bytesRead;
+    const std::span<std::byte> _data;
+    std::span<std::byte>::iterator _dataIter;
     std::byte _currBitFlag;
+
+private:
+
+    friend bool operator==(const DataParser& dp1, const DataParser& dp2);
+
 };
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+bool operator==(const DataParser& dp1, const DataParser& dp2);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
