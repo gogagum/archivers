@@ -4,7 +4,7 @@
 #include <vector>
 #include <boost/container/static_vector.hpp>
 
-#include "../word/int_range_word.hpp"
+#include "../word/integer_word.hpp"
 
 namespace ga::fl {
 

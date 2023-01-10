@@ -4,14 +4,14 @@
 #include <vector>
 
 #include "include/arithmetic_coder.hpp"
-#include "include/flow/byte_flow.hpp"
+#include "include/flow/bytes_word_flow.hpp"
 //#include "include/dictionary/static_dictionary.hpp"
 //#include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 using Sym = ga::w::BytesSymbol<3>;
 using Dict = ga::dict::AdaptiveDictionary<Sym>;
-using Coder = ga::ArithmeticCoder<ga::fl::ByteFlow<Sym>, Dict, std::uint64_t>;
+using Coder = ga::ArithmeticCoder<ga::fl::BytesWordFlow<Sym>, Dict, std::uint64_t>;
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = ga::fl::ByteFlow<Sym>(finData.data(), finData.size());
+    auto byteFlow = ga::fl::BytesWordFlow<Sym>(finData.data(), finData.size());
     auto coder = Coder(std::move(byteFlow));
     auto encoded = coder.encode();
 

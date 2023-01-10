@@ -15,13 +15,13 @@
 namespace ga::fl {
 
 template <class WordT>
-class ByteFlow;
+class BytesWordFlow;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
-class ByteFlow<w::BytesSymbol<numBytes>> {
+class BytesWordFlow<w::BytesSymbol<numBytes>> {
 public:
     using Sym = w::BytesSymbol<numBytes>;
     constexpr static std::uint16_t numBits = Sym::numBits;
@@ -35,7 +35,7 @@ public:
      * @param ptr
      * @param size
      */
-    ByteFlow(const void* ptr, std::size_t size);
+    BytesWordFlow(const void* ptr, std::size_t size);
 
     /**
      * @brief begin - beginning iterator getter.
@@ -74,7 +74,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-ByteFlow<w::BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
+BytesWordFlow<w::BytesSymbol<numBytes>>::BytesWordFlow(const void* ptr, std::size_t size)
         : _currOffset(0) {
     _bytes.resize(size);
     std::memcpy(_bytes.data(), ptr, size);
@@ -82,31 +82,31 @@ ByteFlow<w::BytesSymbol<numBytes>>::ByteFlow(const void* ptr, std::size_t size)
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator {
+auto BytesWordFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator {
     return Iterator(_bytes.data());
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::end() const -> Iterator {
+auto BytesWordFlow<w::BytesSymbol<numBytes>>::end() const -> Iterator {
     return Iterator(_bytes.data() + getNumberOfWords() * numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t ByteFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
+std::size_t BytesWordFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
     return _bytes.size() / numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t ByteFlow<w::BytesSymbol<numBytes>>::_getTailBytesSize() const {
+std::uint8_t BytesWordFlow<w::BytesSymbol<numBytes>>::_getTailBytesSize() const {
     return _bytes.size() % numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto ByteFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
+auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
     Tail ret;
     auto bytesRng =
             boost::make_iterator_range(_bytes.end() - _getTailBytesSize(),
@@ -122,7 +122,7 @@ auto ByteFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::uint8_t numBytes>
-class ByteFlow<w::BytesSymbol<numBytes>>::Iterator
+class BytesWordFlow<w::BytesSymbol<numBytes>>::Iterator
         : public boost::iterator_facade<
             Iterator,
             Sym,
