@@ -13,7 +13,7 @@
 #include "include/dictionary/adaptive_dictionary.hpp"
 
 template <std::uint8_t numBytes>
-using Sym = ga::w::BytesSymbol<numBytes>;
+using Sym = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
 using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>>;

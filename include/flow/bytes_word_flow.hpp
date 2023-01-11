@@ -19,9 +19,9 @@ class BytesWordFlow;
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
-class BytesWordFlow<w::BytesSymbol<numBytes>> {
+class BytesWordFlow<w::BytesWord<numBytes>> {
 public:
-    using Sym = w::BytesSymbol<numBytes>;
+    using Sym = w::BytesWord<numBytes>;
     constexpr static std::uint16_t numBits = Sym::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
 public:
@@ -70,36 +70,36 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesWordFlow<w::BytesSymbol<numBytes>>::BytesWordFlow(
+BytesWordFlow<w::BytesWord<numBytes>>::BytesWordFlow(
         std::span<std::byte> bytes) : _bytes(bytes) {}
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto BytesWordFlow<w::BytesSymbol<numBytes>>::begin() const -> Iterator {
+auto BytesWordFlow<w::BytesWord<numBytes>>::begin() const -> Iterator {
     return Iterator(_bytes.data());
 }
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
-auto BytesWordFlow<w::BytesSymbol<numBytes>>::end() const -> Iterator {
+auto BytesWordFlow<w::BytesWord<numBytes>>::end() const -> Iterator {
     return Iterator(_bytes.data() + getNumberOfWords() * numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t BytesWordFlow<w::BytesSymbol<numBytes>>::getNumberOfWords() const {
+std::size_t BytesWordFlow<w::BytesWord<numBytes>>::getNumberOfWords() const {
     return _bytes.size() / numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::uint8_t BytesWordFlow<w::BytesSymbol<numBytes>>::_getTailBytesSize() const {
+std::uint8_t BytesWordFlow<w::BytesWord<numBytes>>::_getTailBytesSize() const {
     return _bytes.size() % numBytes;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
+auto BytesWordFlow<w::BytesWord<numBytes>>::getTail() const ->Tail {
     Tail ret;
     auto bytesRng = std::span<std::byte>(_bytes.end() - _getTailBytesSize(),
                                          _bytes.end());
@@ -116,7 +116,7 @@ auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-class BytesWordFlow<w::BytesSymbol<numBytes>>::Iterator
+class BytesWordFlow<w::BytesWord<numBytes>>::Iterator
         : public boost::iterator_facade<
             Iterator,
             Sym,

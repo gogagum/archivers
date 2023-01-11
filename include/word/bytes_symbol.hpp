@@ -19,7 +19,7 @@ namespace ga::w {
 /// \brief The BytesSymbol class
 ///
 template <std::uint8_t _numBytes>
-class BytesSymbol {
+class BytesWord {
 public:
 
     constexpr static std::uint16_t numBits = _numBytes * 8;
@@ -32,33 +32,33 @@ public:
      * @param word
      * @return
      */
-    static std::uint64_t ord(const BytesSymbol<_numBytes>& word);
+    static std::uint64_t ord(const BytesWord<_numBytes>& word);
 
     /**
      * @brief byOrd
      * @param ord
      * @return
      */
-    static BytesSymbol<_numBytes> byOrd(std::uint64_t ord);
+    static BytesWord<_numBytes> byOrd(std::uint64_t ord);
 
 public:
 
     /**
      * Default constructor. Constructs a symbol filled with zeros,
      */
-    BytesSymbol() = default;
+    BytesWord() = default;
 
     /**
      * @brief BytesSymbol bytes symbol constructor from pointer to data.
      * @param ptr - pointer to data.
      */
-    BytesSymbol(const std::byte* ptr);
+    BytesWord(const std::byte* ptr);
 
     /**
      * @brief BytesSymbol constructor from array.
      * @param bytes
      */
-    BytesSymbol(const std::array<std::byte, _numBytes>& bytes);
+    BytesWord(const std::array<std::byte, _numBytes>& bytes);
 
     /**
      * @brief toBits transform to bits
@@ -78,8 +78,8 @@ private:
      * @param bs2 - second byte symbol.
      */
     template <std::uint8_t __numBytes>
-    friend bool operator==(const BytesSymbol<__numBytes>& bs1,
-                           const BytesSymbol<__numBytes>& bs2);
+    friend bool operator==(const BytesWord<__numBytes>& bs1,
+                           const BytesWord<__numBytes>& bs2);
 
     /**
      * @brief operator == check if two symbols are equal.
@@ -87,8 +87,8 @@ private:
      * @param bs2 - second byte symbol.
      */
     template <std::uint8_t __numBytes>
-    friend bool operator!=(const BytesSymbol<__numBytes>& bs1,
-                           const BytesSymbol<__numBytes>& bs2);
+    friend bool operator!=(const BytesWord<__numBytes>& bs1,
+                           const BytesWord<__numBytes>& bs2);
 
     /**
      * @brief operator << for debug output.
@@ -98,7 +98,7 @@ private:
      */
     template <std::uint8_t __numBytes>
     friend std::ostream& operator<<(std::ostream& os,
-                                    BytesSymbol<__numBytes> word);
+                                    BytesWord<__numBytes> word);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +108,8 @@ private:
 /// \return `true if symbols are equal, else `false.
 ///
 template <std::uint8_t numBytes>
-bool operator==(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2);
+bool operator==(const BytesWord<numBytes>& bs1,
+                const BytesWord<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator !=
@@ -118,8 +118,8 @@ bool operator==(const BytesSymbol<numBytes>& bs1,
 /// \return `true if symbols are not equal, else `false.
 ///
 template <std::uint8_t numBytes>
-bool operator!=(const BytesSymbol<numBytes>& bs1,
-                const BytesSymbol<numBytes>& bs2);
+bool operator!=(const BytesWord<numBytes>& bs1,
+                const BytesWord<numBytes>& bs2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
@@ -128,13 +128,13 @@ bool operator!=(const BytesSymbol<numBytes>& bs1,
 /// \return reference to os.
 ///
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, BytesSymbol<numBytes> sym);
+std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> sym);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 std::uint64_t
-BytesSymbol<_numBytes>::ord(const BytesSymbol<_numBytes>& word) {
+BytesWord<_numBytes>::ord(const BytesWord<_numBytes>& word) {
     std::uint64_t ret = 0;
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
     std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - _numBytes);
@@ -143,31 +143,31 @@ BytesSymbol<_numBytes>::ord(const BytesSymbol<_numBytes>& word) {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-auto BytesSymbol<_numBytes>::byOrd(
-        std::uint64_t ord) -> BytesSymbol<_numBytes> {
+auto BytesWord<_numBytes>::byOrd(
+        std::uint64_t ord) -> BytesWord<_numBytes> {
     static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
     const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
     std::array<std::byte, _numBytes> retBytes;
     std::copy(asBytesOrdArr.rend() - _numBytes, asBytesOrdArr.rend(), retBytes.begin());
-    return BytesSymbol<_numBytes>(retBytes.data());
+    return BytesWord<_numBytes>(retBytes.data());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesSymbol<numBytes>::BytesSymbol(const std::byte* ptr) {
+BytesWord<numBytes>::BytesWord(const std::byte* ptr) {
     std::memcpy(_data.data(), ptr, numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-BytesSymbol<_numBytes>::BytesSymbol(const std::array<std::byte, _numBytes>& arr)
-    : BytesSymbol(arr.data()) {};
+BytesWord<_numBytes>::BytesWord(const std::array<std::byte, _numBytes>& arr)
+    : BytesWord(arr.data()) {};
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 template <std::output_iterator<bool> IterT>
-void BytesSymbol<_numBytes>::bitsOut(IterT outIter) const {
+void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
     for (auto byte: _data) {
         for (auto bit: ga::impl::make_bits_iterator_range(byte)) {
             *outIter = bit;
@@ -179,21 +179,21 @@ void BytesSymbol<_numBytes>::bitsOut(IterT outIter) const {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool operator==(const w::BytesSymbol<numBytes>& bs1,
-                const w::BytesSymbol<numBytes>& bs2) {
+bool operator==(const w::BytesWord<numBytes>& bs1,
+                const w::BytesWord<numBytes>& bs2) {
     return bs1._data == bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-bool operator!=(const w::BytesSymbol<numBytes>& bs1,
-                const w::BytesSymbol<numBytes>& bs2) {
+bool operator!=(const w::BytesWord<numBytes>& bs1,
+                const w::BytesWord<numBytes>& bs2) {
     return bs1._data != bs2._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, w::BytesSymbol<numBytes> sym) {
+std::ostream& operator<<(std::ostream& os, w::BytesWord<numBytes> sym) {
     for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
         os << std::bitset<8>(std::to_integer<std::uint8_t>(*iter)) << ' ';
     }

@@ -11,19 +11,19 @@
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, Construct) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::w::BytesSymbol<5>(testData.data());
+    [[maybe_unused]] auto sym = ga::w::BytesWord<5>(testData.data());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, ConstructFromArray) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::w::BytesSymbol<5>(testData);
+    [[maybe_unused]] auto sym = ga::w::BytesWord<5>(testData);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder1) {
     using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::w::BytesSymbol<2>;
+    using SymT = ga::w::BytesWord<2>;
 
     SymDataT testData1 = { std::byte{0b00000000}, std::byte{0b11111111} };
     SymDataT testData2 = { std::byte{0b11111111}, std::byte{0b11111111} };
@@ -39,7 +39,7 @@ TEST(BytesSymbol, BytesSymbolsOrder1) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder2) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesSymbol<1>;
+    using SymT = ga::w::BytesWord<1>;
 
     SymDataT testData1 = { std::byte{0b00000111} };
     SymDataT testData2 = { std::byte{0b00001111} };
@@ -55,7 +55,7 @@ TEST(BytesSymbol, BytesSymbolsOrder2) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder3) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesSymbol<1>;
+    using SymT = ga::w::BytesWord<1>;
 
     SymDataT testData1 = { std::byte{0b00001111} };
     SymDataT testData2 = { std::byte{0b00000111} };
@@ -71,7 +71,7 @@ TEST(BytesSymbol, BytesSymbolsOrder3) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder4) {
     using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::w::BytesSymbol<2>;
+    using SymT = ga::w::BytesWord<2>;
 
     SymDataT testData1 = { std::byte{0b10000000}, std::byte{0b00000000} };
     SymDataT testData2 = { std::byte{0b00001111}, std::byte{0b11111111} };
@@ -87,7 +87,7 @@ TEST(BytesSymbol, BytesSymbolsOrder4) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsInMap) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesSymbol<1>;
+    using SymT = ga::w::BytesWord<1>;
     using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
@@ -110,7 +110,7 @@ TEST(BytesSymbol, BytesSymbolsInMap) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesSymbol<1>;
+    using SymT = ga::w::BytesWord<1>;
     using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
 
     SymDataT testData1 = { std::byte{0b00000000} };
@@ -135,7 +135,7 @@ TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BitsOut) {
     using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesSymbol<1>;
+    using SymT = ga::w::BytesWord<1>;
     SymDataT testData = { std::byte{0b00001111} };
     auto sym = SymT(testData);
 

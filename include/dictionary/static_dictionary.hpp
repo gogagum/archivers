@@ -3,6 +3,7 @@
 
 #include <boost/range/irange.hpp>
 
+#include "dictionary_tags.hpp"
 #include "../byte_data_constructor.hpp"
 
 namespace ga::dict {
@@ -13,9 +14,9 @@ namespace ga::dict {
 template <class WordT>
 class StaticDictionary {
 public:
-    static constexpr bool supportsIncrease = false;
-    static constexpr bool requireSymsCounts = true;
-    static constexpr bool constructsFromNoArgs = false;
+
+    using Word = WordT;
+    using ConstructionTag = tags::ConstructsFromSymsCounts;
 
 public:
 

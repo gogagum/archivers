@@ -64,6 +64,7 @@ add_executable(archiever_tests
     test/integer_word_flow.cpp
     test/static_dictionary.cpp
     test/uniform_dictionary.cpp
+    test/adaptive_dictionary.cpp
     include/word/bytes_symbol.hpp
     include/word/integer_word.hpp
     include/word/bits_word.hpp

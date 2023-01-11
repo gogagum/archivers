@@ -2,6 +2,7 @@
 #define ADAPTIVE_DICTIONARY_HPP
 
 #include "integer_random_access_iterator.hpp"
+#include "dictionary_tags.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -21,9 +22,10 @@ namespace ga::dict {
 template <class WordT, std::uint64_t ratio = 1>
 class AdaptiveDictionary {
 public:
-    static constexpr bool supportsIncrease = true;
-    static constexpr bool requireSymsCounts = false;
-    static constexpr bool constructsFromNoArgs = true;
+
+    using Word = WordT;
+    using ConstructionTag = tags::ConstructsFromNoArgs;
+
 public:
     AdaptiveDictionary();
 

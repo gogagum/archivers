@@ -13,6 +13,8 @@
 
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
+#include "dictionary/dictionary_tags.hpp"
+#include "dictionary/traits.hpp"
 
 namespace ga {
 
@@ -39,14 +41,14 @@ public:
      * @brief ArithmeticCoder constructor from byte flow to encode.
      * @param byteFlow - byte flow.
      */
-    template <class DictT_ = DictT> requires DictT_::requireSymsCounts
+    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
     ArithmeticCoder(FlowT&& byteFlow);
 
     /**
      * @brief ArithmeticCoder
      * @param byteFlow
      */
-    template <class DictT_ = DictT> requires DictT_::constructsFromNoArgs
+    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
     ArithmeticCoder(FlowT&& byteFlow);
 
     /**
@@ -74,7 +76,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires DictT_::requireSymsCounts
+template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _dict(_countSyms()),
@@ -82,7 +84,7 @@ ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires DictT_::constructsFromNoArgs
+template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
@@ -96,7 +98,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     _serializeTail(ret);
     _serializeFileWordsCount(ret);
 
-    if constexpr (DictT::requireSymsCounts) {
+    if constexpr (std::is_same_v<typename DictT::ConstructionTag, dict::tags::ConstructsFromSymsCounts>) {
         _dict.template serialize<CountT>(ret);
     }
 
@@ -115,7 +117,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
             currRange.low + (range * h) / _dict.totalWordsCount()
         };
 
-        if constexpr (DictT::supportsIncrease) {
+        if constexpr (dict::traits::needWordIncrease<DictT>) {
             _dict.increaseWordCount(sym);
         }
 

@@ -1,6 +1,8 @@
 #ifndef UNIFORM_DICTIONARY_HPP
 #define UNIFORM_DICTIONARY_HPP
 
+#include "dictionary_tags.hpp"
+
 #include <cstdint>
 
 namespace ga::dict {
@@ -11,9 +13,9 @@ namespace ga::dict {
 template <class WordT>
 class UniformDictionary {
 public:
-    static constexpr bool supportsIncrease = false;
-    static constexpr bool requireSymsCounts = false;
-    static constexpr bool constructsFromNoArgs = true;
+
+    using Word = WordT;
+    using ConstructionTag = tags::ConstructsFromNoArgs;
 
 public:
 

@@ -5,6 +5,7 @@
 
 #include <boost/container/static_vector.hpp>
 #include <boost/range/irange.hpp>
+
 #include <iostream>
 #include <map>
 #include <cstdint>
@@ -14,6 +15,8 @@
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
+#include "dictionary/dictionary_tags.hpp"
+#include "dictionary/traits.hpp"
 
 namespace ga {
 
@@ -44,10 +47,10 @@ public:
      * @brief ArithmeticDecoder constructor from file source.
      * @param source
      */
-    template <class DictT_ = DictT> requires DictT::requireSymsCounts
+    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
     ArithmeticDecoder(Source&& source);
 
-    template <class DictT_ = DictT> requires DictT::constructsFromNoArgs
+    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
     ArithmeticDecoder(Source&& source);
 
     /**
@@ -86,7 +89,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictT_> requires DictT::requireSymsCounts
+template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
 ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
@@ -96,7 +99,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictT_> requires DictT::constructsFromNoArgs
+template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
 ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
@@ -143,7 +146,7 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
             currRange.low + (range * h) / _dict.totalWordsCount()
         };
 
-        if constexpr (DictT::supportsIncrease) {
+        if constexpr (dict::traits::needWordIncrease<DictT>) {
             _dict.increaseWordCount(sym);
         }
 
