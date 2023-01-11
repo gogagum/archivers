@@ -30,12 +30,12 @@ bool DataParser::takeBit() {
         return false;
     }
     bool ret = (*_dataIter & _getByteFlag()) != std::byte{0};
-    _moveBitFlag();
+    _moveInByteOffset();
     return ret;
 }
 
 //----------------------------------------------------------------------------//
-void DataParser::_moveBitFlag() {
+void DataParser::_moveInByteOffset() {
     ++_inByteOffset;
     if (_inByteOffset == 8) {
         _inByteOffset = 0;

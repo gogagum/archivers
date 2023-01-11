@@ -77,7 +77,7 @@ public:
 
 private:
 
-    void _moveBitFlag();
+    void _moveInByteOffset();
 
     std::byte _getByteFlag() const;
 

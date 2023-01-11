@@ -23,10 +23,14 @@ public:
     using Sym = w::BitsWord<_numBits>;
     constexpr static std::uint16_t numBits = Sym::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
-public:
+private:
     class Iterator;
 public:
 
+    /**
+     * @brief BitsWordFlow constructor from span.
+     * @param data - bytes to create words.
+     */
     BitsWordFlow(std::span<std::byte> data);
 
     /**
@@ -66,13 +70,15 @@ BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(std::span<std::byte> data)
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::begin() -> Iterator {
-    return Iterator(_data);
+    _data.seek(0);
+    return Iterator(_data.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::end() -> Iterator {
-    return Iterator(_data, getNumberOfWords() * _numBits);
+    _data.seek(getNumberOfWords() * _numBits);
+    return Iterator(_data.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//
@@ -102,18 +108,17 @@ public:
     using type = Iterator;
 public:
     //------------------------------------------------------------------------//
-    Iterator(DataParser& dataParser, std::size_t offsetFromStart = 0)
-        : _dataParser(dataParser), _offsetFromStart(offsetFromStart) {}
+    Iterator(DataParser::BitsIterator bitsIteratar)
+        : _bitsIterator(bitsIteratar) {}
 protected:
     //------------------------------------------------------------------------//
     Sym dereference() const;
     //------------------------------------------------------------------------//
     bool equal(const type& other) const;
     //------------------------------------------------------------------------//
-    void increment()                    { _offsetFromStart += numBits; }
+    void increment()                    { }
 private:
-    DataParser& _dataParser;
-    std::size_t _offsetFromStart;
+    DataParser::BitsIterator _bitsIterator;
 private:
     friend class boost::iterators::iterator_core_access;
 };
@@ -122,8 +127,7 @@ private:
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::Iterator::dereference() const -> Sym {
-    _dataParser.seek(_offsetFromStart);
-    return Sym(_dataParser.getCurrPosBitsIter());
+    return Sym(const_cast<DataParser::BitsIterator&>(_bitsIterator));
 }
 
 //----------------------------------------------------------------------------//
@@ -131,8 +135,7 @@ template <std::uint16_t _numBits>
 bool
 BitsWordFlow<w::BitsWord<_numBits>>::Iterator::equal(
         const Iterator& other) const {
-    return _dataParser == other._dataParser
-            && _offsetFromStart == other._offsetFromStart;
+    return _bitsIterator == other._bitsIterator;
 }
 
 }

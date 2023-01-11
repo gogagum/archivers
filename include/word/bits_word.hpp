@@ -49,7 +49,14 @@ public:
      * @param inputIter - input iterator to take bits form.
      */
     template <std::input_iterator IterT>
-    BitsWord(IterT inputIter);
+    explicit BitsWord(IterT& inputIter);
+
+    /**
+     * @brief BitsWord - constructor from bits input iterator.
+     * @param inputIter - input iterator to take bits form.
+     */
+    template <std::input_iterator IterT>
+    explicit BitsWord(IterT&& inputIter);
 
     /**
      * @brief bitsOut - give bits of a word out.
@@ -145,7 +152,17 @@ BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT iter) {
+BitsWord<_numBits>::BitsWord(IterT& iter) {
+    for (auto& bit : _bits) {
+        bit = *iter;
+        ++iter;
+    }
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint16_t _numBits>
+template <std::input_iterator IterT>
+BitsWord<_numBits>::BitsWord(IterT&& iter) {
     for (auto& bit : _bits) {
         bit = *iter;
         ++iter;

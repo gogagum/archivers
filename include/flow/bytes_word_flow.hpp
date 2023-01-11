@@ -8,7 +8,6 @@
 #include <cstring>
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/range/iterator_range.hpp>
 #include <boost/container/static_vector.hpp>
 
 namespace ga::fl {
@@ -102,9 +101,8 @@ std::uint8_t BytesWordFlow<w::BytesSymbol<numBytes>>::_getTailBytesSize() const 
 template <std::uint8_t numBytes>
 auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
     Tail ret;
-    auto bytesRng =
-            boost::make_iterator_range(_bytes.end() - _getTailBytesSize(),
-                                       _bytes.end());
+    auto bytesRng = std::span<std::byte>(_bytes.end() - _getTailBytesSize(),
+                                         _bytes.end());
 
     for (auto tailByte: bytesRng) {
         ret.insert(ret.end(),
