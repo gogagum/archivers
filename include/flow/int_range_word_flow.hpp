@@ -15,7 +15,7 @@ template <class I, I low, std::uint16_t numBits>
 class IntegerWordFlow {
 public:
     using Tail = boost::container::static_vector<bool, numBits>;
-    using Sym = w::IntegerWord<I, low, numBits>;
+    using Word = w::IntegerWord<I, low, numBits>;
     static constexpr std::uint8_t numBytes = (numBits - 1) / 8 + 1;
 public:
 

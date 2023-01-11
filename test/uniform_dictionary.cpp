@@ -10,7 +10,6 @@ static_assert(!ga::dict::traits::needWordIncrease<
                   ga::dict::UniformDictionary<ga::w::BytesWord<1>>
               >);
 
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, Construct) {

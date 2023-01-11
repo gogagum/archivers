@@ -22,26 +22,26 @@ namespace ga {
 /// \brief The ArithmeticCoder class
 ///
 template <class FlowT, class DictT, typename CountT = std::uint32_t>
-class ArithmeticCoder : RangesCalc<typename FlowT::Sym> {
+class ArithmeticCoder : RangesCalc<typename FlowT::Word> {
 public:
 
-    using Sym = typename FlowT::Sym;
+    using Word = typename FlowT::Word;
 
     using Res = ByteDataConstructor;
 
 private:
-    using RangesCalc<Sym>::correctedSymsNum;
-    using RangesCalc<Sym>::correctedSymsNum_2;
-    using RangesCalc<Sym>::correctedSymsNum_4;
-    using RangesCalc<Sym>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<Sym>::Range;
+    using RangesCalc<Word>::correctedSymsNum;
+    using RangesCalc<Word>::correctedSymsNum_2;
+    using RangesCalc<Word>::correctedSymsNum_4;
+    using RangesCalc<Word>::correctedSymsNum_3to4;
+    using OrdRange = typename RangesCalc<Word>::Range;
 public:
 
     /**
      * @brief ArithmeticCoder constructor from byte flow to encode.
      * @param byteFlow - byte flow.
      */
-    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
+    template <class DictT_ > requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
     ArithmeticCoder(FlowT&& byteFlow);
 
     /**
@@ -134,7 +134,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
             } else {
                 break;
             }
-            currRange = RangesCalc<Sym>::recalcRange(currRange);
+            currRange = RangesCalc<Word>::recalcRange(currRange);
         }
     }
 
@@ -152,11 +152,11 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
 std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
-    std::vector<std::uint64_t> numFound(Sym::wordsCount, 0);
+    std::vector<std::uint64_t> numFound(Word::wordsCount, 0);
     for (auto word: _symFlow) {
-        numFound[Sym::ord(word)]++;
+        numFound[Word::ord(word)]++;
     }
-    std::vector<std::uint64_t> numFoundCumulative(Sym::wordsCount, 0);
+    std::vector<std::uint64_t> numFoundCumulative(Word::wordsCount, 0);
     std::uint64_t currCumulativeNumFound = 0;
     for (auto&& [numFound, numFoundCumulative]
          : boost::range::combine(numFound, numFoundCumulative)) {
@@ -169,7 +169,7 @@ std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
-    res.putT<std::uint16_t>(Sym::numBits);
+    res.putT<std::uint16_t>(Word::numBits);
 }
 
 //----------------------------------------------------------------------------//

@@ -20,8 +20,8 @@ class BitsWordFlow;
 template <std::uint16_t _numBits>
 class BitsWordFlow<w::BitsWord<_numBits>> {
 public:
-    using Sym = w::BitsWord<_numBits>;
-    constexpr static std::uint16_t numBits = Sym::numBits;
+    using Word = w::BitsWord<_numBits>;
+    constexpr static std::uint16_t numBits = Word::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
 private:
     class Iterator;
@@ -100,9 +100,9 @@ template <std::uint16_t _numBits>
 class BitsWordFlow<w::BitsWord<_numBits>>::Iterator
         : public boost::iterators::iterator_facade<
             Iterator,
-            Sym,
+            Word,
             boost::single_pass_traversal_tag,
-            Sym
+            Word
         > {
 public:
     using type = Iterator;
@@ -112,7 +112,7 @@ public:
         : _bitsIterator(bitsIteratar) {}
 protected:
     //------------------------------------------------------------------------//
-    Sym dereference() const;
+    Word dereference() const;
     //------------------------------------------------------------------------//
     bool equal(const type& other) const;
     //------------------------------------------------------------------------//
@@ -126,8 +126,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-auto BitsWordFlow<w::BitsWord<_numBits>>::Iterator::dereference() const -> Sym {
-    return Sym(const_cast<DataParser::BitsIterator&>(_bitsIterator));
+auto
+BitsWordFlow<w::BitsWord<_numBits>>::Iterator::dereference() const -> Word {
+    return Word(const_cast<DataParser::BitsIterator&>(_bitsIterator));
 }
 
 //----------------------------------------------------------------------------//

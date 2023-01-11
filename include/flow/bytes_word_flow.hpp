@@ -21,8 +21,8 @@ class BytesWordFlow;
 template <std::uint8_t numBytes>
 class BytesWordFlow<w::BytesWord<numBytes>> {
 public:
-    using Sym = w::BytesWord<numBytes>;
-    constexpr static std::uint16_t numBits = Sym::numBits;
+    using Word = w::BytesWord<numBytes>;
+    constexpr static std::uint16_t numBits = Word::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
 public:
     class Iterator;
@@ -119,9 +119,9 @@ template <std::uint8_t numBytes>
 class BytesWordFlow<w::BytesWord<numBytes>>::Iterator
         : public boost::iterator_facade<
             Iterator,
-            Sym,
+            Word,
             boost::incrementable_traversal_tag,
-            Sym> {
+            Word> {
 public:
     using type = Iterator;
 public:
@@ -129,7 +129,7 @@ public:
     Iterator(const std::byte* ptr) : _ptr(ptr) {};
 protected:
     //------------------------------------------------------------------------//
-    Sym dereference() const             { return {_ptr}; };
+    Word dereference() const             { return {_ptr}; };
     //------------------------------------------------------------------------//
     bool equal(const type& other) const { return _ptr == other._ptr; };
     //------------------------------------------------------------------------//
