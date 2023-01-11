@@ -3,7 +3,7 @@
 
 #include "../word/bytes_symbol.hpp"
 
-#include <vector>
+#include <span>
 #include <cstddef>
 #include <cstring>
 #include <boost/iterator/iterator_categories.hpp>
@@ -31,10 +31,9 @@ public:
 
     /**
      * @brief ByteFlow
-     * @param ptr
-     * @param size
+     * @param bytes
      */
-    BytesWordFlow(const void* ptr, std::size_t size);
+    BytesWordFlow(std::span<std::byte> bytes);
 
     /**
      * @brief begin - beginning iterator getter.
@@ -66,18 +65,14 @@ private:
 
 private:
 
-    std::vector<std::byte> _bytes;
-    std::size_t _currOffset;
+    std::span<std::byte> _bytes;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesWordFlow<w::BytesSymbol<numBytes>>::BytesWordFlow(const void* ptr, std::size_t size)
-        : _currOffset(0) {
-    _bytes.resize(size);
-    std::memcpy(_bytes.data(), ptr, size);
-}
+BytesWordFlow<w::BytesSymbol<numBytes>>::BytesWordFlow(
+        std::span<std::byte> bytes) : _bytes(bytes) {}
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
@@ -110,6 +105,7 @@ auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
     auto bytesRng =
             boost::make_iterator_range(_bytes.end() - _getTailBytesSize(),
                                        _bytes.end());
+
     for (auto tailByte: bytesRng) {
         ret.insert(ret.end(),
                    ga::impl::bits_begin(tailByte),
@@ -120,6 +116,7 @@ auto BytesWordFlow<w::BytesSymbol<numBytes>>::getTail() const ->Tail {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 class BytesWordFlow<w::BytesSymbol<numBytes>>::Iterator
         : public boost::iterator_facade<

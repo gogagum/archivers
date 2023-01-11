@@ -7,11 +7,11 @@ namespace ga {
 DataParser::DataParser(std::span<std::byte> data)
     : _data(data),
       _dataIter{_data.begin()},
-      _currBitFlag{0b10000000} { }
+      _inByteOffset(0) { }
 
 //----------------------------------------------------------------------------//
 std::byte DataParser::takeByte() {
-    if (_currBitFlag == std::byte{0b10000000}) {
+    if (_inByteOffset == 0) {
         std::byte ret = *_dataIter;
         ++_dataIter;
         return ret;
@@ -29,18 +29,23 @@ bool DataParser::takeBit() {
     if (_dataIter == _data.end()) {
         return false;
     }
-    bool ret = (*_dataIter & _currBitFlag) != std::byte{0};
+    bool ret = (*_dataIter & _getByteFlag()) != std::byte{0};
     _moveBitFlag();
     return ret;
 }
 
 //----------------------------------------------------------------------------//
 void DataParser::_moveBitFlag() {
-    _currBitFlag >>= 1;
-    if (_currBitFlag == std::byte{0b00000000}) {
-        _currBitFlag = std::byte{0b10000000};
+    ++_inByteOffset;
+    if (_inByteOffset == 8) {
+        _inByteOffset = 0;
         ++_dataIter;
     }
+}
+
+//----------------------------------------------------------------------------//
+std::byte DataParser::_getByteFlag() const {
+    return std::byte{0b10000000} >> _inByteOffset;
 }
 
 //----------------------------------------------------------------------------//
@@ -49,10 +54,29 @@ std::size_t DataParser::getNumBytes() const {
 }
 
 //----------------------------------------------------------------------------//
+std::size_t DataParser::getNumBits() const {
+    return _data.size() * 8;
+}
+
+//----------------------------------------------------------------------------//
 void DataParser::seek(std::size_t bitsOffset) {
     _dataIter = _data.begin() + bitsOffset / 8;
-    const auto inByteOffset = bitsOffset % 8;
-    _currBitFlag = std::byte{0b10000000} >> inByteOffset;
+    _inByteOffset = bitsOffset % 8;
+}
+
+//----------------------------------------------------------------------------//
+auto DataParser::getCurrPosBitsIter() -> BitsIterator {
+    return BitsIterator(*this, (_dataIter - _data.begin()) * 8 + _inByteOffset);
+}
+
+//----------------------------------------------------------------------------//
+auto DataParser::getEndBitsIter() -> BitsIterator {
+    return BitsIterator(*this, _data.size() * 8);
+}
+
+//----------------------------------------------------------------------------//
+auto DataParser::getCurrTailRange() -> boost::iterator_range<BitsIterator> {
+    return boost::make_iterator_range(getCurrPosBitsIter(), getEndBitsIter());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +84,20 @@ void DataParser::seek(std::size_t bitsOffset) {
 bool operator==(const DataParser& dp1, const DataParser& dp2) {
     return dp1._data.data() == dp2._data.data()
             && dp1._dataIter == dp2._dataIter;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+bool DataParser::BitsIterator::dereference() const {
+    _owner->seek(_bitsPosition);
+    bool retBit = _owner->takeBit();
+    return retBit;
+}
+
+//----------------------------------------------------------------------------//
+bool DataParser::BitsIterator::equal(const type& other) const {
+    return _owner == other._owner
+        && _bitsPosition == other._bitsPosition;
 }
 
 }  // namespace ga

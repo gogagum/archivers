@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/iterator_range.hpp>
 
 namespace ga {
 
@@ -19,6 +20,12 @@ namespace ga {
 class DataParser {
 public:
 
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The BitIterator class
+    class BitsIterator;
+
+public:
+
     /**
      * @brief ArithmeticDecoderDecoded
      * @param data
@@ -26,20 +33,20 @@ public:
     explicit DataParser(std::span<std::byte> data);
 
     /**
-     * @brief takeByte
-     * @return
+     * @brief takeByte take one byte.
+     * @return one byte.
      */
     std::byte takeByte();
 
     /**
-     * @brief takeBit
-     * @return
+     * @brief takeBit get one bit from current position and move by one bit.
+     * @return one bit.
      */
     bool takeBit();
 
     /**
-     * @brief takeT
-     * @return
+     * @brief takeT get T as sizeof(T) bits.
+     * @return object of type T.
      */
     template <class T>
     T takeT();
@@ -51,24 +58,38 @@ public:
     std::size_t getNumBytes() const;
 
     /**
+     * @brief getNumBits - get number of bits.
+     * @return number of bits.
+     */
+    std::size_t getNumBits() const;
+
+    /**
      * @brief seek move to bitsOffset position.
      * @param bitsOffset - position to move to.
      */
     void seek(std::size_t bitsOffset);
 
+    BitsIterator getCurrPosBitsIter();
+
+    BitsIterator getEndBitsIter();
+
+    boost::iterator_range<BitsIterator> getCurrTailRange();
+
 private:
 
     void _moveBitFlag();
 
+    std::byte _getByteFlag() const;
+
 private:
+
     const std::span<std::byte> _data;
     std::span<std::byte>::iterator _dataIter;
-    std::byte _currBitFlag;
+    std::uint8_t _inByteOffset;
 
 private:
 
     friend bool operator==(const DataParser& dp1, const DataParser& dp2);
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +109,33 @@ T DataParser::takeT() {
     }
     return ret;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+class DataParser::BitsIterator : public boost::iterators::iterator_facade<
+            BitsIterator,
+            bool,
+            boost::single_pass_traversal_tag,
+            bool
+        > {
+public:
+    using type = BitsIterator;
+public:
+    //------------------------------------------------------------------------//
+    BitsIterator(DataParser& owner, std::size_t bitsPosition)
+        : _owner(&owner), _bitsPosition(bitsPosition) {}
+    //------------------------------------------------------------------------//
+    bool dereference() const;
+    //------------------------------------------------------------------------//
+    bool equal(const type& other) const;
+    //------------------------------------------------------------------------//
+    void increment()                    { ++_bitsPosition; }
+private:
+    DataParser* _owner;
+    std::size_t _bitsPosition;
+private:
+    friend class boost::iterators::iterator_core_access;
+};
 
 }  // namespace ga
 

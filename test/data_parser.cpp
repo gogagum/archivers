@@ -1,22 +1,25 @@
 #include <gtest/gtest.h>
 #include <boost/range/irange.hpp>
+#include <boost/range/algorithm.hpp>
 
 #include "../include/data_parser.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DataParser, Construct) {
-    std::vector<std::byte> testData{
-        static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
-        std::byte{17}, std::byte{11} };
+    auto testData = std::array{
+        std::byte{2}, std::byte{25},
+        std::byte{17}, std::byte{11}
+    };
     [[maybe_unused]] auto decoded = ga::DataParser(testData);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, NumBytes) {
-    std::vector<std::byte> testData{
+    auto testData = std::array{
         static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
-        std::byte{17}, std::byte{11} };
+        std::byte{17}, std::byte{11}
+    };
 
     auto decoded = ga::DataParser(testData);
 
@@ -27,8 +30,8 @@ TEST(DataParser, NumBytes) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, TakeBit) {
-    std::vector<std::byte> testData{ std::byte{0b10100110} };
-                                               //|------|
+    auto testData = std::array{ std::byte{0b10100110} };
+                                          //|------|
 
     auto decoded = ga::DataParser(testData);
 
@@ -37,9 +40,8 @@ TEST(DataParser, TakeBit) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, TakeBits) {
-    std::vector<std::byte> testData =
-        { std::byte{0b10100110}, std::byte{0b00110110} };
-                    //|------|             //|------|
+    auto testData = std::array{ std::byte{0b10100110}, std::byte{0b00110110} };
+                                          //|------|             //|------|
 
     auto decoded = ga::DataParser(testData);
 
@@ -58,9 +60,7 @@ TEST(DataParser, TakeBits) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, BitAfterByte1) {
-    std::vector<std::byte> testData{
-        std::byte{2}, std::byte{0b10100110} };
-
+    auto testData = std::array{ std::byte{2}, std::byte{0b10100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
@@ -69,9 +69,7 @@ TEST(DataParser, BitAfterByte1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, BitAfterByte2) {
-    std::vector<std::byte> testData{
-        std::byte{2}, std::byte{0b00100110} };
-
+    auto testData = std::array { std::byte{2}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
@@ -80,9 +78,7 @@ TEST(DataParser, BitAfterByte2) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, ByteAfterBit0) {
-    std::vector<std::byte> testData{
-        std::byte{0b00000010}, std::byte{0b00100110} };
-
+    auto testData = std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     decoded.takeBit();
@@ -91,12 +87,10 @@ TEST(DataParser, ByteAfterBit0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, ByteAfterBit1) {
-    std::vector<std::byte> testData{
-        std::byte{0b00000010}, std::byte{0b00100110} };
-
+    auto testData = std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
-    for (auto _: boost::irange(0, 8)) {
+    for ([[maybe_unused]] auto _: boost::irange(0, 8)) {
         decoded.takeBit();
     }
 
@@ -105,9 +99,7 @@ TEST(DataParser, ByteAfterBit1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, UInt16T) {
-    std::vector<std::byte> testData{
-        std::byte{0b01100010}, std::byte{0b00100110} };
-
+    auto testData = std::array{ std::byte{0b01100010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeT<std::uint16_t>(),
@@ -116,10 +108,7 @@ TEST(DataParser, UInt16T) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek0) {
-    std::vector<std::byte> testData{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
+    auto testData = std::array{std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.takeBit();
@@ -133,10 +122,7 @@ TEST(DataParser, Seek0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek1) {
-    std::vector<std::byte> testData{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
+    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.seek(4);
@@ -148,10 +134,7 @@ TEST(DataParser, Seek1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek2) {
-    std::vector<std::byte> testData{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
+    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.seek(10);
@@ -165,10 +148,7 @@ TEST(DataParser, Seek2) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare0) {
-    std::vector<std::byte> testData{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
+    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto p0 = ga::DataParser(testData);
     auto p1 = ga::DataParser(testData);
 
@@ -177,14 +157,8 @@ TEST(DataParser, EqCompare0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare1) {
-    std::vector<std::byte> testData0{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
-    std::vector<std::byte> testData1{
-        std::byte{0b01001100}, std::byte{0b00100100}
-    };
-
+    auto testData0 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    auto testData1 = std::array{ std::byte{0b01001100}, std::byte{0b00100100} };
     auto p0 = ga::DataParser(testData0);
     auto p1 = ga::DataParser(testData1);
 
@@ -193,13 +167,8 @@ TEST(DataParser, EqCompare1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare2) {
-    std::vector<std::byte> testData0{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
-
-    std::vector<std::byte> testData1{
-        std::byte{0b01001100}, std::byte{0b00111100}
-    };
+    auto testData0 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    auto testData1 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
 
     EXPECT_EQ(testData0, testData1);
 
@@ -207,4 +176,32 @@ TEST(DataParser, EqCompare2) {
     auto p1 = ga::DataParser(testData1);
 
     EXPECT_NE(p0, p1);
+}
+
+//----------------------------------------------------------------------------//
+TEST(DataParser, IterateThroughTail0) {
+    auto testData = std::array{std::byte{0b00110101}};
+    auto parser = ga::DataParser(testData);
+    for ([[maybe_unused]] auto _: boost::irange(0, 5)) {
+        parser.takeBit();
+    }
+    std::vector<bool> testBits;
+    for (auto tailBit: parser.getCurrTailRange()) {
+        testBits.push_back(tailBit);
+    }
+    auto expectedTail = std::vector{true, false, true};
+    EXPECT_EQ(testBits, expectedTail);
+}
+
+//----------------------------------------------------------------------------//
+TEST(DataParser, IterateThroughTail1) {
+    auto testData = std::array{std::byte{0b00110101}, std::byte{0b00011101}};
+    auto parser = ga::DataParser(testData);
+    for ([[maybe_unused]] auto _: boost::irange(0, 12)) {
+        parser.takeBit();
+    }
+    std::vector<bool> testBits;
+    boost::range::copy(parser.getCurrTailRange(), std::back_inserter(testBits));
+    auto expectedTail = std::vector{true, true, false, true};
+    EXPECT_EQ(testBits, expectedTail);
 }

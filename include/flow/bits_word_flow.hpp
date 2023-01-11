@@ -4,6 +4,7 @@
 #include "../word/bits_word.hpp"
 #include "../data_parser.hpp"
 
+#include <span>
 #include <cstdint>
 #include <cstddef>
 #include <boost/container/static_vector.hpp>
@@ -26,7 +27,7 @@ public:
     class Iterator;
 public:
 
-    BitsWordFlow(std::vector<std::byte>&& data);
+    BitsWordFlow(std::span<std::byte> data);
 
     /**
      * @brief begin - get iterator to begin.
@@ -53,14 +54,14 @@ public:
     Tail getTail() const;
 
 private:
-    DataParser _data;
+    mutable DataParser _data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(
-        std::vector<std::byte>&& data) : _data(data) {}
+BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(std::span<std::byte> data)
+    : _data(data) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
@@ -83,7 +84,8 @@ std::size_t BitsWordFlow<w::BitsWord<_numBits>>::getNumberOfWords() const {
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::getTail() const -> Tail {
-
+     _data.seek(getNumberOfWords() * _numBits);
+     return Tail(_data.getCurrPosBitsIter(), _data.getEndBitsIter());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +95,7 @@ class BitsWordFlow<w::BitsWord<_numBits>>::Iterator
         : public boost::iterators::iterator_facade<
             Iterator,
             Sym,
-            boost::incrementable_traversal_tag,
+            boost::single_pass_traversal_tag,
             Sym
         > {
 public:
@@ -121,11 +123,7 @@ private:
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::Iterator::dereference() const -> Sym {
     _dataParser.seek(_offsetFromStart);
-    boost::container::static_vector<bool, numBits> bits;
-    for (auto _: boost::irange<std::uint16_t>(0, _numBits)) {
-        bits.push_back(_dataParser.takeBit());
-    }
-    return Sym(bits.begin());
+    return Sym(_dataParser.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//

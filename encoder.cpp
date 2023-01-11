@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     // Read data
     fin.read(reinterpret_cast<char*>(finData.data()), finData.size());
 
-    auto byteFlow = ga::fl::BytesWordFlow<Sym>(finData.data(), finData.size());
+    auto byteFlow = ga::fl::BytesWordFlow<Sym>(finData);
     auto coder = Coder(std::move(byteFlow));
     auto encoded = coder.encode();
 
