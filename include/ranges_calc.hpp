@@ -25,7 +25,7 @@ template <class SymT> requires (SymT::numBits >= 32)
 struct CountTChoose<SymT> {
     using Type = boost::multiprecision::number<
         boost::multiprecision::cpp_int_backend<
-            SymT::numBits + 32,
+            SymT::numBits + 33,
             1024,
             boost::multiprecision::unsigned_magnitude,
             boost::multiprecision::unchecked, void

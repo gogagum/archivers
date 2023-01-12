@@ -111,10 +111,9 @@ template <class SymT, class DictT, typename CountT>
 auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
     typename ga::impl::CountTChoose<SymT>::Type value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
-    assert(valueBits < 1024 && "`Value must be placeble in 1024 bits");
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
-        value = (value << 1ull) + (_source.takeBit() ? 1ull : 0ull);
+        value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
     auto currRange = OrdRange { 0, correctedSymsNum };

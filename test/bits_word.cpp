@@ -4,6 +4,50 @@
 
 #include "../include/word/bits_word.hpp"
 #include "../include/bits_iterator.hpp"
+#include "../include/ranges_calc.hpp"
+
+namespace bm = boost::multiprecision;
+
+////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BitsWord<8>>::Type,
+        std::uint64_t
+    >
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BitsWord<31>>::Type,
+        std::uint64_t
+    >
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BitsWord<32>>::Type,
+        bm::number<
+            bm::cpp_int_backend<
+                65, 1024, bm::unsigned_magnitude, bm::unchecked, void
+            >
+        >
+    >
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BitsWord<523>>::Type,
+        bm::number<
+            bm::cpp_int_backend<
+                523 + 33, 1024, bm::unsigned_magnitude, bm::unchecked, void
+            >
+        >
+    >
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
