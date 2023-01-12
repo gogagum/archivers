@@ -7,7 +7,7 @@
 
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
-#include "include/word/bytes_symbol.hpp"
+#include "include/word/bytes_word.hpp"
 //#include "include/dictionary/static_dictionary.hpp"
 //#include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"

@@ -4,7 +4,7 @@
 #include <vector>
 #include <boost/range/combine.hpp>
 
-#include "../include/word/bytes_symbol.hpp"
+#include "../include/word/bytes_word.hpp"
 #include "../include/word/word_ord_comp.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////

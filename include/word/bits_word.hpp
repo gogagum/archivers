@@ -14,8 +14,15 @@ namespace ga::w{
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWord class
 ///
-template <std::uint16_t _numBits>
+template <std::uint16_t _numBits,
+          class OrdT = std::uint64_t,
+          class CountT = std::uint64_t>
 class BitsWord {
+public:
+
+    using Ord = OrdT;
+    using Count = CountT;
+
 public:
 
     constexpr static std::uint16_t numBits = _numBits;
@@ -28,14 +35,14 @@ public:
      * @param word - to get order of.
      * @return word order index.
      */
-    static std::uint64_t ord(const BitsWord<_numBits>& word);
+    static Ord ord(const BitsWord<_numBits>& word);
 
     /**
      * @brief byOrd
      * @param ord
      * @return
      */
-    static BitsWord<_numBits> byOrd(std::uint64_t ord);
+    static BitsWord<_numBits, OrdT, CountT> byOrd(std::uint64_t ord);
 
 public:
 
@@ -128,8 +135,8 @@ std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-std::uint64_t BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) {
+template <std::uint16_t _numBits, class OrdT, class CountT>
+auto BitsWord<_numBits, OrdT, CountT>::ord(const BitsWord<_numBits>& bw) -> Ord {
     auto ret = std::uint64_t{0};
     for (auto bit : bw._bits) {
         ret <<= 1;
@@ -139,8 +146,9 @@ std::uint64_t BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) {
 }
 
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
+template <std::uint16_t _numBits, class OrdT, class CountT>
+BitsWord<_numBits, OrdT, CountT>
+BitsWord<_numBits, OrdT, CountT>::byOrd(std::uint64_t ord) {
     BitsWord<_numBits> ret;
     for (auto i : boost::irange<std::uint16_t>(0, _numBits)) {
         ret._bits[i] = (ord >> (numBits - i - 1)) & 1;
@@ -150,9 +158,9 @@ BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
+template <std::uint16_t _numBits, class OrdT, class CountT>
 template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT& iter) {
+BitsWord<_numBits, OrdT, CountT>::BitsWord(IterT& iter) {
     for (auto& bit : _bits) {
         bit = *iter;
         ++iter;
@@ -160,9 +168,9 @@ BitsWord<_numBits>::BitsWord(IterT& iter) {
 }
 
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
+template <std::uint16_t _numBits, class OrdT, class CountT>
 template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT&& iter) {
+BitsWord<_numBits, OrdT, CountT>::BitsWord(IterT&& iter) {
     for (auto& bit : _bits) {
         bit = *iter;
         ++iter;
@@ -170,9 +178,9 @@ BitsWord<_numBits>::BitsWord(IterT&& iter) {
 }
 
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
+template <std::uint16_t _numBits, class OrdT, class CountT>
 template <std::output_iterator<bool> IterT>
-void BitsWord<_numBits>::bitsOut(IterT outIter) const {
+void BitsWord<_numBits, OrdT, CountT>::bitsOut(IterT outIter) const {
     std::ranges::copy(_bits, outIter);
 }
 

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../include/dictionary/adaptive_dictionary.hpp"
-#include "../include/word/bytes_symbol.hpp"
+#include "../include/word/bytes_word.hpp"
 #include "../include/dictionary/traits.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -16,6 +16,8 @@ class IntegerWordFlow {
 public:
     using Tail = boost::container::static_vector<bool, numBits>;
     using Word = w::IntegerWord<I, low, numBits>;
+    using Count = typename Word::Count;
+    using Ord = typename Word::Ord;
     static constexpr std::uint8_t numBytes = (numBits - 1) / 8 + 1;
 public:
 

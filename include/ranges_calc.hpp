@@ -29,8 +29,8 @@ protected:
 public:
 
     struct Range {
-        typename SymT::CountT low;
-        typename SymT::CountT high;
+        typename SymT::Count low;
+        typename SymT::Count high;
     };
 
 public:
