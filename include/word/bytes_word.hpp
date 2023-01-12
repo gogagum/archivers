@@ -20,15 +20,13 @@ namespace ga::w {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
 ///
-template <std::uint8_t _numBytes,
-          class CountT = std::uint64_t>
+template <std::uint8_t _numBytes>
 class BytesWord {
 public:
 
     constexpr static std::uint16_t numBits = _numBytes * 8;
     using Ord = typename impl::OrdTChoose<numBits>::Type;
     constexpr static Ord wordsCount = Ord{1} << numBits;
-    using Count = CountT;
 
 public:
 
@@ -137,9 +135,9 @@ std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> sym);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes, class CountT>
+template <std::uint8_t _numBytes>
 std::uint64_t
-BytesWord<_numBytes, CountT>::ord(const BytesWord<_numBytes>& word) {
+BytesWord<_numBytes>::ord(const BytesWord<_numBytes>& word) {
     std::uint64_t ret = 0;
     auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
     std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - _numBytes);
@@ -147,9 +145,8 @@ BytesWord<_numBytes, CountT>::ord(const BytesWord<_numBytes>& word) {
 }
 
 //----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes, class CountT>
-auto BytesWord<_numBytes, CountT>::byOrd(
-        std::uint64_t ord) -> BytesWord<_numBytes> {
+template <std::uint8_t _numBytes>
+auto BytesWord<_numBytes>::byOrd(std::uint64_t ord) -> BytesWord<_numBytes> {
     static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
     const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
     std::array<std::byte, _numBytes> retBytes;
@@ -159,20 +156,20 @@ auto BytesWord<_numBytes, CountT>::byOrd(
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint8_t numBytes, class CountT>
-BytesWord<numBytes, CountT>::BytesWord(const std::byte* ptr) {
+template <std::uint8_t numBytes>
+BytesWord<numBytes>::BytesWord(const std::byte* ptr) {
     std::memcpy(_data.data(), ptr, numBytes);
 }
 
 //----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes, class CountT>
-BytesWord<_numBytes, CountT>::BytesWord(const std::array<std::byte, _numBytes>& arr)
+template <std::uint8_t _numBytes>
+BytesWord<_numBytes>::BytesWord(const std::array<std::byte, _numBytes>& arr)
     : BytesWord(arr.data()) {};
 
 //----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes, class CountT>
+template <std::uint8_t _numBytes>
 template <std::output_iterator<bool> IterT>
-void BytesWord<_numBytes, CountT>::bitsOut(IterT outIter) const {
+void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
     for (auto byte: _data) {
         for (auto bit: ga::impl::make_bits_iterator_range(byte)) {
             *outIter = bit;

@@ -5,11 +5,9 @@
 
 namespace ga::dict::traits {
 
-
 namespace impl {
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief The NeedWordIncrease class
-///
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <class DictT>
 struct NeedWordIncrease {
     constexpr static bool ret = requires(DictT a) {

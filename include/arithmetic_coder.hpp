@@ -191,7 +191,7 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
     auto tail = _symFlow.getTail();
-    res.putT<std::uint8_t>(tail.size());
+    res.putT<std::uint16_t>(tail.size());
 
     for (auto tailBit : tail) {
         res.putBit(tailBit);
