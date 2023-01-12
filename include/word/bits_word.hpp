@@ -1,6 +1,8 @@
 #ifndef BITS_SYMBOL_HPP
 #define BITS_SYMBOL_HPP
 
+#include "ord_t_choose.hpp"
+
 #include <array>
 #include <algorithm>
 #include <boost/range/irange.hpp>
@@ -18,6 +20,10 @@ template <std::uint16_t _numBits>
 class BitsWord {
 public:
 
+    using Ord = typename impl::OrdTChoose<_numBits>::Type;
+
+public:
+
     constexpr static std::uint16_t numBits = _numBits;
     constexpr static std::uint64_t wordsCount = 1ull << numBits;
 
@@ -28,7 +34,7 @@ public:
      * @param word - to get order of.
      * @return word order index.
      */
-    static std::uint64_t ord(const BitsWord<_numBits>& word);
+    static Ord ord(const BitsWord<_numBits>& word);
 
     /**
      * @brief byOrd
@@ -129,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw);
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-std::uint64_t BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) {
+auto BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) -> Ord {
     auto ret = std::uint64_t{0};
     for (auto bit : bw._bits) {
         ret <<= 1;

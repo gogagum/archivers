@@ -109,18 +109,17 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
 auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
-    std::uint64_t value = 0;
+    typename ga::impl::CountTChoose<SymT>::Type value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
-    assert(valueBits < 64 && "`value must be placeble in 64 bits");
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
-        value = (value << 1ull) + (_source.takeBit() ? 1ull : 0ull);
+        value = (value << 1) + (_source.takeBit() ? 1 : 0);
     }
 
     auto currRange = OrdRange { 0, correctedSymsNum };
 
     Ret ret;
-    ret.tail = _deserializeTail();
+    ret.tail = _tail;
 
     int lastPercent = -1;
 
@@ -131,8 +130,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
             lastPercent = currPercent;
         }
 
-        std::uint64_t range = currRange.high - currRange.low;
-        std::uint64_t aux =
+        auto range = currRange.high - currRange.low;
+        auto aux =
                 ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);

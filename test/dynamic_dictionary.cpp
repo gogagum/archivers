@@ -1,12 +1,24 @@
 #include <gtest/gtest.h>
 
-#include "../include/word/bytes_symbol.hpp"
+#include "../include/word/bytes_word.hpp"
+#include "../include/word/bits_word.hpp"
+#include "../include/word/integer_word.hpp"
 #include "../include/dictionary/adaptive_dictionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, Construct) {
+TEST(DynamicDictionary, ConstructBytesWord) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>();
+}
+
+//----------------------------------------------------------------------------//
+TEST(DynamicDictionary, ConstructBitsWord) {
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BitsWord<2>>();
+}
+
+//----------------------------------------------------------------------------//
+TEST(DynamicDictionary, ConstructIntWord) {
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::IntegerWord<int, 0, 3>>();
 }
 
 //----------------------------------------------------------------------------//

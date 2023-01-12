@@ -6,13 +6,19 @@
 #include <cassert>
 #include <cstdint>
 
+#include "ord_t_choose.hpp"
+
 namespace ga::w {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IntegerWord class
 ///
-template <std::integral I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint16_t _numBits>
 class IntegerWord {
+public:
+
+    using Ord = typename impl::OrdTChoose<_numBits>::Type;
+
 public:
 
     constexpr static std::uint16_t numBits = _numBits;
@@ -26,7 +32,8 @@ public:
      * @param word
      * @return
      */
-    static std::uint64_t ord(const IntegerWord<I, low, _numBits>& word);
+    static std::uint64_t
+    ord(const IntegerWord<I, low, _numBits>& word);
 
     /**
      * @brief byOrd
@@ -64,36 +71,44 @@ private:
     const I _value;
 
 private:
-    template <std::integral _I, _I _low, std::uint8_t __numBits>
-    friend bool operator==(const IntegerWord<_I, _low, __numBits>& iw1,
-                           const IntegerWord<_I, _low, __numBits>& iw2);
+    template <std::integral _I, _I _low, std::uint16_t __numBits>
+    friend bool operator==(
+        const IntegerWord<_I, _low, __numBits>& iw1,
+        const IntegerWord<_I, _low, __numBits>& iw2
+    );
 
+    template <std::integral _I, _I _low, std::uint16_t __numBits>
+    friend bool operator!=(
+        const IntegerWord<_I, _low, __numBits>& iw1,
+        const IntegerWord<_I, _low, __numBits>& iw2
+    );
 
-    template <std::integral _I, _I _low, std::uint8_t __numBits>
-    friend bool operator!=(const IntegerWord<_I, _low, __numBits>& iw1,
-                           const IntegerWord<_I, _low, __numBits>& iw2);
-
-    template <std::integral _I, _I _low, std::uint8_t __numBits>
-    friend std::ostream& operator<<(std::ostream& os,
-                                    IntegerWord<I, low, _numBits>& word);
+    template <std::integral _I, _I _low, std::uint16_t __numBits>
+    friend std::ostream& operator<<(
+        std::ostream& os,
+        IntegerWord<I, low, _numBits>& word
+    );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBits>
-std::uint64_t IntegerWord<I, low, _numBits>::ord(const IntegerWord<I, low, _numBits>& word) {
+template <std::integral I, I low, std::uint16_t _numBits>
+std::uint64_t
+IntegerWord<I, low, _numBits>::ord(const IntegerWord<I, low, _numBits>& word) {
     return static_cast<std::uint64_t>(word._value - low);
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBits>
-IntegerWord<I, low, _numBits> IntegerWord<I, low, _numBits>::byOrd(std::uint64_t ord) {
-    return IntegerWord<I, low, _numBits>(static_cast<I>(ord + low));
+template <std::integral I, I low, std::uint16_t _numBits>
+IntegerWord<I, low, _numBits>
+IntegerWord<I, low, _numBits>::byOrd(std::uint64_t ord) {
+    return IntegerWord<I, low, _numBits>(
+                static_cast<I>(ord + low));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint16_t _numBits>
 IntegerWord<I, low, _numBits>::IntegerWord(I value) : _value(value) {
     if (_value < low || _value >= high) {
         throw IncorrectOrd(_value);
@@ -102,7 +117,7 @@ IntegerWord<I, low, _numBits>::IntegerWord(I value) : _value(value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBits>
+template <std::integral I, I low, std::uint16_t _numBits>
 IntegerWord<I, low, _numBits>::IncorrectOrd::IncorrectOrd(I v)
     : std::runtime_error("low: " + std::to_string(low)
                          + " high: " + std::to_string(high)
@@ -110,23 +125,24 @@ IntegerWord<I, low, _numBits>::IncorrectOrd::IncorrectOrd(I v)
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBits>
-std::ostream& operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word) {
+template <std::integral I, I low, std::uint16_t _numBits>
+std::ostream&
+operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word) {
     os << "Word(" << word._value - low << ")";
     return os;
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBytes>
-bool operator==(const IntegerWord<I, low, _numBytes>& iw1,
-                const IntegerWord<I, low, _numBytes>& iw2) {
+template <std::integral I, I low, std::uint16_t _numBits>
+bool operator==(const IntegerWord<I, low, _numBits>& iw1,
+                const IntegerWord<I, low, _numBits>& iw2) {
     return iw1._value == iw2._value;
 }
 
 //----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint8_t _numBytes>
-bool operator!=(const IntegerWord<I, low, _numBytes>& iw1,
-                const IntegerWord<I, low, _numBytes>& iw2) {
+template <std::integral I, I low, std::uint16_t _numBits>
+bool operator!=(const IntegerWord<I, low, _numBits>& iw1,
+                const IntegerWord<I, low, _numBits>& iw2) {
     return iw1._value != iw2._value;
 }
 

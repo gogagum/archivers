@@ -2,7 +2,7 @@
 
 #include "../include/dictionary/uniform_dictionary.hpp"
 #include "../include/dictionary/traits.hpp"
-#include "../include/word/bytes_symbol.hpp"
+#include "../include/word/bytes_word.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

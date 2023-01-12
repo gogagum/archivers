@@ -3,34 +3,65 @@
 
 #include <cstdint>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 namespace ga {
+
+namespace impl {
+
+////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <class SymT>
+struct CountTChoose;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <class SymT> requires (SymT::numBits < 32)
+struct CountTChoose<SymT> {
+    using Type = std::uint64_t;
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <class SymT> requires (SymT::numBits >= 32)
+struct CountTChoose<SymT> {
+    using Type = boost::multiprecision::number<
+        boost::multiprecision::cpp_int_backend<
+            SymT::numBits + 33,
+            1024,
+            boost::multiprecision::unsigned_magnitude,
+            boost::multiprecision::unchecked, void
+        >
+    >;
+};
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
 ///
 template <class SymT>
 class RangesCalc {
-private:
+public:
 
-    constexpr static std::uint64_t _computeCorrectingConst();
+    using Count = typename impl::CountTChoose<SymT>::Type;
+    constexpr static Count _computeCorrectingConst();
 
-protected:
+public:
 
-    constexpr static auto symsNum = static_cast<std::uint64_t>(SymT::wordsCount);
-    constexpr static auto symsNum_2 = symsNum / 2;
-    constexpr static auto symsNum_4 = symsNum / 4;
-    constexpr static auto symsNum_3to4 = 3 * symsNum / 4;
-    constexpr static auto correctingConst = _computeCorrectingConst();
-    constexpr static auto correctedSymsNum = symsNum * correctingConst;
-    constexpr static auto correctedSymsNum_2 = symsNum_2 * correctingConst;
-    constexpr static auto correctedSymsNum_4 = symsNum_4 * correctingConst;
-    constexpr static auto correctedSymsNum_3to4 = symsNum_3to4 * correctingConst;
+    constexpr static Count symsNum = SymT::wordsCount;
+    constexpr static Count symsNum_2 = symsNum / 2;
+    constexpr static Count symsNum_4 = symsNum / 4;
+    constexpr static Count symsNum_3to4 = 3 * symsNum / 4;
+    constexpr static Count correctingConst = _computeCorrectingConst();
+    constexpr static Count correctedSymsNum = symsNum * correctingConst;
+    constexpr static Count correctedSymsNum_2 = symsNum_2 * correctingConst;
+    constexpr static Count correctedSymsNum_4 = symsNum_4 * correctingConst;
+    constexpr static Count correctedSymsNum_3to4 = symsNum_3to4 * correctingConst;
 
 public:
 
     struct Range {
-        std::uint64_t low;
-        std::uint64_t high;
+        Count low;
+        Count high;
     };
 
 public:
@@ -42,8 +73,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT>
-constexpr std::uint64_t RangesCalc<SymT>::_computeCorrectingConst() {
-    std::uint64_t correctingConst = 1;
+constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
+    auto correctingConst = Count{1};
     while (correctingConst * symsNum < (1ull << 33)) {
         correctingConst <<= 1ull;
     }

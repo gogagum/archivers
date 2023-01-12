@@ -10,7 +10,9 @@
 #include <cstring>
 #include <ostream>
 #include <boost/range/combine.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
+#include "ord_t_choose.hpp"
 #include "../bits_iterator.hpp"
 
 namespace ga::w {
@@ -23,7 +25,8 @@ class BytesWord {
 public:
 
     constexpr static std::uint16_t numBits = _numBytes * 8;
-    constexpr static std::uint64_t wordsCount = 1ull << numBits;
+    using Ord = typename impl::OrdTChoose<numBits>::Type;
+    constexpr static Ord wordsCount = Ord{1} << numBits;
 
 public:
 
@@ -143,8 +146,7 @@ BytesWord<_numBytes>::ord(const BytesWord<_numBytes>& word) {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-auto BytesWord<_numBytes>::byOrd(
-        std::uint64_t ord) -> BytesWord<_numBytes> {
+auto BytesWord<_numBytes>::byOrd(std::uint64_t ord) -> BytesWord<_numBytes> {
     static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
     const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
     std::array<std::byte, _numBytes> retBytes;

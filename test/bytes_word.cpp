@@ -4,8 +4,52 @@
 #include <vector>
 #include <boost/range/combine.hpp>
 
-#include "../include/word/bytes_symbol.hpp"
+#include "../include/word/bytes_word.hpp"
 #include "../include/word/word_ord_comp.hpp"
+#include "../include/ranges_calc.hpp"
+
+namespace bm = boost::multiprecision;
+
+////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BytesWord<1>>::Type,
+        std::uint64_t
+    >
+);
+
+ //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BytesWord<3>>::Type,
+        std::uint64_t
+    >
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BytesWord<4>>::Type,
+        bm::number<
+            bm::cpp_int_backend<
+                65, 1024, bm::unsigned_magnitude, bm::unchecked, void
+            >
+        >
+    >
+);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(
+    std::is_same_v<
+        typename ga::impl::CountTChoose<ga::w::BytesWord<34>>::Type,
+        bm::number<
+            bm::cpp_int_backend<
+                34 * 8 + 33, 1024, bm::unsigned_magnitude, bm::unchecked, void
+            >
+        >
+    >
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

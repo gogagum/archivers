@@ -122,7 +122,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     std::size_t btf = 0;
 
     for (auto sym : _symFlow) {
-        std::uint64_t range = currRange.high - currRange.low;
+        auto range = currRange.high - currRange.low;
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
@@ -191,7 +191,7 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
     auto tail = _symFlow.getTail();
-    res.putT<std::uint8_t>(tail.size());
+    res.putT<std::uint16_t>(tail.size());
 
     for (auto tailBit : tail) {
         res.putBit(tailBit);

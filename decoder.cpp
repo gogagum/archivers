@@ -7,7 +7,7 @@
 
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
-#include "include/word/bytes_symbol.hpp"
+#include "include/word/bytes_word.hpp"
 //#include "include/dictionary/static_dictionary.hpp"
 //#include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
@@ -16,7 +16,7 @@ template <std::uint8_t numBytes>
 using Sym = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>>;
+using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, typename ga::impl::CountTChoose<Sym<numBytes>>::Type>;
 
 template <std::uint8_t numBytes>
 using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
