@@ -131,8 +131,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
             lastPercent = currPercent;
         }
 
-        std::uint64_t range = currRange.high - currRange.low;
-        std::uint64_t aux =
+        auto range = currRange.high - currRange.low;
+        auto aux =
                 ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);

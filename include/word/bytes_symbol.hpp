@@ -10,6 +10,7 @@
 #include <cstring>
 #include <ostream>
 #include <boost/range/combine.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "../bits_iterator.hpp"
 
@@ -20,6 +21,11 @@ namespace ga::w {
 ///
 template <std::uint8_t _numBytes>
 class BytesWord {
+public:
+
+    using OrdT = std::uint64_t;
+    using CountT = boost::multiprecision::uint128_t;
+
 public:
 
     constexpr static std::uint16_t numBits = _numBytes * 8;

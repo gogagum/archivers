@@ -29,8 +29,8 @@ protected:
 public:
 
     struct Range {
-        std::uint64_t low;
-        std::uint64_t high;
+        typename SymT::CountT low;
+        typename SymT::CountT high;
     };
 
 public:

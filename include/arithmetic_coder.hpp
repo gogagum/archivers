@@ -122,7 +122,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     std::size_t btf = 0;
 
     for (auto sym : _symFlow) {
-        std::uint64_t range = currRange.high - currRange.low;
+        auto range = currRange.high - currRange.low;
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
