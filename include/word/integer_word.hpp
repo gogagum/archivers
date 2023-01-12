@@ -6,19 +6,21 @@
 #include <cassert>
 #include <cstdint>
 
+#include "ord_t_choose.hpp"
+
 namespace ga::w {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IntegerWord class
 ///
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT = std::uint64_t, typename CountT = std::uint64_t
+    std::integral I, I low, std::uint16_t _numBits,
+    typename CountT = std::uint64_t
 >
 class IntegerWord {
 public:
 
-    using Ord = OrdT;
+    using Ord = typename impl::OrdTChoose<_numBits>::Type;
     using Count = CountT;
 
 public:
@@ -35,14 +37,14 @@ public:
      * @return
      */
     static std::uint64_t
-    ord(const IntegerWord<I, low, _numBits, OrdT, CountT>& word);
+    ord(const IntegerWord<I, low, _numBits, CountT>& word);
 
     /**
      * @brief byOrd
      * @param ord
      * @return
      */
-    static IntegerWord<I, low, _numBits, OrdT, CountT> byOrd(std::uint64_t ord);
+    static IntegerWord<I, low, _numBits, CountT> byOrd(std::uint64_t ord);
 
 public:
 
@@ -74,63 +76,57 @@ private:
 
 private:
     template <
-        std::integral _I, _I _low, std::uint8_t __numBits,
-        typename _OrdT, typename _CountT
+        std::integral _I, _I _low, std::uint16_t __numBits, typename _CountT
     >
     friend bool operator==(
-        const IntegerWord<_I, _low, __numBits, _OrdT, _CountT>& iw1,
-        const IntegerWord<_I, _low, __numBits, _OrdT, _CountT>& iw2
+        const IntegerWord<_I, _low, __numBits, _CountT>& iw1,
+        const IntegerWord<_I, _low, __numBits, _CountT>& iw2
     );
 
     template <
-        std::integral _I, _I _low, std::uint8_t __numBits,
-        class _OrdT, class _CountT
+        std::integral _I, _I _low, std::uint16_t __numBits, class _CountT
     >
     friend bool operator!=(
-        const IntegerWord<_I, _low, __numBits, _OrdT, _CountT>& iw1,
-        const IntegerWord<_I, _low, __numBits, _OrdT, _CountT>& iw2
+        const IntegerWord<_I, _low, __numBits, _CountT>& iw1,
+        const IntegerWord<_I, _low, __numBits, _CountT>& iw2
     );
 
     template <
-        std::integral _I, _I _low, std::uint8_t __numBits,
-        class _OrdT, class _CountT
+        std::integral _I, _I _low, std::uint16_t __numBits, class _CountT
     >
     friend std::ostream& operator<<(
         std::ostream& os,
-        IntegerWord<I, low, _numBits, _OrdT, _CountT>& word
+        IntegerWord<I, low, _numBits, _CountT>& word
     );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
 std::uint64_t
-IntegerWord<I, low, _numBits, OrdT, CountT>::ord(
-        const IntegerWord<I, low, _numBits, OrdT, CountT>& word) {
+IntegerWord<I, low, _numBits, CountT>::ord(
+        const IntegerWord<I, low, _numBits, CountT>& word) {
     return static_cast<std::uint64_t>(word._value - low);
 }
 
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
-IntegerWord<I, low, _numBits, OrdT, CountT>
-IntegerWord<I, low, _numBits, OrdT, CountT>::byOrd(std::uint64_t ord) {
-    return IntegerWord<I, low, _numBits, OrdT, CountT>(
+IntegerWord<I, low, _numBits, CountT>
+IntegerWord<I, low, _numBits, CountT>::byOrd(std::uint64_t ord) {
+    return IntegerWord<I, low, _numBits, CountT>(
                 static_cast<I>(ord + low));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
-IntegerWord<I, low, _numBits, OrdT, CountT>::IntegerWord(I value) : _value(value) {
+IntegerWord<I, low, _numBits, CountT>::IntegerWord(I value) : _value(value) {
     if (_value < low || _value >= high) {
         throw IncorrectOrd(_value);
     }
@@ -139,10 +135,9 @@ IntegerWord<I, low, _numBits, OrdT, CountT>::IntegerWord(I value) : _value(value
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
-IntegerWord<I, low, _numBits, OrdT, CountT>::IncorrectOrd::IncorrectOrd(I v)
+IntegerWord<I, low, _numBits, CountT>::IncorrectOrd::IncorrectOrd(I v)
     : std::runtime_error("low: " + std::to_string(low)
                          + " high: " + std::to_string(high)
                          + " value: " + std::to_string(v) ) {}
@@ -150,33 +145,30 @@ IntegerWord<I, low, _numBits, OrdT, CountT>::IncorrectOrd::IncorrectOrd(I v)
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBits,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
 std::ostream&
 operator<<(std::ostream& os,
-           IntegerWord<I, low, _numBits, OrdT, CountT>& word) {
+           IntegerWord<I, low, _numBits, CountT>& word) {
     os << "Word(" << word._value - low << ")";
     return os;
 }
 
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBytes,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
-bool operator==(const IntegerWord<I, low, _numBytes, OrdT, CountT>& iw1,
-                const IntegerWord<I, low, _numBytes, OrdT, CountT>& iw2) {
+bool operator==(const IntegerWord<I, low, _numBits, CountT>& iw1,
+                const IntegerWord<I, low, _numBits, CountT>& iw2) {
     return iw1._value == iw2._value;
 }
 
 //----------------------------------------------------------------------------//
 template <
-    std::integral I, I low, std::uint8_t _numBytes,
-    typename OrdT, typename CountT
+    std::integral I, I low, std::uint16_t _numBits, typename CountT
 >
-bool operator!=(const IntegerWord<I, low, _numBytes, OrdT, CountT>& iw1,
-                const IntegerWord<I, low, _numBytes, OrdT, CountT>& iw2) {
+bool operator!=(const IntegerWord<I, low, _numBits, CountT>& iw1,
+                const IntegerWord<I, low, _numBits, CountT>& iw2) {
     return iw1._value != iw2._value;
 }
 
