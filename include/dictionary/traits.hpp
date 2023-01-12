@@ -5,10 +5,27 @@
 
 namespace ga::dict::traits {
 
+
+namespace impl {
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The NeedWordIncrease class
+///
 template <class DictT>
-concept needWordIncrease = requires(DictT a) {
-    { a.increaseWordCount(std::declval<typename DictT::Word>()) };
+struct NeedWordIncrease {
+    constexpr static bool ret = requires(DictT a) {
+        { a.increaseWordCount(std::declval<typename DictT::Word>()) };
+    };
 };
+}
+
+//----------------------------------------------------------------------------//
+template <class DictT>
+constexpr const bool needWordIncrease = impl::NeedWordIncrease<DictT>::ret;
+
+//----------------------------------------------------------------------------//
+template <class DictT, class ConstructionTag>
+constexpr const bool constructionTypeIs =
+        std::is_same_v<typename DictT::ConstructionTag, ConstructionTag>;
 
 }
 

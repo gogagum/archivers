@@ -41,14 +41,22 @@ public:
      * @brief ArithmeticCoder constructor from byte flow to encode.
      * @param byteFlow - byte flow.
      */
-    template <class DictT_ > requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
+    template <class DictT_ >
+        requires ga::dict::traits::constructionTypeIs<
+            DictT_,
+            dict::tags::ConstructsFromSymsCounts
+        >
     ArithmeticCoder(FlowT&& byteFlow);
 
     /**
      * @brief ArithmeticCoder
      * @param byteFlow
      */
-    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
+    template <class DictT_ = DictT>
+        requires ga::dict::traits::constructionTypeIs<
+            DictT_,
+            dict::tags::ConstructsFromNoArgs
+        >
     ArithmeticCoder(FlowT&& byteFlow);
 
     /**
@@ -76,7 +84,11 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
+template <class DictT_>
+    requires ga::dict::traits::constructionTypeIs<
+        DictT_,
+        dict::tags::ConstructsFromSymsCounts
+    >
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _dict(_countSyms()),
@@ -84,7 +96,10 @@ ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
+template <class DictT_> requires ga::dict::traits::constructionTypeIs<
+    DictT_,
+    dict::tags::ConstructsFromNoArgs
+>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
         : _symFlow(symbolsFlow),
           _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
