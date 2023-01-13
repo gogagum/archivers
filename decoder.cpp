@@ -6,7 +6,7 @@
 #include <vector>
 #include <span>
 
-#include "decoder_file_opener.hpp"
+#include "file_opener.hpp"
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_word.hpp"
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    auto filesOpener = FilesOpener(argv[1], argv[2]);
+    auto filesOpener = FileOpener(argv[1], argv[2]);
 
     auto decoded = ga::DataParser(filesOpener.getInData());
     std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
         break;
     }
 
-    filesOpener.getOutstream().write(reinterpret_cast<const char*>(dataConstructor.data()), dataConstructor.bytesSize());
+    filesOpener.getOutFileStream().write(reinterpret_cast<const char*>(dataConstructor.data()), dataConstructor.bytesSize());
 
     return 0;
 }

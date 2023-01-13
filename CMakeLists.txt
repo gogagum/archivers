@@ -18,6 +18,7 @@ find_package(Boost COMPONENTS system REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(archiever_encoder encoder.cpp
+        file_opener.cpp
         include/arithmetic_coder.hpp
         include/byte_data_constructor.hpp
         include/byte_data_constructor.cpp
@@ -29,7 +30,7 @@ if(Boost_FOUND)
         include/word/bytes_word.hpp
     )
     add_executable(archiever_decoder decoder.cpp
-        decoder_file_opener.cpp
+        file_opener.cpp
         include/arithmetic_decoder.hpp
         include/data_parser.hpp
         include/data_parser.cpp

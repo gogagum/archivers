@@ -121,7 +121,16 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 
     std::size_t btf = 0;
 
+    std::int8_t lastPercent = -1;
+    std::size_t wordsCoded = 0;
+
     for (auto sym : _symFlow) {
+        if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.getNumberOfWords();
+                currPercent != lastPercent) {
+            std::cout << static_cast<int>(currPercent) << "%" << std::endl;
+            lastPercent = currPercent;
+        }
+
         auto range = currRange.high - currRange.low;
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
@@ -151,6 +160,8 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
             }
             currRange = RangesCalc<Word>::recalcRange(currRange);
         }
+
+        ++wordsCoded;
     }
 
     if (currRange.low < correctedSymsNum_4) {
