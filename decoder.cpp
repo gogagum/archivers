@@ -10,19 +10,37 @@
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_word.hpp"
-//#include "include/dictionary/static_dictionary.hpp"
-//#include "include/dictionary/uniform_dictionary.hpp"
+#include "include/word/bits_word.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 #include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
-using Sym = ga::w::BytesWord<numBytes>;
+using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, typename ga::impl::CountTChoose<Sym<numBytes>>::Type, 4>;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 4>;
 
 template <std::uint8_t numBytes>
-using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
+using BytesDecoder = ga::ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, std::uint64_t>;
+
+template <std::uint16_t numBits>
+using BitsWord = ga::w::BitsWord<numBits>;
+
+template <std::uint16_t numBits>
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 4>;
+
+template <std::uint16_t numBits>
+using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
+
+#define BITS_DECODER_CASE(bits) \
+    case (bits): \
+        packIntoByteDataConstructor(BitsDecoder<(bits)>(std::move(decoded))); \
+        break;
+
+#define BYTES_DECODER_CASE(bytes) \
+    case (bytes * 8): \
+        packIntoByteDataConstructor(BytesDecoder<(bytes)>(std::move(decoded))); \
+        break;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
@@ -53,18 +71,39 @@ int main(int argc, char* argv[]) {
     };
 
     switch (symBitLen) {
-    case 8:
-        packIntoByteDataConstructor(Decoder<1>(std::move(decoded)));
-        break;
-    case 16:
-        packIntoByteDataConstructor(Decoder<2>(std::move(decoded)));
-        break;
-    case 24:
-        packIntoByteDataConstructor(Decoder<3>(std::move(decoded)));
-        break;
-    case 32:
-        packIntoByteDataConstructor(Decoder<4>(std::move(decoded)));
-        break;
+        BYTES_DECODER_CASE(1);
+        BITS_DECODER_CASE(9);
+        BITS_DECODER_CASE(10);
+        BITS_DECODER_CASE(11);
+        BITS_DECODER_CASE(12);
+        BITS_DECODER_CASE(13);
+        BITS_DECODER_CASE(14);
+        BITS_DECODER_CASE(15);
+        BYTES_DECODER_CASE(2);
+        BITS_DECODER_CASE(17);
+        BITS_DECODER_CASE(18);
+        BITS_DECODER_CASE(19);
+        BITS_DECODER_CASE(20);
+        BITS_DECODER_CASE(21);
+        BITS_DECODER_CASE(22);
+        BITS_DECODER_CASE(23);
+        BYTES_DECODER_CASE(3);
+        BITS_DECODER_CASE(25);
+        BITS_DECODER_CASE(26);
+        BITS_DECODER_CASE(27);
+        BITS_DECODER_CASE(28);
+        BITS_DECODER_CASE(29);
+        BITS_DECODER_CASE(30);
+        BITS_DECODER_CASE(31);
+        BYTES_DECODER_CASE(4);
+        BITS_DECODER_CASE(33);
+        BITS_DECODER_CASE(34);
+        BITS_DECODER_CASE(35);
+        BITS_DECODER_CASE(36);
+        BITS_DECODER_CASE(37);
+        BITS_DECODER_CASE(38);
+        BITS_DECODER_CASE(39);
+        BYTES_DECODER_CASE(5);
     default:
         assert(false);
         break;

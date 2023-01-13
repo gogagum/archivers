@@ -29,23 +29,15 @@ static_assert(
 static_assert(
     std::is_same_v<
         typename ga::impl::CountTChoose<ga::w::BitsWord<32>>::Type,
-        bm::number<
-            bm::cpp_int_backend<
-                65, 1024, bm::unsigned_magnitude, bm::unchecked, void
-            >
-        >
+        bm::uint256_t
     >
 );
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(
     std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::BitsWord<523>>::Type,
-        bm::number<
-            bm::cpp_int_backend<
-                523 + 33, 1024, bm::unsigned_magnitude, bm::unchecked, void
-            >
-        >
+        typename ga::impl::CountTChoose<ga::w::BitsWord<111>>::Type,
+        bm::uint256_t
     >
 );
 

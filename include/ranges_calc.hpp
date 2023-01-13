@@ -5,6 +5,8 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+using tp = boost::multiprecision::uint256_t;
+
 namespace ga {
 
 namespace impl {
@@ -23,14 +25,7 @@ struct CountTChoose<SymT> {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <class SymT> requires (SymT::numBits >= 32)
 struct CountTChoose<SymT> {
-    using Type = boost::multiprecision::number<
-        boost::multiprecision::cpp_int_backend<
-            SymT::numBits + 33,
-            1024,
-            boost::multiprecision::unsigned_magnitude,
-            boost::multiprecision::unchecked, void
-        >
-    >;
+    using Type = boost::multiprecision::uint256_t;
 };
 
 }
@@ -48,9 +43,10 @@ public:
 public:
 
     constexpr static Count symsNum = SymT::wordsCount;
-    constexpr static Count symsNum_2 = symsNum / 2;
-    constexpr static Count symsNum_4 = symsNum / 4;
-    constexpr static Count symsNum_3to4 = 3 * symsNum / 4;
+    constexpr static Count symsNum_2 = symsNum / Count{2};
+    constexpr static Count symsNum_4 = symsNum / Count{4};
+    constexpr static Count threeSymsNum = Count{3} * symsNum;
+    constexpr static Count symsNum_3to4 = threeSymsNum / Count{4};
     constexpr static Count correctingConst = _computeCorrectingConst();
     constexpr static Count correctedSymsNum = symsNum * correctingConst;
     constexpr static Count correctedSymsNum_2 = symsNum_2 * correctingConst;
