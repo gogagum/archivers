@@ -4,7 +4,7 @@
 namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-DataParser::DataParser(std::span<std::byte> data)
+DataParser::DataParser(std::span<const std::byte> data)
     : _data(data),
       _dataIter{_data.begin()},
       _inByteOffset(0) { }

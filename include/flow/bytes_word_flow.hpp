@@ -32,7 +32,7 @@ public:
      * @brief ByteFlow
      * @param bytes
      */
-    BytesWordFlow(std::span<std::byte> bytes);
+    BytesWordFlow(std::span<const std::byte> bytes);
 
     /**
      * @brief begin - beginning iterator getter.
@@ -64,14 +64,14 @@ private:
 
 private:
 
-    std::span<std::byte> _bytes;
+    std::span<const std::byte> _bytes;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 BytesWordFlow<w::BytesWord<numBytes>>::BytesWordFlow(
-        std::span<std::byte> bytes) : _bytes(bytes) {}
+        std::span<const std::byte> bytes) : _bytes(bytes) {}
 
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
@@ -101,8 +101,8 @@ std::uint8_t BytesWordFlow<w::BytesWord<numBytes>>::_getTailBytesSize() const {
 template <std::uint8_t numBytes>
 auto BytesWordFlow<w::BytesWord<numBytes>>::getTail() const ->Tail {
     Tail ret;
-    auto bytesRng = std::span<std::byte>(_bytes.end() - _getTailBytesSize(),
-                                         _bytes.end());
+    auto bytesRng = std::span<const std::byte>(_bytes.end() - _getTailBytesSize(),
+                                               _bytes.end());
 
     for (auto tailByte: bytesRng) {
         ret.insert(ret.end(),

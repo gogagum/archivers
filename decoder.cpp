@@ -6,6 +6,7 @@
 #include <vector>
 #include <span>
 
+#include "decoder_file_opener.hpp"
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_word.hpp"
@@ -18,61 +19,10 @@ template <std::uint8_t numBytes>
 using Sym = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, typename ga::impl::CountTChoose<Sym<numBytes>>::Type>;
+using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, typename ga::impl::CountTChoose<Sym<numBytes>>::Type, 4>;
 
 template <std::uint8_t numBytes>
 using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
-
-class FilesOpener{
-public:
-    FilesOpener(std::string inFileName, std::string outFileName) {
-        _openInFile(inFileName);
-        _openOutFile(outFileName);
-    }
-
-    std::span<std::byte> getInData() {
-        return std::span<std::byte>(_finData.begin(), _finData.end());
-    }
-
-    std::ofstream& getOutstream() {
-        return _fout;
-    }
-
-private:
-    void _openInFile(const std::string& fileInName) {
-        std::ifstream fin{fileInName, std::ifstream::ate | std::ifstream::binary};
-        if (!fin.is_open()) {
-            std::cout << "Could not open file: " << fileInName << std::endl;
-            // TODO throw
-        }
-        fin.unsetf(std::ios::skipws);
-        // get its size:
-        std::streampos finSize;
-
-        fin.seekg(0, std::ios::end);
-        finSize = fin.tellg();
-        std::cerr << "File size: " << finSize << "." << std::endl;
-        fin.seekg(0, std::ios::beg);
-
-        _finData.resize(finSize);
-
-        fin.read(reinterpret_cast<char*>(_finData.data()), finSize);
-    }
-
-    void _openOutFile(std::string& fileOutName) {
-        _fout.open(fileOutName, std::ios::binary | std::ios::out);
-        if (!_fout.is_open()) {
-            std::cout << "Could not open file: " << fileOutName << "." << std::endl;
-            // TODO throw
-        }
-    }
-
-private:
-    std::vector<std::byte> _finData;
-    std::ofstream _fout;
-};
-
-
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {

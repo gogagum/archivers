@@ -29,6 +29,7 @@ if(Boost_FOUND)
         include/word/bytes_word.hpp
     )
     add_executable(archiever_decoder decoder.cpp
+        decoder_file_opener.cpp
         include/arithmetic_decoder.hpp
         include/data_parser.hpp
         include/data_parser.cpp

@@ -30,7 +30,7 @@ public:
      * @brief ArithmeticDecoderDecoded
      * @param data
      */
-    explicit DataParser(std::span<std::byte> data);
+    explicit DataParser(std::span<const std::byte> data);
 
     /**
      * @brief takeByte take one byte.
@@ -83,8 +83,8 @@ private:
 
 private:
 
-    const std::span<std::byte> _data;
-    std::span<std::byte>::iterator _dataIter;
+    const std::span<const std::byte> _data;
+    std::span<const std::byte>::iterator _dataIter;
     std::uint8_t _inByteOffset;
 
 private:
