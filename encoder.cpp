@@ -9,7 +9,7 @@
 //#include "include/dictionary/uniform_dictionary.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
 
-using Sym = ga::w::BytesWord<3>;
+using Sym = ga::w::BytesWord<2>;
 using Dict = ga::dict::AdaptiveDictionary<Sym>;
 using Coder = ga::ArithmeticCoder<ga::fl::BytesWordFlow<Sym>, Dict, std::uint64_t>;
 

@@ -1,6 +1,7 @@
 #include <boost/range/irange.hpp>
 
 #include "byte_data_constructor.hpp"
+#include "bits_iterator.hpp"
 
 namespace ga {
 
@@ -40,8 +41,13 @@ ByteDataConstructor::putBitsRepeatWithReset(bool bit, std::size_t& num) {
 
 //----------------------------------------------------------------------------//
 void ByteDataConstructor::putByte(std::byte b) {
-    assert(!_startedBits && "Can`t write bytes after bits.");
-    _data.push_back(b);
+    if (_currBitFlag == std::byte{0b10000000}) {
+        _data.push_back(b);
+    } else {
+        for (auto bit: impl::make_bits_iterator_range(b)) {
+            putBit(bit);
+        }
+    }
 }
 
 //----------------------------------------------------------------------------//
@@ -54,10 +60,14 @@ const std::size_t ByteDataConstructor::bytesSize() const {
     return _data.size();
 }
 
-
 //----------------------------------------------------------------------------//
 auto ByteDataConstructor::getBitBackInserter() -> BitBackInserter {
     return BitBackInserter(*this);
+}
+
+//----------------------------------------------------------------------------//
+auto ByteDataConstructor::getByteBackInserter() -> ByteBackInserter {
+    return ByteBackInserter(*this);
 }
 
 //----------------------------------------------------------------------------//

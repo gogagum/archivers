@@ -17,18 +17,14 @@ class ByteDataConstructor {
 public:
 
     ////////////////////////////////////////////////////////////////////////////
+    /// \brief The ByteBackInserter class
+    ///
+    class ByteBackInserter;
+
+    ////////////////////////////////////////////////////////////////////////////
     /// \brief The BitBackInserter class
     ///
-    class BitBackInserter {
-    public:
-        BitBackInserter(ByteDataConstructor& owner) : _owner(owner) {};
-        void operator++() const { }
-        void operator++(int) const { }
-        void operator=(bool bit) { _owner.putBit(bit); }
-        BitBackInserter& operator*() { return *this; }
-    private:
-        ByteDataConstructor& _owner;
-    };
+    class BitBackInserter;
 
 public:
 
@@ -88,6 +84,13 @@ public:
      */
     BitBackInserter getBitBackInserter();
 
+    /**
+     * @brief getByteBackInserter returns byte insert iterator to add bytes at
+     * the end.
+     * @return
+     */
+    ByteBackInserter getByteBackInserter();
+
 private:
 
     void _moveBitFlag();
@@ -108,6 +111,39 @@ void ByteDataConstructor::putT(auto s) {
         putByte(byte);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The ByteDataConstructor::ByteBackInserter class
+///
+class ByteDataConstructor::ByteBackInserter {
+public:
+    using difference_type = std::ptrdiff_t;
+public:
+    ByteBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
+    ByteBackInserter operator++(int) { return* this; }
+    ByteBackInserter& operator++() { return *this; }
+    void operator=(std::byte byte) { _owner->putByte(byte); }
+    ByteBackInserter& operator*() { return* this; }
+private:
+    ByteDataConstructor* _owner;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The ByteDataConstructor::BitBackInserter class
+///
+class ByteDataConstructor::BitBackInserter {
+public:
+    using difference_type = std::ptrdiff_t;
+public:
+    BitBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
+    BitBackInserter operator++(int) { return* this; }
+    BitBackInserter& operator++() { return *this; }
+    void operator=(bool bit) { _owner->putBit(bit); }
+    BitBackInserter& operator*() { return *this; }
+    ByteBackInserter getBytesIter() { return _owner->getByteBackInserter(); }
+private:
+    ByteDataConstructor* _owner;
+};
 
 
 

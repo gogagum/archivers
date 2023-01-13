@@ -7,6 +7,7 @@
 #include "../include/word/bytes_word.hpp"
 #include "../include/word/word_ord_comp.hpp"
 #include "../include/ranges_calc.hpp"
+#include "../include/byte_data_constructor.hpp"
 
 namespace bm = boost::multiprecision;
 
@@ -50,6 +51,15 @@ static_assert(
         >
     >
 );
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(!ga::w::BytesOutputTransformable<std::vector<bool>::iterator>);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::BitBackInserter>);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(!ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::ByteBackInserter>);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

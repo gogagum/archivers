@@ -17,6 +17,14 @@
 
 namespace ga::w {
 
+template <class IterT>
+concept BytesOutputTransformable =
+    std::output_iterator<IterT, bool>
+    && requires(IterT iter) {
+        { iter.getBytesIter() } -> std::output_iterator<std::byte>;
+    };
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
 ///
@@ -68,6 +76,10 @@ public:
      * @return bits array
      */
     template <std::output_iterator<bool> IterT>
+    void bitsOut(IterT outIter) const;
+
+
+    template <BytesOutputTransformable IterT>
     void bitsOut(IterT outIter) const;
 
 private:
@@ -171,12 +183,18 @@ template <std::uint8_t _numBytes>
 template <std::output_iterator<bool> IterT>
 void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
     for (auto byte: _data) {
-        for (auto bit: ga::impl::make_bits_iterator_range(byte)) {
-            *outIter = bit;
-            ++outIter;
-        }
+        auto rng = ga::impl::make_bits_iterator_range(byte);
+        std::copy(rng.begin(), rng.end(), outIter);
     }
 }
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t _numBytes>
+template <BytesOutputTransformable IterT>
+void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
+    auto bytesIter = outIter.getBytesIter();
+    std::copy(_data.begin(), _data.end(), bytesIter);
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

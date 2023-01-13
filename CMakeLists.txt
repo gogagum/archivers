@@ -32,6 +32,7 @@ if(Boost_FOUND)
         include/arithmetic_decoder.hpp
         include/data_parser.hpp
         include/data_parser.cpp
+        include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
