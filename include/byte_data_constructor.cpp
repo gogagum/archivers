@@ -8,12 +8,10 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 ByteDataConstructor::ByteDataConstructor()
-    : _currBitFlag{0b10000000},
-      _startedBits{false} {}
+    : _currBitFlag{0b10000000} {}
 
 //----------------------------------------------------------------------------//
 void ByteDataConstructor::putBit(bool bit) {
-    _startedBits = true;
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(std::byte{0b00000000});
     }
@@ -51,12 +49,7 @@ void ByteDataConstructor::putByte(std::byte b) {
 }
 
 //----------------------------------------------------------------------------//
-const std::byte* ByteDataConstructor::data() const {
-    return _data.data();
-}
-
-//----------------------------------------------------------------------------//
-const std::size_t ByteDataConstructor::bytesSize() const {
+std::size_t ByteDataConstructor::size() const {
     return _data.size();
 }
 

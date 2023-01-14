@@ -31,7 +31,7 @@ public:
      * @brief BitsWordFlow constructor from span.
      * @param data - bytes to create words.
      */
-    BitsWordFlow(std::span<std::byte> data);
+    BitsWordFlow(std::span<const std::byte> data);
 
     /**
      * @brief begin - get iterator to begin.
@@ -64,7 +64,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(std::span<std::byte> data)
+BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(std::span<const std::byte> data)
     : _data(data) {}
 
 //----------------------------------------------------------------------------//

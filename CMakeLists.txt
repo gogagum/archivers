@@ -19,6 +19,7 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(archiever_encoder encoder.cpp
         file_opener.cpp
+        include/data_parser.cpp
         include/arithmetic_coder.hpp
         include/byte_data_constructor.hpp
         include/byte_data_constructor.cpp

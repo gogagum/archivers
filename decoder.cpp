@@ -18,7 +18,7 @@ template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 4>;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 8>;
 
 template <std::uint8_t numBytes>
 using BytesDecoder = ga::ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, std::uint64_t>;
@@ -27,7 +27,7 @@ template <std::uint16_t numBits>
 using BitsWord = ga::w::BitsWord<numBits>;
 
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 4>;
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 8>;
 
 template <std::uint16_t numBits>
 using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     auto decoded = ga::DataParser(filesOpener.getInData());
     std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
-    std::cerr << "Word bytes length: "
+    std::cerr << "Word bits length: "
               << static_cast<unsigned int>(symBitLen) << std::endl;
 
     auto dataConstructor = ga::ByteDataConstructor();
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
         break;
     }
 
-    filesOpener.getOutFileStream().write(reinterpret_cast<const char*>(dataConstructor.data()), dataConstructor.bytesSize());
+    filesOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
 
     return 0;
 }

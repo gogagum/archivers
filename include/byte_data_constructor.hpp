@@ -69,13 +69,14 @@ public:
      * @brief data - get data pointer
      * @return data pointer
      */
-    const std::byte* data() const;
+    template <class T>
+    const T* data() const;
 
     /**
-     * @brief bytesSize - get data bytes size
-     * @return data size in bytes
+     * @brief size
+     * @return
      */
-    const std::size_t bytesSize() const;
+    std::size_t size() const;
 
     /**
      * @brief getBitBackInserter returns bit insert iterator to add bits at
@@ -98,7 +99,6 @@ private:
 private:
     std::vector<std::byte> _data;
     std::byte _currBitFlag;
-    bool _startedBits;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +110,12 @@ void ByteDataConstructor::putT(auto s) {
     for (auto byte: boost::adaptors::reverse(bytes)) {
         putByte(byte);
     }
+}
+
+//----------------------------------------------------------------------------//
+template <class T>
+const T* ByteDataConstructor::data() const {
+    return reinterpret_cast<const T*>(_data.data());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
