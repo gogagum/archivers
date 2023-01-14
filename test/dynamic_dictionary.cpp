@@ -8,22 +8,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, ConstructBytesWord) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>(1);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, ConstructBitsWord) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BitsWord<2>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BitsWord<2>>(2);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, ConstructIntWord) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::IntegerWord<int, 0, 3>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::IntegerWord<int, 0, 3>>(3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, LowerAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(3);
     auto symData = std::array{std::byte{37}};
     auto word = ga::w::BytesWord<1>(symData);
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 37);
@@ -31,7 +31,7 @@ TEST(DynamicDictionary, LowerAfterConstruct) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, LowerZeroAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(2);
     auto symData = std::array<std::byte, 1>{std::byte{0}};
     auto word = ga::w::BytesWord<1>(symData.data());
     EXPECT_EQ(dict.getLowerCumulativeNumFound(word), 0);
@@ -39,7 +39,7 @@ TEST(DynamicDictionary, LowerZeroAfterConstruct) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, HigherZeroAfterConstruct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(2);
     auto symData = std::array{std::byte{42}};
     auto word = ga::w::BytesWord<1>(symData);
     EXPECT_EQ(dict.getHigherCumulativeNumFound(word), 43);
@@ -47,7 +47,7 @@ TEST(DynamicDictionary, HigherZeroAfterConstruct) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, Increase) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{12}};
     dict.increaseWordCount(ga::w::BytesWord<1>(increasedWordData));
     auto symData = std::array{std::byte{42}};
@@ -57,7 +57,7 @@ TEST(DynamicDictionary, Increase) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, IncreaseExactTheSame) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{12}};
     auto increasedWord = ga::w::BytesWord<1>(increasedWordData);
     dict.increaseWordCount(increasedWord);
@@ -67,7 +67,7 @@ TEST(DynamicDictionary, IncreaseExactTheSame) {
 
 //----------------------------------------------------------------------------//
 TEST(DynamicDictionary, IncreaseZero) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{0}};
     auto increasedWord = ga::w::BytesWord<1>(increasedWordData);
     dict.increaseWordCount(increasedWord);

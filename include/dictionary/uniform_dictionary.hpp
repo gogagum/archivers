@@ -15,7 +15,7 @@ class UniformDictionary {
 public:
 
     using Word = WordT;
-    using ConstructionTag = tags::ConstructsFromNoArgs;
+    using ConstructionTag = tags::NoNeedWordsCounts;
 
 public:
 

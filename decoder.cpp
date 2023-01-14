@@ -18,7 +18,7 @@ template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 8>;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type>;
 
 template <std::uint8_t numBytes>
 using BytesDecoder = ga::ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, std::uint64_t>;
@@ -27,19 +27,19 @@ template <std::uint16_t numBits>
 using BitsWord = ga::w::BitsWord<numBits>;
 
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 8>;
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type>;
 
 template <std::uint16_t numBits>
 using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
 
 #define BITS_DECODER_CASE(bits) \
     case (bits): \
-        packIntoByteDataConstructor(BitsDecoder<(bits)>(std::move(decoded))); \
+        packIntoByteDataConstructor(BitsDecoder<(bits)>(std::move(decoded), 2)); \
         break;
 
 #define BYTES_DECODER_CASE(bytes) \
     case (bytes * 8): \
-        packIntoByteDataConstructor(BytesDecoder<(bytes)>(std::move(decoded))); \
+        packIntoByteDataConstructor(BytesDecoder<(bytes)>(std::move(decoded), 2)); \
         break;
 
 //----------------------------------------------------------------------------//

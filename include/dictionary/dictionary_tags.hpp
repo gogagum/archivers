@@ -3,13 +3,9 @@
 
 namespace ga::dict::tags {
 
-class ConstructsFromNoArgs {
-    ConstructsFromNoArgs() {}
-};
+struct NeedWordsCounts;
 
-class ConstructsFromSymsCounts {
-    ConstructsFromSymsCounts() {}
-};
+struct NoNeedWordsCounts;
 
 }
 

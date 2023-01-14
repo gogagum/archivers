@@ -17,7 +17,7 @@ public:
 
     using Word = WordT;
     using Count = CountT;
-    using ConstructionTag = tags::ConstructsFromSymsCounts;
+    using ConstructionTag = tags::NeedWordsCounts;
 
 public:
 

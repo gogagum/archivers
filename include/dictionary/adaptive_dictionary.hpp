@@ -20,17 +20,17 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionary class
 ///
-template <class WordT, typename CountT = std::uint64_t, std::uint64_t ratio = 1>
+template <class WordT, typename CountT = std::uint64_t>
 class AdaptiveDictionary {
 public:
 
     using Word = WordT;
-    using ConstructionTag = tags::ConstructsFromNoArgs;
+    using ConstructionTag = tags::NoNeedWordsCounts;
     using Ord = typename WordT::Ord;
     using Count = CountT;
 
 public:
-    AdaptiveDictionary();
+    AdaptiveDictionary(std::uint64_t ratio);
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -67,17 +67,18 @@ public:
 
 public:
     boost::icl::interval_map<Ord, Count> _additionalCounts;
+    Count _ratio;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
-AdaptiveDictionary<WordT, CountT, ratio>::AdaptiveDictionary() {}
+template <class WordT, typename CountT>
+AdaptiveDictionary<WordT, CountT>::AdaptiveDictionary(std::uint64_t ratio) : _ratio(ratio) {}
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
+template <class WordT, typename CountT>
 WordT
-AdaptiveDictionary<WordT, CountT, ratio>::getWord(Count cumulativeNumFound) const {
+AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
@@ -91,9 +92,9 @@ AdaptiveDictionary<WordT, CountT, ratio>::getWord(Count cumulativeNumFound) cons
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
+template <class WordT, typename CountT>
 auto
-AdaptiveDictionary<WordT, CountT, ratio>::getLowerCumulativeNumFound(
+AdaptiveDictionary<WordT, CountT>::getLowerCumulativeNumFound(
         const WordT& word) const -> Count {
     if (std::uint64_t ord = WordT::ord(word); ord == 0) {
         return 0;
@@ -103,31 +104,31 @@ AdaptiveDictionary<WordT, CountT, ratio>::getLowerCumulativeNumFound(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
+template <class WordT, typename CountT>
 auto
-AdaptiveDictionary<WordT, CountT, ratio>::getHigherCumulativeNumFound(
+AdaptiveDictionary<WordT, CountT>::getHigherCumulativeNumFound(
         const WordT& word) const -> Count {
     std::uint64_t ord = WordT::ord(word);
     return ord + 1 + _additionalCounts(ord);
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
-auto AdaptiveDictionary<WordT, CountT, ratio>::totalWordsCount() const -> Count {
+template <class WordT, typename CountT>
+auto AdaptiveDictionary<WordT, CountT>::totalWordsCount() const -> Count {
     return WordT::wordsCount + _additionalCounts(WordT::wordsCount - 1);
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT, std::uint64_t ratio>
+template <class WordT, typename CountT>
 void
-AdaptiveDictionary<WordT, CountT, ratio>::increaseWordCount(const WordT& word) {
+AdaptiveDictionary<WordT, CountT>::increaseWordCount(const WordT& word) {
     _additionalCounts +=
             std::make_pair(
                 boost::icl::interval<Ord>::right_open(
                     WordT::ord(word),
                     WordT::wordsCount
                 ),
-                Count{1} * ratio
+                _ratio
             );
 }
 

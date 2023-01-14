@@ -41,23 +41,23 @@ public:
      * @brief ArithmeticCoder constructor from byte flow to encode.
      * @param byteFlow - byte flow.
      */
-    template <class DictT_ >
+    template <class DictT_, class... DictOuterArgs>
         requires ga::dict::traits::constructionTypeIs<
             DictT_,
-            dict::tags::ConstructsFromSymsCounts
+            dict::tags::NeedWordsCounts
         >
-    ArithmeticCoder(FlowT&& byteFlow);
+    ArithmeticCoder(FlowT&& byteFlow, DictOuterArgs&&... dictOuterArgs);
 
     /**
      * @brief ArithmeticCoder
      * @param byteFlow
      */
-    template <class DictT_ = DictT>
+    template <class DictT_ = DictT, class... DictOuterArgs>
         requires ga::dict::traits::constructionTypeIs<
             DictT_,
-            dict::tags::ConstructsFromNoArgs
+            dict::tags::NoNeedWordsCounts
         >
-    ArithmeticCoder(FlowT&& byteFlow);
+    ArithmeticCoder(FlowT&& byteFlow, DictOuterArgs&&... dictOuterArgs);
 
     /**
      * @brief encode - encode byte flow.
@@ -84,24 +84,28 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_>
+template <class DictT_, class... DictOuterArgs>
     requires ga::dict::traits::constructionTypeIs<
         DictT_,
-        dict::tags::ConstructsFromSymsCounts
+        dict::tags::NeedWordsCounts
     >
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
+ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
+                                                       DictOuterArgs&&... dictOuterArgs)
         : _symFlow(symbolsFlow),
-          _dict(_countSyms()),
+          _dict(_countSyms(), std::forward<DictOuterArgs>(dictOuterArgs)...),
           _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires ga::dict::traits::constructionTypeIs<
-    DictT_,
-    dict::tags::ConstructsFromNoArgs
->
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
+template <class DictT_, class... DictOuterArgs>
+    requires ga::dict::traits::constructionTypeIs<
+        DictT_,
+        dict::tags::NoNeedWordsCounts
+    >
+ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
+                                                       DictOuterArgs&&... dictOuterArgs)
         : _symFlow(symbolsFlow),
+          _dict(std::forward<DictOuterArgs>(dictOuterArgs)...),
           _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
@@ -113,7 +117,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     _serializeTail(ret);
     _serializeFileWordsCount(ret);
 
-    if constexpr (std::is_same_v<typename DictT::ConstructionTag, dict::tags::ConstructsFromSymsCounts>) {
+    if constexpr (std::is_same_v<typename DictT::ConstructionTag, dict::tags::NeedWordsCounts>) {
         _dict.template serialize<CountT>(ret);
     }
 
@@ -163,6 +167,8 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 
         ++wordsCoded;
     }
+
+    std::cout << "100%" << std::endl;
 
     if (currRange.low < correctedSymsNum_4) {
         ret.putBit(false);

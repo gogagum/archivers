@@ -47,11 +47,17 @@ public:
      * @brief ArithmeticDecoder constructor from file source.
      * @param source
      */
-    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
-    ArithmeticDecoder(Source&& source);
+    template <class DictT_ = DictT, class... DictOuterArgs>
+        requires ga::dict::traits::constructionTypeIs<
+            DictT_, dict::tags::NeedWordsCounts
+        >
+    ArithmeticDecoder(Source&& source, DictOuterArgs&&... dictOuterArgs);
 
-    template <class DictT_ = DictT> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
-    ArithmeticDecoder(Source&& source);
+    template <class DictT_ = DictT, class... DictOuterArgs>
+        requires ga::dict::traits::constructionTypeIs<
+            DictT_, dict::tags::NoNeedWordsCounts
+        >
+    ArithmeticDecoder(Source&& source, DictOuterArgs&&... dictOuterArgs);
 
     /**
      * @brief decode - decode source as a vector of bytes.
@@ -72,7 +78,7 @@ private:
 
     Tail _deserializeTail();
 
-    std::vector<std::uint64_t> _deserializeDict();
+    std::vector<std::uint64_t> _deserializeWordsCounts();
 
     CountT _deserializeFileWordsCount();
 
@@ -89,21 +95,32 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromSymsCounts>
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
+template <class DictT_, class... DictOuterArgs>
+requires ga::dict::traits::constructionTypeIs<
+    DictT_,
+    dict::tags::NeedWordsCounts
+>
+ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
+        Source&& source, DictOuterArgs&&... dictOuterArgs)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
       _fileWordsCount(_deserializeFileWordsCount()),
-      _dict(_deserializeDict()),
+      _dict(_deserializeWordsCounts(), std::forward<DictOuterArgs>(dictOuterArgs)...),
       _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictT_> requires std::is_same_v<typename DictT_::ConstructionTag, dict::tags::ConstructsFromNoArgs>
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(Source&& source)
+template <class DictT_, class... DictOuterArgs>
+requires ga::dict::traits::constructionTypeIs<
+    DictT_,
+    dict::tags::NoNeedWordsCounts
+>
+ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
+        Source&& source, DictOuterArgs&&... dictOuterArgs)
     : _source(std::move(source)),
       _tail(_deserializeTail()),
       _fileWordsCount(_deserializeFileWordsCount()),
+      _dict(std::forward<DictOuterArgs>(dictOuterArgs)...),
       _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
 
 //----------------------------------------------------------------------------//
@@ -185,7 +202,7 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
 std::vector<std::uint64_t>
-ArithmeticDecoder<SymT, DictT, CountT>::_deserializeDict() {
+ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
     std::vector<std::uint64_t> ret(SymT::wordsCount);
     CountT numUniqueSyms = _source.takeT<std::uint32_t>();
 

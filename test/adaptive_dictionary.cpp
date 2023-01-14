@@ -5,7 +5,7 @@
 #include "../include/dictionary/traits.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(ga::dict::traits::needWordIncrease<
                   ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>
               >);
@@ -13,5 +13,5 @@ static_assert(ga::dict::traits::needWordIncrease<
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, Construct) {
-    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>();
+    auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>(1);
 }

@@ -18,7 +18,7 @@ template <std::uint8_t numBytes>
 using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
 
 template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 8>;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type>;
 
 template <std::uint8_t numBytes>
 using BytesCoder = ga::ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, std::uint64_t>;
@@ -30,28 +30,22 @@ template <std::uint16_t numBits>
 using BitsFlow = ga::fl::BitsWordFlow<BitsWord<numBits>>;
 
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 8>;
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type>;
 
 template <std::uint16_t numBits>
 using BitsCoder = ga::ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, std::uint64_t>;
 
 #define BYTES_CASE(bytes) \
-    case (bytes * 8): { \
-        auto byteFlow = BytesFlow<(bytes)>(fileOpener.getInData()); \
-        auto coder = BytesCoder<(bytes)>(std::move(byteFlow)); \
-        auto encoded = coder.encode(); \
-        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size()); \
-    } \
-    break;
+    case (bytes) * 8: \
+        encodeImpl(BytesCoder<(bytes)>( \
+                       BytesFlow<(bytes)>(fileOpener.getInData()), 2)); \
+        break;
 
 #define BITS_CASE(bits) \
-    case (bits): { \
-        auto bitFlow = BitsFlow<(bits)>(fileOpener.getInData()); \
-        auto coder = BitsCoder<(bits)>(std::move(bitFlow)); \
-        auto encoded = coder.encode(); \
-        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size()); \
-    } \
-    break;
+    case (bits): \
+        encodeImpl(BitsCoder<(bits)>( \
+                       BitsFlow<(bits)>(fileOpener.getInData()), 2)); \
+        break;
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -62,6 +56,11 @@ int main(int argc, char* argv[]) {
     auto fileOpener = FileOpener(argv[1], argv[2]);
 
     std::size_t numBits = (argc == 3) ? 16 : std::stoi(argv[3]);
+
+    const auto encodeImpl = [&fileOpener](auto&& coder) {
+        auto encoded = coder.encode();
+        fileOpener.getOutFileStream().write(encoded.template data<char>(), encoded.size());
+    };
 
     switch (numBits) {
         BYTES_CASE(1);
@@ -101,8 +100,6 @@ int main(int argc, char* argv[]) {
         assert(false);
         break;
     }
-
-    //fileOpener.getOutFileStream().write(reinterpret_cast<const char*>(encoded.data()), encoded.size());
 
     return 0;
 }
