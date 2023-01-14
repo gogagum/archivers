@@ -1,16 +1,17 @@
-#include "arithmetic_coder_encoded.hpp"
+#include <boost/range/irange.hpp>
+
+#include "byte_data_constructor.hpp"
+#include "bits_iterator.hpp"
 
 namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-ArithmeticCoderEncoded::ArithmeticCoderEncoded()
-    : _currBitFlag{0b10000000},
-      _startedBits{false} {}
+ByteDataConstructor::ByteDataConstructor()
+    : _currBitFlag{0b10000000} {}
 
 //----------------------------------------------------------------------------//
-void ArithmeticCoderEncoded::putBit(bool bit) {
-    _startedBits = true;
+void ByteDataConstructor::putBit(bool bit) {
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(std::byte{0b00000000});
     }
@@ -23,37 +24,47 @@ void ArithmeticCoderEncoded::putBit(bool bit) {
 }
 
 //----------------------------------------------------------------------------//
-void ArithmeticCoderEncoded::putBitsRepeat(bool bit, std::size_t num) {
-    for (std::size_t i = 0; i < num; ++i) {
+void ByteDataConstructor::putBitsRepeat(bool bit, std::size_t num) {
+    for ([[maybe_unused]] auto _ : boost::irange<std::size_t>(0, num)) {
         putBit(bit);
     }
 }
 
 //----------------------------------------------------------------------------//
 void
-ArithmeticCoderEncoded::putBitsRepeatWithReset(bool bit, std::size_t& num) {
+ByteDataConstructor::putBitsRepeatWithReset(bool bit, std::size_t& num) {
     putBitsRepeat(bit, num);
     num = 0;
 }
 
 //----------------------------------------------------------------------------//
-void ArithmeticCoderEncoded::putByte(std::byte b) {
-    assert(!_startedBits && "Can`t write bytes after bits.");
-    _data.push_back(b);
+void ByteDataConstructor::putByte(std::byte b) {
+    if (_currBitFlag == std::byte{0b10000000}) {
+        _data.push_back(b);
+    } else {
+        for (auto bit: impl::make_bits_iterator_range(b)) {
+            putBit(bit);
+        }
+    }
 }
 
 //----------------------------------------------------------------------------//
-const std::byte* ArithmeticCoderEncoded::data() const {
-    return _data.data();
-}
-
-//----------------------------------------------------------------------------//
-const std::size_t ArithmeticCoderEncoded::bytesSize() const {
+std::size_t ByteDataConstructor::size() const {
     return _data.size();
 }
 
 //----------------------------------------------------------------------------//
-void ArithmeticCoderEncoded::_moveBitFlag() {
+auto ByteDataConstructor::getBitBackInserter() -> BitBackInserter {
+    return BitBackInserter(*this);
+}
+
+//----------------------------------------------------------------------------//
+auto ByteDataConstructor::getByteBackInserter() -> ByteBackInserter {
+    return ByteBackInserter(*this);
+}
+
+//----------------------------------------------------------------------------//
+void ByteDataConstructor::_moveBitFlag() {
     _currBitFlag >>= 1;
     if (_currBitFlag == std::byte{0b00000000}) {
         _currBitFlag = std::byte{0b10000000};

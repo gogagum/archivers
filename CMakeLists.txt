@@ -18,25 +18,29 @@ find_package(Boost COMPONENTS system REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(archiever_encoder encoder.cpp
+        file_opener.cpp
+        include/data_parser.cpp
         include/arithmetic_coder.hpp
-        include/arithmetic_coder_encoded.hpp
-        include/arithmetic_coder_encoded.cpp
+        include/byte_data_constructor.hpp
+        include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
-        include/flow/byte_flow.hpp
-        include/word/bytes_symbol.hpp
+        include/flow/bytes_word_flow.hpp
+        include/word/bytes_word.hpp
     )
     add_executable(archiever_decoder decoder.cpp
+        file_opener.cpp
         include/arithmetic_decoder.hpp
-        include/arithmetic_decoder_decoded.hpp
-        include/arithmetic_decoder_decoded.cpp
+        include/data_parser.hpp
+        include/data_parser.cpp
+        include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
         include/dictionary/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
-        include/word/bytes_symbol.hpp
+        include/word/bytes_word.hpp
     )
     install(TARGETS archiever_encoder archiever_decoder
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -51,11 +55,26 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(archiever_tests test.cpp
-    include/arithmetic_coder_encoded.cpp
-    include/word/bytes_symbol.hpp
-    include/word/int_range_word.hpp
-    include/arithmetic_decoder_decoded.cpp
+add_executable(archiever_tests
+    test/bits_iterator.cpp
+    test/bits_word.cpp
+    test/bits_word_flow.cpp
+    test/byte_data_constructor.cpp
+    test/bytes_word.cpp
+    test/bytes_word_flow.cpp
+    test/data_parser.cpp
+    test/dynamic_dictionary.cpp
+    test/integer_word.cpp
+    test/integer_word_flow.cpp
+    test/static_dictionary.cpp
+    test/uniform_dictionary.cpp
+    test/adaptive_dictionary.cpp
+    include/word/bytes_word.hpp
+    include/word/integer_word.hpp
+    include/word/bits_word.hpp
+    include/word/word_ord_comp.hpp
+    include/byte_data_constructor.cpp
+    include/data_parser.cpp
     include/flow/int_range_word_flow.hpp
 )
 

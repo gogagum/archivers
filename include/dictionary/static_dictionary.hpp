@@ -3,19 +3,21 @@
 
 #include <boost/range/irange.hpp>
 
-#include "../arithmetic_coder_encoded.hpp"
+#include "dictionary_tags.hpp"
+#include "../byte_data_constructor.hpp"
 
 namespace ga::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The StaticDictionary class
 ///
-template <class WordT>
+template <class WordT, class CountT = std::uint64_t>
 class StaticDictionary {
 public:
-    static constexpr bool supportsIncrease = false;
-    static constexpr bool requireSymsCounts = true;
-    static constexpr bool constructsFromNoArgs = false;
+
+    using Word = WordT;
+    using Count = CountT;
+    using ConstructionTag = tags::ConstructsFromSymsCounts;
 
 public:
 
@@ -38,7 +40,7 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(std::uint64_t cumulativeNumFound) const;
+    WordT getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getLowerCumulativeNumFound - lower letters count.
@@ -58,7 +60,7 @@ public:
      * @brief totalWordsCount
      * @return
      */
-    std::uint64_t totalWordsCount() const;
+    typename Word::Ord totalWordsCount() const;
 
     /**
      * @brief numUniqueWords
@@ -66,8 +68,8 @@ public:
      */
     std::uint64_t numUniqueWords() const;
 
-    template <class CountT>
-    void serialize(ArithmeticCoderEncoded& res) const;
+    template <class _CountT>
+    void serialize(ByteDataConstructor& res) const;
 
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
@@ -76,9 +78,9 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT>
+template <class WordT, typename CountT>
 template <class RangeT>
-StaticDictionary<WordT>::StaticDictionary(
+StaticDictionary<WordT, CountT>::StaticDictionary(
         const RangeT& cumulativeWordsCountsRange) {
     std::copy(cumulativeWordsCountsRange.begin(),
               cumulativeWordsCountsRange.end(),
@@ -86,8 +88,8 @@ StaticDictionary<WordT>::StaticDictionary(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-StaticDictionary<WordT>::StaticDictionary(
+template <class WordT, typename CountT>
+StaticDictionary<WordT, CountT>::StaticDictionary(
         std::vector<std::uint64_t>&& cumulativeNumFound)
     : _cumulativeNumFound(std::move(cumulativeNumFound)) {
     assert(this->_cumulativeNumFound.size() == WordT::wordsCount
@@ -96,17 +98,17 @@ StaticDictionary<WordT>::StaticDictionary(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
+template <class WordT, typename CountT>
 WordT
-StaticDictionary<WordT>::getWord(std::uint64_t cumulativeNumFound) const {
+StaticDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     auto it = std::ranges::upper_bound(_cumulativeNumFound, cumulativeNumFound);
     return WordT::byOrd(it - _cumulativeNumFound.begin());
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
+template <class WordT, typename CountT>
 std::uint64_t
-StaticDictionary<WordT>::getLowerCumulativeNumFound(const WordT& word) const {
+StaticDictionary<WordT, CountT>::getLowerCumulativeNumFound(const WordT& word) const {
     if (std::uint64_t ord = WordT::ord(word); ord == 0) {
         return 0;
     } else {
@@ -115,21 +117,21 @@ StaticDictionary<WordT>::getLowerCumulativeNumFound(const WordT& word) const {
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
+template <class WordT, typename CountT>
 std::uint64_t
-StaticDictionary<WordT>::getHigherCumulativeNumFound(const WordT& word) const {
+StaticDictionary<WordT, CountT>::getHigherCumulativeNumFound(const WordT& word) const {
     return _cumulativeNumFound[WordT::ord(word)];
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t StaticDictionary<WordT>::totalWordsCount() const {
+template <class WordT, typename CountT>
+auto StaticDictionary<WordT, CountT>::totalWordsCount() const -> typename Word::Ord {
     return *_cumulativeNumFound.rbegin();
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t StaticDictionary<WordT>::numUniqueWords() const {
+template <class WordT, typename CountT>
+std::uint64_t StaticDictionary<WordT, CountT>::numUniqueWords() const {
     std::uint64_t prevCumulativeNumFound = 0;
     return std::ranges::count_if(_cumulativeNumFound,
                                  [&prevCumulativeNumFound](auto count) {
@@ -140,16 +142,16 @@ std::uint64_t StaticDictionary<WordT>::numUniqueWords() const {
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-template <class CountT>
-void StaticDictionary<WordT>::serialize(ArithmeticCoderEncoded& res) const {
+template <class WordT, typename CountT>
+template <class _CountT>
+void StaticDictionary<WordT, CountT>::serialize(ByteDataConstructor& res) const {
     res.putT<std::uint32_t>(this->numUniqueWords());
 
     // Unique words and their counts
     for (auto i : boost::irange<std::size_t>(0, this->_cumulativeNumFound.size())) {
         auto w = WordT::byOrd(i);
         res.putT<WordT>(w);
-        res.putT<CountT>(this->_cumulativeNumFound[i]);
+        res.putT<_CountT>(this->_cumulativeNumFound[i]);
     }
 }
 

@@ -4,22 +4,43 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <span>
 
-#include "include/arithmetic_decoder_decoded.hpp"
+#include "file_opener.hpp"
+#include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
-#include "include/word/bytes_symbol.hpp"
-#include "include/dictionary/static_dictionary.hpp"
-#include "include/dictionary/uniform_dictionary.hpp"
+#include "include/word/bytes_word.hpp"
+#include "include/word/bits_word.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
+#include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
-using Sym = ga::w::BytesSymbol<numBytes>;
+using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using Dict = ga::dict::AdaptiveDictionary<Sym<numBytes>, 3>;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type, 8>;
 
 template <std::uint8_t numBytes>
-using Decoder = ga::ArithmeticDecoder<Sym<numBytes>, Dict<numBytes>, std::uint64_t>;
+using BytesDecoder = ga::ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, std::uint64_t>;
+
+template <std::uint16_t numBits>
+using BitsWord = ga::w::BitsWord<numBits>;
+
+template <std::uint16_t numBits>
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type, 8>;
+
+template <std::uint16_t numBits>
+using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
+
+#define BITS_DECODER_CASE(bits) \
+    case (bits): \
+        packIntoByteDataConstructor(BitsDecoder<(bits)>(std::move(decoded))); \
+        break;
+
+#define BYTES_DECODER_CASE(bytes) \
+    case (bytes * 8): \
+        packIntoByteDataConstructor(BytesDecoder<(bytes)>(std::move(decoded))); \
+        break;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
@@ -30,88 +51,65 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    std::string fileIn = argv[1];
-    std::string fileOut = argv[2];
+    auto filesOpener = FileOpener(argv[1], argv[2]);
 
-    std::ifstream fin{fileIn, std::ifstream::ate | std::ifstream::binary};
-    if (!fin.is_open()) {
-        std::cout << "Could not open file: " << fileIn << std::endl;
-        return 0;
-    }
-
-    fin.unsetf(std::ios::skipws);
-
-    // get its size:
-    std::streampos finSize;
-
-    fin.seekg(0, std::ios::end);
-    finSize = fin.tellg();
-    std::cerr << "File size: " << finSize << "." << std::endl;
-    fin.seekg(0, std::ios::beg);
-
-    std::vector<std::byte> finData;
-    finData.resize(finSize);
-
-    fin.read(reinterpret_cast<char*>(finData.data()), finSize);
-
-    auto decoded = ga::ArithmeticDecoderDecoded(std::move(finData));
+    auto decoded = ga::DataParser(filesOpener.getInData());
     std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
-    std::cerr << "Word bytes length: "
+    std::cerr << "Word bits length: "
               << static_cast<unsigned int>(symBitLen) << std::endl;
 
-    std::vector<std::byte> res;
+    auto dataConstructor = ga::ByteDataConstructor();
+
+    const auto packIntoByteDataConstructor = [&dataConstructor](auto&& decoder) {
+        auto ret = decoder.decode();
+        for (auto& word: ret.syms) {
+            word.bitsOut(dataConstructor.getBitBackInserter());
+        }
+        std::copy(ret.tail.begin(), ret.tail.end(),
+                  dataConstructor.getBitBackInserter());
+    };
 
     switch (symBitLen) {
-    case 8: {
-            auto decoder = Decoder<1>(std::move(decoded));
-            auto ret = decoder.decode();
-            auto symsSize = ret.syms.size();
-            res.resize(symsSize + ret.tail.size());
-            std::memcpy(res.data(), ret.syms.data(), symsSize);
-            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
-        }
-        break;
-    case 16: {
-            auto decoder = Decoder<2>(std::move(decoded));
-            auto ret = decoder.decode();
-            auto symsSize = ret.syms.size() * 2;
-            res.resize(symsSize + ret.tail.size());
-            std::memcpy(res.data(), ret.syms.data(), symsSize);
-            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
-        }
-        break;
-    case 24: {
-            auto decoder = Decoder<3>(std::move(decoded));
-            auto ret = decoder.decode();
-            auto symsSize = ret.syms.size() * 3;
-            res.resize(symsSize + ret.tail.size());
-            std::memcpy(res.data(), ret.syms.data(), symsSize);
-            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
-        }
-        break;
-    case 32: {
-            auto decoder = Decoder<4>(std::move(decoded));
-            auto ret = decoder.decode();
-            auto symsSize = ret.syms.size() * 3;
-            res.resize(symsSize + ret.tail.size());
-            std::memcpy(res.data(), ret.syms.data(), symsSize);
-            std::memcpy(res.data() + symsSize, ret.tail.data(), ret.tail.size());
-        }
-        break;
+        BYTES_DECODER_CASE(1);
+        BITS_DECODER_CASE(9);
+        BITS_DECODER_CASE(10);
+        BITS_DECODER_CASE(11);
+        BITS_DECODER_CASE(12);
+        BITS_DECODER_CASE(13);
+        BITS_DECODER_CASE(14);
+        BITS_DECODER_CASE(15);
+        BYTES_DECODER_CASE(2);
+        BITS_DECODER_CASE(17);
+        BITS_DECODER_CASE(18);
+        BITS_DECODER_CASE(19);
+        BITS_DECODER_CASE(20);
+        BITS_DECODER_CASE(21);
+        BITS_DECODER_CASE(22);
+        BITS_DECODER_CASE(23);
+        BYTES_DECODER_CASE(3);
+        BITS_DECODER_CASE(25);
+        BITS_DECODER_CASE(26);
+        BITS_DECODER_CASE(27);
+        BITS_DECODER_CASE(28);
+        BITS_DECODER_CASE(29);
+        BITS_DECODER_CASE(30);
+        BITS_DECODER_CASE(31);
+        BYTES_DECODER_CASE(4);
+        BITS_DECODER_CASE(33);
+        BITS_DECODER_CASE(34);
+        BITS_DECODER_CASE(35);
+        BITS_DECODER_CASE(36);
+        BITS_DECODER_CASE(37);
+        BITS_DECODER_CASE(38);
+        BITS_DECODER_CASE(39);
+        BYTES_DECODER_CASE(5);
     default:
         assert(false);
         break;
     }
 
-    std::ofstream fout;
-    fout.open(fileOut, std::ios::binary | std::ios::out);
-    if (!fout.is_open()) {
-        std::cout << "Could not open file: " << fileOut << "." << std::endl;
-        return 0;
-    }
-    fout.write(reinterpret_cast<const char*>(res.data()), res.size());
-    fout.close();
+    filesOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
 
     return 0;
 }

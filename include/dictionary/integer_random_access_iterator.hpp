@@ -19,23 +19,23 @@ public:
     using type = IntegerRandomAccessIterator<T>;
 public:
     //------------------------------------------------------------------------//
-    IntegerRandomAccessIterator(T initial = 0) : _val(initial) {};
+    IntegerRandomAccessIterator(T initial = 0) : _val(initial) {}
     //------------------------------------------------------------------------//
     IntegerRandomAccessIterator(const type& other) = default;
 protected:
     //------------------------------------------------------------------------//
     std::ptrdiff_t
-    distance_to(const type& rhs) const  { return rhs._val - _val; };
+    distance_to(const type& rhs) const  { return rhs._val - _val; }
     //------------------------------------------------------------------------//
-    void advance(std::ptrdiff_t n)      { _val += n; };
+    void advance(std::ptrdiff_t n)      { _val += n; }
     //------------------------------------------------------------------------//
-    T dereference() const               { return _val; };
+    T dereference() const               { return _val; }
     //------------------------------------------------------------------------//
-    bool equal(const type& other) const { return _val == other._val; };
+    bool equal(const type& other) const { return _val == other._val; }
     //------------------------------------------------------------------------//
-    void increment()                    { ++_val; };
+    void increment()                    { ++_val; }
     //------------------------------------------------------------------------//
-    void decrement()                    { --_val; };
+    void decrement()                    { --_val; }
 
 public:
     //------------------------------------------------------------------------//
