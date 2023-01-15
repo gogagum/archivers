@@ -9,11 +9,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost COMPONENTS system REQUIRED)
+find_package(Boost COMPONENTS system program_options REQUIRED)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -42,6 +45,10 @@ if(Boost_FOUND)
         include/dictionary/integer_random_access_iterator.hpp
         include/word/bytes_word.hpp
     )
+
+    target_link_libraries(archiever_encoder ${Boost_LIBRARIES})
+    target_link_libraries(archiever_decoder ${Boost_LIBRARIES})
+
     install(TARGETS archiever_encoder archiever_decoder
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()

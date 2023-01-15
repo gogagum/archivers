@@ -81,7 +81,6 @@ constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
 //----------------------------------------------------------------------------//
 template <class SymT>
 auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
-    Range ret;
     if (r.high <= symsNum_2 * correctingConst) {
         return { r.low * 2, r.high * 2 };
     } else if (r.low >= symsNum_2 * correctingConst) {
@@ -96,7 +95,7 @@ auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
             r.high * 2 - symsNum_2 * correctingConst
         };
     }
-    return r;
+    return Range();
 }
 
 }

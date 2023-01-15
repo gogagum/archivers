@@ -6,6 +6,9 @@
 #include <vector>
 #include <span>
 
+#include <boost/program_options.hpp>
+#include <boost/format.hpp>
+
 #include "file_opener.hpp"
 #include "include/data_parser.hpp"
 #include "include/arithmetic_decoder.hpp"
@@ -32,6 +35,8 @@ using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::im
 template <std::uint16_t numBits>
 using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
 
+namespace bpo = boost::program_options;
+
 #define BITS_DECODER_CASE(bits) \
     case (bits): \
         packIntoByteDataConstructor(BitsDecoder<(bits)>(std::move(decoded), 2)); \
@@ -44,72 +49,87 @@ using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, 
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
-    assert(argc == 3 && "Wrong number of arguments.");
+    bpo::options_description appOptionsDescr("Console options.");
 
-    if (argc < 3) {
-        std::cout << "Usage: " << argv[0] << " <decoded> <result>" << std::endl;
-        return 0;
+    std::string inFileName;
+    std::string outFileName;
+
+    try {
+        appOptionsDescr.add_options()
+                ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
+                ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.");
+
+        bpo::variables_map vm;
+        bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
+        bpo::notify(vm);
+    } catch (const std::logic_error& error) {
+        std::cout << error.what() << std::endl;
+        return 1;
     }
 
-    auto filesOpener = FileOpener(argv[1], argv[2]);
+    try {
+        auto filesOpener = FileOpener(inFileName, outFileName);
 
-    auto decoded = ga::DataParser(filesOpener.getInData());
-    std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
+        auto decoded = ga::DataParser(filesOpener.getInData());
+        std::uint16_t symBitLen = decoded.takeT<std::uint16_t>();
 
-    std::cerr << "Word bits length: "
-              << static_cast<unsigned int>(symBitLen) << std::endl;
+        std::cerr << "Word bits length: "
+                  << static_cast<unsigned int>(symBitLen) << std::endl;
 
-    auto dataConstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ga::ByteDataConstructor();
 
-    const auto packIntoByteDataConstructor = [&dataConstructor](auto&& decoder) {
-        auto ret = decoder.decode();
-        for (auto& word: ret.syms) {
-            word.bitsOut(dataConstructor.getBitBackInserter());
+        const auto packIntoByteDataConstructor = [&dataConstructor, &filesOpener](auto&& decoder) {
+            auto ret = decoder.decode();
+            for (auto& word: ret.syms) {
+                word.bitsOut(dataConstructor.getBitBackInserter());
+            }
+            std::copy(ret.tail.begin(), ret.tail.end(),
+                      dataConstructor.getBitBackInserter());
+            filesOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
+        };
+
+        switch (symBitLen) {
+            BYTES_DECODER_CASE(1);
+            BITS_DECODER_CASE(9);
+            BITS_DECODER_CASE(10);
+            BITS_DECODER_CASE(11);
+            BITS_DECODER_CASE(12);
+            BITS_DECODER_CASE(13);
+            BITS_DECODER_CASE(14);
+            BITS_DECODER_CASE(15);
+            BYTES_DECODER_CASE(2);
+            BITS_DECODER_CASE(17);
+            BITS_DECODER_CASE(18);
+            BITS_DECODER_CASE(19);
+            BITS_DECODER_CASE(20);
+            BITS_DECODER_CASE(21);
+            BITS_DECODER_CASE(22);
+            BITS_DECODER_CASE(23);
+            BYTES_DECODER_CASE(3);
+            BITS_DECODER_CASE(25);
+            BITS_DECODER_CASE(26);
+            BITS_DECODER_CASE(27);
+            BITS_DECODER_CASE(28);
+            BITS_DECODER_CASE(29);
+            BITS_DECODER_CASE(30);
+            BITS_DECODER_CASE(31);
+            BYTES_DECODER_CASE(4);
+            BITS_DECODER_CASE(33);
+            BITS_DECODER_CASE(34);
+            BITS_DECODER_CASE(35);
+            BITS_DECODER_CASE(36);
+            BITS_DECODER_CASE(37);
+            BITS_DECODER_CASE(38);
+            BITS_DECODER_CASE(39);
+            BYTES_DECODER_CASE(5);
+        default:
+            throw std::runtime_error((boost::format("bit length %1% is not supported") % symBitLen).str());
+            break;
         }
-        std::copy(ret.tail.begin(), ret.tail.end(),
-                  dataConstructor.getBitBackInserter());
-    };
-
-    switch (symBitLen) {
-        BYTES_DECODER_CASE(1);
-        BITS_DECODER_CASE(9);
-        BITS_DECODER_CASE(10);
-        BITS_DECODER_CASE(11);
-        BITS_DECODER_CASE(12);
-        BITS_DECODER_CASE(13);
-        BITS_DECODER_CASE(14);
-        BITS_DECODER_CASE(15);
-        BYTES_DECODER_CASE(2);
-        BITS_DECODER_CASE(17);
-        BITS_DECODER_CASE(18);
-        BITS_DECODER_CASE(19);
-        BITS_DECODER_CASE(20);
-        BITS_DECODER_CASE(21);
-        BITS_DECODER_CASE(22);
-        BITS_DECODER_CASE(23);
-        BYTES_DECODER_CASE(3);
-        BITS_DECODER_CASE(25);
-        BITS_DECODER_CASE(26);
-        BITS_DECODER_CASE(27);
-        BITS_DECODER_CASE(28);
-        BITS_DECODER_CASE(29);
-        BITS_DECODER_CASE(30);
-        BITS_DECODER_CASE(31);
-        BYTES_DECODER_CASE(4);
-        BITS_DECODER_CASE(33);
-        BITS_DECODER_CASE(34);
-        BITS_DECODER_CASE(35);
-        BITS_DECODER_CASE(36);
-        BITS_DECODER_CASE(37);
-        BITS_DECODER_CASE(38);
-        BITS_DECODER_CASE(39);
-        BYTES_DECODER_CASE(5);
-    default:
-        assert(false);
-        break;
+    } catch (const std::runtime_error&  error) {
+        std::cout << error.what();
+        return 2;
     }
-
-    filesOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
 
     return 0;
 }
