@@ -10,6 +10,11 @@ static_assert(!ga::dict::traits::needWordIncrease<
                   ga::dict::StaticDictionary<ga::w::BytesWord<1>>
               >);
 
+//----------------------------------------------------------------------------//
+static_assert(ga::dict::traits::needSerialize<
+                  ga::dict::StaticDictionary<ga::w::BytesWord<1>>
+              >);
+
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(StaticDictionary, Construct) {

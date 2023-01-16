@@ -1,8 +1,6 @@
 #ifndef UNIFORM_DICTIONARY_HPP
 #define UNIFORM_DICTIONARY_HPP
 
-#include "dictionary_tags.hpp"
-
 #include <cstdint>
 
 namespace ga::dict {
@@ -15,7 +13,6 @@ class UniformDictionary {
 public:
 
     using Word = WordT;
-    using ConstructionTag = tags::NoNeedWordsCounts;
 
 public:
 

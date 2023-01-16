@@ -12,6 +12,7 @@
 #include "include/word/bits_word.hpp"
 #include "include/flow/bits_word_flow.hpp"
 #include "include/dictionary/adaptive_dictionary.hpp"
+#include "include/dictionary/adaptive_dicitonary_ratio_constructor.hpp"
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
@@ -21,6 +22,9 @@ using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
 
 template <std::uint8_t numBytes>
 using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type>;
+
+template <std::uint8_t numBytes>
+using BytesDictConstructor = ga::dict::construct::AdaptiveDictionaryRatioConstructor<BytesDict<numBytes>>;
 
 template <std::uint8_t numBytes>
 using BytesCoder = ga::ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, std::uint64_t>;
@@ -35,19 +39,26 @@ template <std::uint16_t numBits>
 using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type>;
 
 template <std::uint16_t numBits>
+using BitsDictConstructor = ga::dict::construct::AdaptiveDictionaryRatioConstructor<BitsDict<numBits>>;
+
+template <std::uint16_t numBits>
 using BitsCoder = ga::ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, std::uint64_t>;
 
 #define BYTES_CASE(bytes) \
     case (bytes) * 8: \
         encodeImpl(BytesCoder<(bytes)>( \
-                       BytesFlow<(bytes)>(fileOpener.getInData()), ratio)); \
+                       BytesFlow<(bytes)>(fileOpener.getInData()), \
+                       BytesDictConstructor<(bytes)>(ratio)) \
+        ); \
         break;
 
 #define BITS_CASE(bits) \
     case (bits): \
         encodeImpl(BitsCoder<(bits)>( \
-                       BitsFlow<(bits)>(fileOpener.getInData()), ratio)); \
-        break;
+                       BitsFlow<(bits)>(fileOpener.getInData()), \
+                       BitsDictConstructor<(bits)>(ratio)) \
+        ); \
+    break;
 
 namespace bpo = boost::program_options;
 
@@ -85,38 +96,29 @@ int main(int argc, char* argv[]) {
 
         switch (numBits) {
             BYTES_CASE(1);
-            BITS_CASE(9);
-            BITS_CASE(10);
-            BITS_CASE(11);
-            BITS_CASE(12);
-            BITS_CASE(13);
-            BITS_CASE(14);
-            BITS_CASE(15);
+            //BITS_CASE(9);
+            //BITS_CASE(10);
+            //BITS_CASE(11);
+            //BITS_CASE(12);
+            //BITS_CASE(13);
+            //BITS_CASE(14);
+            //BITS_CASE(15);
             BYTES_CASE(2);
-            BITS_CASE(17);
-            BITS_CASE(18);
-            BITS_CASE(19);
-            BITS_CASE(20);
-            BITS_CASE(21);
-            BITS_CASE(22);
-            BITS_CASE(23);
+            //BITS_CASE(17);
+            //BITS_CASE(18);
+            //BITS_CASE(19);
+            //BITS_CASE(20);
+            //BITS_CASE(21);
+            //BITS_CASE(22);
+            //BITS_CASE(23);
             BYTES_CASE(3);
-            BITS_CASE(25);
-            BITS_CASE(26);
-            BITS_CASE(27);
-            BITS_CASE(28);
-            BITS_CASE(29);
-            BITS_CASE(30);
-            BITS_CASE(31);
-            BYTES_CASE(4);
-            BITS_CASE(33);
-            BITS_CASE(34);
-            BITS_CASE(35);
-            BITS_CASE(36);
-            BITS_CASE(37);
-            BITS_CASE(38);
-            BITS_CASE(39);
-            BYTES_CASE(5);
+            //BITS_CASE(25);
+            //BITS_CASE(26);
+            //BITS_CASE(27);
+            //BITS_CASE(28);
+            //BITS_CASE(29);
+            //BITS_CASE(30);
+            //BITS_CASE(31);
         default:
             assert(false);
             break;

@@ -3,7 +3,6 @@
 
 #include <boost/range/irange.hpp>
 
-#include "dictionary_tags.hpp"
 #include "../byte_data_constructor.hpp"
 
 namespace ga::dict {
@@ -17,7 +16,6 @@ public:
 
     using Word = WordT;
     using Count = CountT;
-    using ConstructionTag = tags::NeedWordsCounts;
 
 public:
 
@@ -68,7 +66,10 @@ public:
      */
     std::uint64_t numUniqueWords() const;
 
-    template <class _CountT>
+    /**
+     * @brief serialize
+     * @param res
+     */
     void serialize(ByteDataConstructor& res) const;
 
 protected:
@@ -143,7 +144,6 @@ std::uint64_t StaticDictionary<WordT, CountT>::numUniqueWords() const {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-template <class _CountT>
 void StaticDictionary<WordT, CountT>::serialize(ByteDataConstructor& res) const {
     res.putT<std::uint32_t>(this->numUniqueWords());
 
@@ -151,7 +151,7 @@ void StaticDictionary<WordT, CountT>::serialize(ByteDataConstructor& res) const 
     for (auto i : boost::irange<std::size_t>(0, this->_cumulativeNumFound.size())) {
         auto w = WordT::byOrd(i);
         res.putT<WordT>(w);
-        res.putT<_CountT>(this->_cumulativeNumFound[i]);
+        res.putT<std::uint64_t>(this->_cumulativeNumFound[i]);
     }
 }
 

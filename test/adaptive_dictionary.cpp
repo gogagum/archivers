@@ -10,6 +10,11 @@ static_assert(ga::dict::traits::needWordIncrease<
                   ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>
               >);
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+static_assert(ga::dict::traits::needSerialize<
+                  ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>
+              >);
+
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, Construct) {

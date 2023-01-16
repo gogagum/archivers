@@ -2,7 +2,7 @@
 #define ADAPTIVE_DICTIONARY_HPP
 
 #include "integer_random_access_iterator.hpp"
-#include "dictionary_tags.hpp"
+#include "../byte_data_constructor.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -25,12 +25,13 @@ class AdaptiveDictionary {
 public:
 
     using Word = WordT;
-    using ConstructionTag = tags::NoNeedWordsCounts;
     using Ord = typename WordT::Ord;
     using Count = CountT;
 
 public:
     AdaptiveDictionary(std::uint64_t ratio);
+
+    AdaptiveDictionary(AdaptiveDictionary<WordT, CountT>&& other) = default;
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -64,6 +65,11 @@ public:
      * @param word - word which count we increase.
      */
     void increaseWordCount(const WordT& word);
+
+    /**
+     * @brief serialize
+     */
+    void serialize(ByteDataConstructor& dataConstructor) const;
 
 public:
     boost::icl::interval_map<Ord, Count> _additionalCounts;
@@ -130,6 +136,14 @@ AdaptiveDictionary<WordT, CountT>::increaseWordCount(const WordT& word) {
                 ),
                 _ratio
             );
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+void
+AdaptiveDictionary<WordT, CountT>::serialize(
+        ByteDataConstructor& dataConstructor) const {
+    dataConstructor.putT(CountT(_ratio));
 }
 
 }  // namecpace ga::dict

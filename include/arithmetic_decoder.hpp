@@ -15,7 +15,6 @@
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
-#include "dictionary/dictionary_tags.hpp"
 #include "dictionary/traits.hpp"
 
 namespace ga {
@@ -43,21 +42,8 @@ public:
 
 public:
 
-    /**
-     * @brief ArithmeticDecoder constructor from file source.
-     * @param source
-     */
-    template <class DictT_ = DictT, class... DictOuterArgs>
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_, dict::tags::NeedWordsCounts
-        >
-    ArithmeticDecoder(Source&& source, DictOuterArgs&&... dictOuterArgs);
-
-    template <class DictT_ = DictT, class... DictOuterArgs>
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_, dict::tags::NoNeedWordsCounts
-        >
-    ArithmeticDecoder(Source&& source, DictOuterArgs&&... dictOuterArgs);
+    template <class DictConstructor>
+    ArithmeticDecoder(Source& source, DictConstructor&& constructor);
 
     /**
      * @brief decode - decode source as a vector of bytes.
@@ -85,42 +71,23 @@ private:
     std::uint8_t _computeAdditionalBitsCnt() const;
 
 private:
-    Source _source;
-    const Tail _tail;
-    CountT _fileWordsCount;
-    DictT _dict;
+    Source& _source;
+    DictT _dict;                                 // #1 to deserialize.
+    CountT _fileWordsCount;                      // #2 to deserialize.
+    const Tail _tail;                            // #3 to deserialize.
     const std::uint8_t _additionalBitsCnt;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictT_, class... DictOuterArgs>
-requires ga::dict::traits::constructionTypeIs<
-    DictT_,
-    dict::tags::NeedWordsCounts
->
+template <class DictConstructor>
 ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
-        Source&& source, DictOuterArgs&&... dictOuterArgs)
-    : _source(std::move(source)),
-      _tail(_deserializeTail()),
+        Source& source, DictConstructor&& constructor)
+    : _source(source),
+      _dict(constructor.construct()),
       _fileWordsCount(_deserializeFileWordsCount()),
-      _dict(_deserializeWordsCounts(), std::forward<DictOuterArgs>(dictOuterArgs)...),
-      _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-template <class DictT_, class... DictOuterArgs>
-requires ga::dict::traits::constructionTypeIs<
-    DictT_,
-    dict::tags::NoNeedWordsCounts
->
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
-        Source&& source, DictOuterArgs&&... dictOuterArgs)
-    : _source(std::move(source)),
       _tail(_deserializeTail()),
-      _fileWordsCount(_deserializeFileWordsCount()),
-      _dict(std::forward<DictOuterArgs>(dictOuterArgs)...),
       _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
 
 //----------------------------------------------------------------------------//

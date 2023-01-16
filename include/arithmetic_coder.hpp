@@ -13,7 +13,6 @@
 
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
-#include "dictionary/dictionary_tags.hpp"
 #include "dictionary/traits.hpp"
 
 namespace ga {
@@ -38,26 +37,12 @@ private:
 public:
 
     /**
-     * @brief ArithmeticCoder constructor from byte flow to encode.
-     * @param byteFlow - byte flow.
-     */
-    template <class DictT_, class... DictOuterArgs>
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_,
-            dict::tags::NeedWordsCounts
-        >
-    ArithmeticCoder(FlowT&& byteFlow, DictOuterArgs&&... dictOuterArgs);
-
-    /**
      * @brief ArithmeticCoder
      * @param byteFlow
+     * @param constructor
      */
-    template <class DictT_ = DictT, class... DictOuterArgs>
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_,
-            dict::tags::NoNeedWordsCounts
-        >
-    ArithmeticCoder(FlowT&& byteFlow, DictOuterArgs&&... dictOuterArgs);
+    template <class DictConstructor>
+    ArithmeticCoder(FlowT&& byteFlow, DictConstructor&& constructor);
 
     /**
      * @brief encode - encode byte flow.
@@ -71,6 +56,8 @@ private:
 
     void _serializeNumBits(Res& res);
 
+    void _serializeDict(Res& res);
+
     void _serializeTail(Res& res);
 
     void _serializeFileWordsCount(Res& res);
@@ -83,30 +70,13 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-template <class DictT_, class... DictOuterArgs>
-    requires ga::dict::traits::constructionTypeIs<
-        DictT_,
-        dict::tags::NeedWordsCounts
-    >
+template <class FlowT, class DictT, class CountT>
+template <class DictConstructor>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
-                                                       DictOuterArgs&&... dictOuterArgs)
-        : _symFlow(symbolsFlow),
-          _dict(_countSyms(), std::forward<DictOuterArgs>(dictOuterArgs)...),
-          _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-template <class DictT_, class... DictOuterArgs>
-    requires ga::dict::traits::constructionTypeIs<
-        DictT_,
-        dict::tags::NoNeedWordsCounts
-    >
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
-                                                       DictOuterArgs&&... dictOuterArgs)
-        : _symFlow(symbolsFlow),
-          _dict(std::forward<DictOuterArgs>(dictOuterArgs)...),
-          _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
+                                                       DictConstructor&& constructor) :
+    _symFlow(symbolsFlow),
+    _dict(constructor.construct()),
+    _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
@@ -114,12 +84,9 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     auto ret = Res();
 
     _serializeNumBits(ret);
-    _serializeTail(ret);
+    _serializeDict(ret);
     _serializeFileWordsCount(ret);
-
-    if constexpr (std::is_same_v<typename DictT::ConstructionTag, dict::tags::NeedWordsCounts>) {
-        _dict.template serialize<CountT>(ret);
-    }
+    _serializeTail(ret);
 
     auto currRange = OrdRange { 0, correctedSymsNum };
 
@@ -202,6 +169,14 @@ std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
     res.putT<std::uint16_t>(Word::numBits);
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
+    if constexpr (ga::dict::traits::needSerialize<DictT>) {
+        _dict.serialize(res);
+    }
 }
 
 //----------------------------------------------------------------------------//

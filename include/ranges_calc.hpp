@@ -95,7 +95,7 @@ auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
             r.high * 2 - symsNum_2 * correctingConst
         };
     }
-    return Range();
+    return r;
 }
 
 }

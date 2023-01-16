@@ -2,23 +2,22 @@
 #define TRAITS_HPP
 
 #include <utility>
+#include "../byte_data_constructor.hpp"
 
 namespace ga::dict::traits {
 
-namespace impl {
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <class DictT>
-struct NeedWordIncrease {
-    constexpr static bool ret = requires(DictT a) {
-        { a.increaseWordCount(std::declval<typename DictT::Word>()) };
-    };
+constexpr const bool needWordIncrease = requires(DictT a) {
+    { a.increaseWordCount(std::declval<typename DictT::Word>()) };
 };
-}
 
-//----------------------------------------------------------------------------//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <class DictT>
-constexpr const bool needWordIncrease = impl::NeedWordIncrease<DictT>::ret;
+constexpr const bool needSerialize = requires(const DictT& a, ByteDataConstructor& dataConstructor) {
+    { a.serialize(dataConstructor) };
+};
 
 //----------------------------------------------------------------------------//
 template <class DictT, class ConstructionTag>
