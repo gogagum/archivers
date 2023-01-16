@@ -14,7 +14,7 @@
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_word.hpp"
 #include "include/word/bits_word.hpp"
-#include "include/dictionary/adaptive/adaptive_dictionary.hpp"
+#include "include/dictionary/adaptive_dictionary.hpp"
 #include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>

@@ -1,7 +1,7 @@
 #ifndef ADAPTIVE_DICTIONARY_HPP
 #define ADAPTIVE_DICTIONARY_HPP
 
-#include "../integer_random_access_iterator.hpp"
+#include "integer_random_access_iterator.hpp"
 
 #include <cassert>
 #include <cstdint>

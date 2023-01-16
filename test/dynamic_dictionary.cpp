@@ -3,26 +3,26 @@
 #include "../include/word/bytes_word.hpp"
 #include "../include/word/bits_word.hpp"
 #include "../include/word/integer_word.hpp"
-#include "../include/dictionary/adaptive/adaptive_dictionary.hpp"
+#include "../include/dictionary/adaptive_dictionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, ConstructBytesWord) {
+TEST(AdaptiveDictionary, ConstructBytesWord) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>(1);
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, ConstructBitsWord) {
+TEST(AdaptiveDictionary, ConstructBitsWord) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BitsWord<2>>(2);
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, ConstructIntWord) {
+TEST(AdaptiveDictionary, ConstructIntWord) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::IntegerWord<int, 0, 3>>(3);
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, LowerAfterConstruct) {
+TEST(AdaptiveDictionary, LowerAfterConstruct) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(3);
     auto symData = std::array{std::byte{37}};
     auto word = ga::w::BytesWord<1>(symData);
@@ -30,7 +30,7 @@ TEST(DynamicDictionary, LowerAfterConstruct) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, LowerZeroAfterConstruct) {
+TEST(AdaptiveDictionary, LowerZeroAfterConstruct) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(2);
     auto symData = std::array<std::byte, 1>{std::byte{0}};
     auto word = ga::w::BytesWord<1>(symData.data());
@@ -38,7 +38,7 @@ TEST(DynamicDictionary, LowerZeroAfterConstruct) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, HigherZeroAfterConstruct) {
+TEST(AdaptiveDictionary, HigherZeroAfterConstruct) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(2);
     auto symData = std::array{std::byte{42}};
     auto word = ga::w::BytesWord<1>(symData);
@@ -46,7 +46,7 @@ TEST(DynamicDictionary, HigherZeroAfterConstruct) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, Increase) {
+TEST(AdaptiveDictionary, Increase) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{12}};
     dict.increaseWordCount(ga::w::BytesWord<1>(increasedWordData));
@@ -56,7 +56,7 @@ TEST(DynamicDictionary, Increase) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, IncreaseExactTheSame) {
+TEST(AdaptiveDictionary, IncreaseExactTheSame) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{12}};
     auto increasedWord = ga::w::BytesWord<1>(increasedWordData);
@@ -66,7 +66,7 @@ TEST(DynamicDictionary, IncreaseExactTheSame) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DynamicDictionary, IncreaseZero) {
+TEST(AdaptiveDictionary, IncreaseZero) {
     auto dict = ga::dict::AdaptiveDictionary<ga::w::BytesWord<1>>(1);
     auto increasedWordData = std::array{std::byte{0}};
     auto increasedWord = ga::w::BytesWord<1>(increasedWordData);

@@ -2,7 +2,7 @@
 
 #include "../include/arithmetic_coder.hpp"
 #include "../include/flow/bits_word_flow.hpp"
-#include "../include/dictionary/adaptive/adaptive_dictionary.hpp"
+#include "../include/dictionary/adaptive_dictionary.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
