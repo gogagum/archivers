@@ -1,8 +1,6 @@
 #ifndef BITS_SYMBOL_HPP
 #define BITS_SYMBOL_HPP
 
-#include "ord_t_choose.hpp"
-
 #include <array>
 #include <algorithm>
 #include <boost/range/irange.hpp>
@@ -20,7 +18,7 @@ template <std::uint16_t _numBits>
 class BitsWord {
 public:
 
-    using Ord = typename impl::OrdTChoose<_numBits>::Type;
+    using Ord = std::uint64_t;
 
 public:
 

@@ -6,44 +6,9 @@
 
 #include "../include/word/bytes_word.hpp"
 #include "../include/word/word_ord_comp.hpp"
-#include "../include/ranges_calc.hpp"
 #include "../include/byte_data_constructor.hpp"
 
-namespace bm = boost::multiprecision;
-
 ////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::BytesWord<1>>::Type,
-        std::uint64_t
-    >
-);
-
- //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::BytesWord<3>>::Type,
-        std::uint64_t
-    >
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::BytesWord<4>>::Type,
-        bm::uint256_t
-    >
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::BytesWord<30>>::Type,
-        bm::uint256_t
-    >
-);
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(!ga::w::BytesOutputTransformable<std::vector<bool>::iterator>);
 

@@ -3,32 +3,7 @@
 
 #include <cstdint>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
-using tp = boost::multiprecision::uint256_t;
-
 namespace ga {
-
-namespace impl {
-
-////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT>
-struct CountTChoose;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT> requires (SymT::numBits < 32)
-struct CountTChoose<SymT> {
-    using Type = std::uint64_t;
-};
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT> requires (SymT::numBits >= 32)
-struct CountTChoose<SymT> {
-    using Type = boost::multiprecision::uint256_t;
-};
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
@@ -37,7 +12,7 @@ template <class SymT>
 class RangesCalc {
 public:
 
-    using Count = typename impl::CountTChoose<SymT>::Type;
+    using Count = std::uint64_t;
     constexpr static Count _computeCorrectingConst();
 
 public:

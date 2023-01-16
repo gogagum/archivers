@@ -15,7 +15,6 @@ TEST(ByteDataConstructor, PutBitFalse) {
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b00000000});
 }
 
-
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBitTrue) {
     auto encoded = ga::ByteDataConstructor();

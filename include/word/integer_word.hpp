@@ -6,8 +6,6 @@
 #include <cassert>
 #include <cstdint>
 
-#include "ord_t_choose.hpp"
-
 namespace ga::w {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +15,7 @@ template <std::integral I, I low, std::uint16_t _numBits>
 class IntegerWord {
 public:
 
-    using Ord = typename impl::OrdTChoose<_numBits>::Type;
+    using Ord = std::uint64_t;
 
 public:
 

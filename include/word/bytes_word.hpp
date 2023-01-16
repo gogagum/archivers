@@ -12,7 +12,6 @@
 #include <boost/range/combine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "ord_t_choose.hpp"
 #include "../bits_iterator.hpp"
 
 namespace ga::w {
@@ -33,7 +32,7 @@ class BytesWord {
 public:
 
     constexpr static std::uint16_t numBits = _numBytes * 8;
-    using Ord = typename impl::OrdTChoose<numBits>::Type;
+    using Ord = std::uint64_t;
     constexpr static Ord wordsCount = Ord{1} << numBits;
 
 public:

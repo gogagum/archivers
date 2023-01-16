@@ -106,15 +106,16 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 
         auto h = _dict.getHigherCumulativeNumFound(sym);
         auto l = _dict.getLowerCumulativeNumFound(sym);
-
-        currRange = OrdRange {
-            currRange.low + (range * l) / _dict.totalWordsCount(),
-            currRange.low + (range * h) / _dict.totalWordsCount()
-        };
+        auto totalWords = _dict.totalWordsCount();
 
         if constexpr (dict::traits::needWordIncrease<DictT>) {
             _dict.increaseWordCount(sym);
         }
+
+        currRange = OrdRange {
+            currRange.low + (range * l) / totalWords,
+            currRange.low + (range * h) / totalWords
+        };
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {

@@ -93,7 +93,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
 auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
-    typename ga::impl::CountTChoose<SymT>::Type value = 0;
+    typename RangesCalc<SymT>::Count value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {

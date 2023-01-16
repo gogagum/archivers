@@ -15,23 +15,13 @@
 #include "include/word/bytes_word.hpp"
 #include "include/word/bits_word.hpp"
 #include "include/dictionary/adaptive/adaptive_dictionary.hpp"
-#include "include/dictionary/adaptive/adaptive_dictionary_deserialize_constructor.hpp"
 #include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<
-    BytesWord<numBytes>,
-    typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type
->;
-
-template <std::uint8_t numBytes>
-using BytesDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<
-    BytesDict<numBytes>,
-    ga::DataParser
->;
+using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>>;
 
 template <std::uint8_t numBytes>
 using BytesDecoder = ga::ArithmeticDecoder<
@@ -44,16 +34,7 @@ template <std::uint16_t numBits>
 using BitsWord = ga::w::BitsWord<numBits>;
 
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<
-    BitsWord<numBits>,
-    typename ga::impl::CountTChoose<BitsWord<numBits>>::Type
->;
-
-template <std::uint16_t numBits>
-using BitsDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<
-    BitsDict<numBits>,
-    ga::DataParser
->;
+using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>>;
 
 template <std::uint16_t numBits>
 using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
@@ -62,12 +43,18 @@ namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
     case (bits): \
-        packIntoByteDataConstructor(BitsDecoder<(bits)>(decoded, BitsDictConstructor<(bits)>(decoded))); \
+        packIntoByteDataConstructor(BitsDecoder<(bits)>( \
+            decoded, \
+            [&decoded]() { return BitsDict<(bits)>(decoded.takeT<std::uint64_t>()); } \
+        )); \
         break;
 
 #define BYTES_DECODER_CASE(bytes) \
     case (bytes * 8): \
-        packIntoByteDataConstructor(BytesDecoder<(bytes)>(decoded, BytesDictConstructor<(bytes)>(decoded))); \
+        packIntoByteDataConstructor(BytesDecoder<(bytes)>( \
+            decoded, \
+            [&decoded]() { return BytesDict<(bytes)>(decoded.takeT<std::uint64_t>()); } \
+        )); \
         break;
 
 //----------------------------------------------------------------------------//
@@ -99,10 +86,6 @@ int main(int argc, char* argv[]) {
         std::cout << "Word bits length: "
                   << static_cast<unsigned int>(symBitLen) << std::endl;
 
-        //auto ratio = decoded.takeT<std::uint64_t>();
-        //std::cout << "Ratio: "
-        //          << static_cast<unsigned int>(ratio) << std::endl;
-
         auto dataConstructor = ga::ByteDataConstructor();
 
         const auto packIntoByteDataConstructor = [&dataConstructor, &filesOpener](auto&& decoder) {
@@ -123,7 +106,7 @@ int main(int argc, char* argv[]) {
             //BITS_DECODER_CASE(12);
             //BITS_DECODER_CASE(13);
             //BITS_DECODER_CASE(14);
-            //BITS_DECODER_CASE(15);
+            BITS_DECODER_CASE(15);
             BYTES_DECODER_CASE(2);
             //BITS_DECODER_CASE(17);
             //BITS_DECODER_CASE(18);
@@ -138,8 +121,9 @@ int main(int argc, char* argv[]) {
             //BITS_DECODER_CASE(27);
             //BITS_DECODER_CASE(28);
             //BITS_DECODER_CASE(29);
-            //BITS_DECODER_CASE(30);
-            //BITS_DECODER_CASE(31);
+            BITS_DECODER_CASE(30);
+            BITS_DECODER_CASE(31);
+            BYTES_DECODER_CASE(4);
         default:
             throw std::runtime_error((boost::format("bit length %1% is not supported") % symBitLen).str());
             break;
