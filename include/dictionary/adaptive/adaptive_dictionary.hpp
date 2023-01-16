@@ -1,8 +1,7 @@
 #ifndef ADAPTIVE_DICTIONARY_HPP
 #define ADAPTIVE_DICTIONARY_HPP
 
-#include "integer_random_access_iterator.hpp"
-#include "../byte_data_constructor.hpp"
+#include "../integer_random_access_iterator.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -69,7 +68,8 @@ public:
     /**
      * @brief serialize
      */
-    void serialize(ByteDataConstructor& dataConstructor) const;
+    template <class DestT>
+    void serialize(DestT& dataConstructor) const;
 
 public:
     boost::icl::interval_map<Ord, Count> _additionalCounts;
@@ -140,9 +140,9 @@ AdaptiveDictionary<WordT, CountT>::increaseWordCount(const WordT& word) {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
+template <class DestT>
 void
-AdaptiveDictionary<WordT, CountT>::serialize(
-        ByteDataConstructor& dataConstructor) const {
+AdaptiveDictionary<WordT, CountT>::serialize(DestT& dataConstructor) const {
     dataConstructor.putT(CountT(_ratio));
 }
 

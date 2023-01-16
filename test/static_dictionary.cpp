@@ -12,7 +12,8 @@ static_assert(!ga::dict::traits::needWordIncrease<
 
 //----------------------------------------------------------------------------//
 static_assert(ga::dict::traits::needSerialize<
-                  ga::dict::StaticDictionary<ga::w::BytesWord<1>>
+                  ga::dict::StaticDictionary<ga::w::BytesWord<1>>,
+                  ga::ByteDataConstructor
               >);
 
 ////////////////////////////////////////////////////////////////////////////////

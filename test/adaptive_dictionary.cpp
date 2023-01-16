@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../include/dictionary/adaptive_dictionary.hpp"
+#include "../include/dictionary/adaptive/adaptive_dictionary.hpp"
 #include "../include/word/bytes_word.hpp"
 #include "../include/dictionary/traits.hpp"
 
@@ -12,7 +12,8 @@ static_assert(ga::dict::traits::needWordIncrease<
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(ga::dict::traits::needSerialize<
-                  ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>
+                  ga::dict::AdaptiveDictionary<ga::w::BytesWord<2>>,
+                  ga::ByteDataConstructor
               >);
 
 ////////////////////////////////////////////////////////////////////////////////

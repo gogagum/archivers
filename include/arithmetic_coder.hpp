@@ -75,7 +75,7 @@ template <class DictConstructor>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
                                                        DictConstructor&& constructor) :
     _symFlow(symbolsFlow),
-    _dict(constructor.construct()),
+    _dict(constructor()),
     _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
@@ -174,7 +174,7 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
-    if constexpr (ga::dict::traits::needSerialize<DictT>) {
+    if constexpr (ga::dict::traits::needSerialize<DictT, ga::ByteDataConstructor>) {
         _dict.serialize(res);
     }
 }

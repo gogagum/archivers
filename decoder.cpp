@@ -14,30 +14,46 @@
 #include "include/arithmetic_decoder.hpp"
 #include "include/word/bytes_word.hpp"
 #include "include/word/bits_word.hpp"
-#include "include/dictionary/adaptive_dictionary.hpp"
-#include "include/dictionary/adaptive_dictionary_deserialize_constructor.hpp"
+#include "include/dictionary/adaptive/adaptive_dictionary.hpp"
+#include "include/dictionary/adaptive/adaptive_dictionary_deserialize_constructor.hpp"
 #include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
 
 template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>, typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type>;
+using BytesDict = ga::dict::AdaptiveDictionary<
+    BytesWord<numBytes>,
+    typename ga::impl::CountTChoose<BytesWord<numBytes>>::Type
+>;
 
 template <std::uint8_t numBytes>
-using BytesDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<BytesDict<numBytes>>;
+using BytesDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<
+    BytesDict<numBytes>,
+    ga::DataParser
+>;
 
 template <std::uint8_t numBytes>
-using BytesDecoder = ga::ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, std::uint64_t>;
+using BytesDecoder = ga::ArithmeticDecoder<
+    BytesWord<numBytes>,
+    BytesDict<numBytes>,
+    std::uint64_t
+>;
 
 template <std::uint16_t numBits>
 using BitsWord = ga::w::BitsWord<numBits>;
 
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>, typename ga::impl::CountTChoose<BitsWord<numBits>>::Type>;
+using BitsDict = ga::dict::AdaptiveDictionary<
+    BitsWord<numBits>,
+    typename ga::impl::CountTChoose<BitsWord<numBits>>::Type
+>;
 
 template <std::uint16_t numBits>
-using BitsDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<BitsDict<numBits>>;
+using BitsDictConstructor = ga::dict::construct::AdaptiveDictionaryDeserializeConstructor<
+    BitsDict<numBits>,
+    ga::DataParser
+>;
 
 template <std::uint16_t numBits>
 using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;

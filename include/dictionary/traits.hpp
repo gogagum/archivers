@@ -14,8 +14,8 @@ constexpr const bool needWordIncrease = requires(DictT a) {
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class DictT>
-constexpr const bool needSerialize = requires(const DictT& a, ByteDataConstructor& dataConstructor) {
+template <class DictT, class DestT>
+constexpr const bool needSerialize = requires(const DictT& a, DestT& dataConstructor) {
     { a.serialize(dataConstructor) };
 };
 

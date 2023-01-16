@@ -85,7 +85,7 @@ template <class DictConstructor>
 ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
         Source& source, DictConstructor&& constructor)
     : _source(source),
-      _dict(constructor.construct()),
+      _dict(constructor()),
       _fileWordsCount(_deserializeFileWordsCount()),
       _tail(_deserializeTail()),
       _additionalBitsCnt(_computeAdditionalBitsCnt()) {}

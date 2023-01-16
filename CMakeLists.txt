@@ -28,7 +28,7 @@ if(Boost_FOUND)
         include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
-        include/dictionary/adaptive_dictionary.hpp
+        include/dictionary/adaptive/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
         include/flow/bytes_word_flow.hpp
         include/word/bytes_word.hpp
@@ -41,7 +41,7 @@ if(Boost_FOUND)
         include/byte_data_constructor.cpp
         include/dictionary/uniform_dictionary.hpp
         include/dictionary/static_dictionary.hpp
-        include/dictionary/adaptive_dictionary.hpp
+        include/dictionary/adaptive/adaptive_dictionary.hpp
         include/dictionary/integer_random_access_iterator.hpp
         include/word/bytes_word.hpp
     )
@@ -76,6 +76,7 @@ add_executable(archiever_tests
     test/static_dictionary.cpp
     test/uniform_dictionary.cpp
     test/adaptive_dictionary.cpp
+    test/arithmetic_coder.cpp
     include/word/bytes_word.hpp
     include/word/integer_word.hpp
     include/word/bits_word.hpp

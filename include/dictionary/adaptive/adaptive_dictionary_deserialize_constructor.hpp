@@ -2,7 +2,6 @@
 #define ADAPTIVE_DICTIONARY_DESERIALIZE_CONSTRUCTOR_HPP
 
 #include "adaptive_dictionary.hpp"
-#include "../data_parser.hpp"
 
 #include <cstdint>
 
@@ -11,25 +10,23 @@ namespace ga::dict::construct {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionaryDeserializeConstructor class
 ///
-template <class DictT>
+template <class DictT, class DataParser>
 class AdaptiveDictionaryDeserializeConstructor;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionaryDeserializeConstructor class
 ///
-template <class WordT, class CountT>
-class AdaptiveDictionaryDeserializeConstructor<AdaptiveDictionary<WordT, CountT>> {
+template <class WordT, class CountT, class DataParser>
+class AdaptiveDictionaryDeserializeConstructor<AdaptiveDictionary<WordT, CountT>, DataParser> {
 public:
     using Dict = AdaptiveDictionary<WordT, CountT>;
 
 public:
     //------------------------------------------------------------------------//
-    AdaptiveDictionaryDeserializeConstructor(ga::DataParser& data)
-        : _ratio(data.takeT<std::uint64_t>()) {};
+    AdaptiveDictionaryDeserializeConstructor(DataParser& data)
+        : _ratio(data.template takeT<std::uint64_t>()) {};
     //------------------------------------------------------------------------//
-    Dict construct() {
-        return AdaptiveDictionary<WordT, CountT>(_ratio);
-    }
+    Dict operator()() { return AdaptiveDictionary<WordT, CountT>(_ratio); }
 private:
     std::uint64_t _ratio;
 };
