@@ -49,7 +49,7 @@ using BitsCoder = ga::ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, std:
     case (bits): \
         encodeImpl(BitsCoder<(bits)>( \
             BitsFlow<(bits)>(fileOpener.getInData()), \
-            [ratio]() { return BytesDict<(bytes)>(ratio); }) \
+            [ratio]() { return BytesDict<(bits)>(ratio); }) \
         ); \
     break;
 
