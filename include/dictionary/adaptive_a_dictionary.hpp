@@ -2,6 +2,7 @@
 #define ADAPTIVE_A_DICTIONARY_HPP
 
 #include "integer_random_access_iterator.hpp"
+#include "word_probability_stats.hpp"
 
 #include <unordered_set>
 #include <cstdint>
@@ -18,6 +19,7 @@ public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
     using Count = CountT;
+    using ProbabilityStats = WordProbabilityStats<CountT>;
 public:
     AdaptiveADictionary();
     AdaptiveADictionary(AdaptiveADictionary<WordT, CountT>&& other) = default;
@@ -28,6 +30,13 @@ public:
      * @return word with exact cumulative number found.
      */
     WordT getWord(Count cumulativeNumFound) const;
+
+    /**
+     * @brief getWordProbabilityStats
+     * @param word
+     * @return
+     */
+    ProbabilityStats getWordProbabilityStats(const WordT& word) const;
 
     /**
      * @brief getLowerCumulativeNumFound - lower letters count.

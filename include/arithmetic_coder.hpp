@@ -103,18 +103,11 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
         }
 
         auto range = currRange.high - currRange.low;
-
-        auto h = _dict.getHigherCumulativeNumFound(sym);
-        auto l = _dict.getLowerCumulativeNumFound(sym);
-        auto totalWords = _dict.totalWordsCount();
-
-        if constexpr (dict::traits::needWordIncrease<DictT>) {
-            _dict.increaseWordCount(sym);
-        }
+        auto [low, high, totalWords] = _dict.getProbabilityStats(sym);
 
         currRange = OrdRange {
-            currRange.low + (range * l) / totalWords,
-            currRange.low + (range * h) / totalWords
+            currRange.low + (range * low) / totalWords,
+            currRange.low + (range * high) / totalWords
         };
 
         while (true) {

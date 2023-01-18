@@ -15,7 +15,6 @@
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
-#include "dictionary/traits.hpp"
 
 namespace ga {
 
@@ -116,22 +115,17 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
         auto range = currRange.high - currRange.low;
         auto aux =
-                ((value - currRange.low + 1) * _dict.totalWordsCount() - 1) / range;
+                ((value - currRange.low + 1) * _dict.getTotalWordsCount() - 1) / range;
 
         auto sym = _dict.getWord(aux);
         ret.syms.push_back(sym);
 
-        auto h = _dict.getHigherCumulativeNumFound(sym);
-        auto l = _dict.getLowerCumulativeNumFound(sym);
+        auto [low, high, totalWordsCount] = _dict.getProbabilityStats(sym);
 
         currRange = OrdRange {
-            currRange.low + (range * l) / _dict.totalWordsCount(),
-            currRange.low + (range * h) / _dict.totalWordsCount()
+            currRange.low + (range * low) / totalWordsCount,
+            currRange.low + (range * high) / totalWordsCount
         };
-
-        if constexpr (dict::traits::needWordIncrease<DictT>) {
-            _dict.increaseWordCount(sym);
-        }
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {
