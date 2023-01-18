@@ -50,7 +50,8 @@ TEST(StaticDictionary, Ord2Bytes1) {
 TEST(StaticDictionary, Ord2BytesFromFreq) {
     using Dict = ga::dict::StaticDictionary<ga::w::BitsWord<3>>;
 
-    auto freq = std::array<std::uint64_t, 8>{ 2, 3, 1, 2, 5, 9, 3 };
+    auto freq = std::array<std::uint64_t, 8>{ 2, 3, 1, 2, 5,  9,  3 };
+                                           // 3, 5, 6, 8, 13, 22, 25
     auto dict = Dict::fromCounts(freq);
 
     auto word1 = ga::w::BitsWord<3>(ga::impl::bits_begin(std::byte{0b010}) + 5);

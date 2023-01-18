@@ -36,21 +36,7 @@ public:
      * @param word
      * @return
      */
-    ProbabilityStats getWordProbabilityStats(const WordT& word) const;
-
-    /**
-     * @brief getLowerCumulativeNumFound - lower letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
-     */
-    Count getLowerCumulativeNumFound(const WordT& word) const;
-
-    /**
-     * @brief getHigherCumulativeNumFound - lower or equal letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
-     */
-    Count getHigherCumulativeNumFound(const WordT& word) const;
+    ProbabilityStats getWordProbabilityStats(const WordT& word);
 
     /**
      * @brief totalWordsCount
@@ -58,17 +44,13 @@ public:
      */
     Count totalWordsCount() const;
 
-    /**
-     * @brief increaseWordCount
-     * @param word - word which count we increase.
-     */
-    void increaseWordCount(const WordT& word);
-
 private:
 
     Count _getLowerCumulativeNumFound(Ord ord) const;
 
     Count _getLowerUnique(Ord ord) const;
+
+    void _increaseWordCount(Ord word);
 
 public:
     bicl::interval_map<Ord, Count> _cumulativeFoundWordsCount;
@@ -101,17 +83,14 @@ AdaptiveADictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto
-AdaptiveADictionary<WordT, CountT>::getLowerCumulativeNumFound(
-        const WordT& word) const -> Count {
-    return _getLowerCumulativeNumFound(WordT::ord(word));
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto
-AdaptiveADictionary<WordT, CountT>::getHigherCumulativeNumFound(
-        const WordT& word) const -> Count {
-    return _getLowerCumulativeNumFound(WordT::ord(word) + 1);
+AdaptiveADictionary<WordT, CountT>::getWordProbabilityStats(
+        const Word& word) -> ProbabilityStats {
+    auto ord = Word::ord(word);
+    auto low = _getLowerCumulativeNumFound(ord);
+    auto high = _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 1;
+    auto total = totalWordsCount();
+    _increaseWordCount(ord);
+    return { low, high, total };
 }
 
 //----------------------------------------------------------------------------//
@@ -124,15 +103,15 @@ auto AdaptiveADictionary<WordT, CountT>::totalWordsCount() const -> Count {
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 void
-AdaptiveADictionary<WordT, CountT>::increaseWordCount(const WordT& word) {
+AdaptiveADictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
     auto interval =
-        bicl::interval<Ord>::right_open(WordT::ord(word), WordT::wordsCount);
-    _cumulativeFoundWordsCount += std::make_pair(interval, 1);
-    if (!_foundWordsCount.contains(WordT::ord(word))) {
-        _cumulativeFoundUniueWords += std::make_pair(interval, 1);
-        _foundWordsCount.insert({word, 1});
+        bicl::interval<Ord>::right_open(ord, WordT::wordsCount);
+    _cumulativeFoundWordsCount += std::make_pair(interval, Count{1});
+    if (!_foundWordsCount.contains(ord)) {
+        _cumulativeFoundUniueWords += std::make_pair(interval, Count{1});
+        _foundWordsCount.insert({ord, 1});
     } else {
-        ++_foundWordsCount.at(word);
+        ++_foundWordsCount.at(ord);
     }
 }
 
