@@ -1,6 +1,7 @@
 #ifndef STATIC_DICTIONARY_HPP
 #define STATIC_DICTIONARY_HPP
 
+#include <vector>
 #include <boost/range/irange.hpp>
 
 namespace ga::dict {
@@ -73,7 +74,6 @@ public:
 
 protected:
     std::vector<std::uint64_t> _cumulativeNumFound;
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////
