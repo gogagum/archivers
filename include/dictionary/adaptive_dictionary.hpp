@@ -16,6 +16,8 @@
 
 namespace ga::dict {
 
+namespace bicl = boost::icl;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionary class
 ///
@@ -53,6 +55,9 @@ public:
      */
     Count getHigherCumulativeNumFound(const WordT& word) const;
 
+
+
+
     /**
      * @brief totalWordsCount
      * @return
@@ -71,8 +76,17 @@ public:
     template <class DestT>
     void serialize(DestT& dataConstructor) const;
 
-public:
-    boost::icl::interval_map<Ord, Count> _additionalCounts;
+private:
+
+    Count _getLowerCumulativeNumFound(Ord ord) const;
+
+private:
+
+    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
+
+private:
+    bicl::interval_map<Ord, Count> _cumulativeWordCounts;
+    std::unordered_map<Ord, Count> _wordCounts;
     Count _ratio;
 };
 
@@ -105,7 +119,7 @@ AdaptiveDictionary<WordT, CountT>::getLowerCumulativeNumFound(
     if (std::uint64_t ord = WordT::ord(word); ord == 0) {
         return 0;
     } else {
-        return ord + _additionalCounts(ord - 1);
+        return ord + _cumulativeWordCounts(ord - 1);
     }
 }
 
@@ -114,7 +128,7 @@ template <class WordT, typename CountT>
 auto
 AdaptiveDictionary<WordT, CountT>::getHigherCumulativeNumFound(
         const WordT& word) const -> Count {
-    std::uint64_t ord = WordT::ord(word);
+    auto ord = Count{ WordT::ord(word) };
     return ord + 1 + _additionalCounts(ord) * _ratio;
 }
 
@@ -128,14 +142,9 @@ auto AdaptiveDictionary<WordT, CountT>::totalWordsCount() const -> Count {
 template <class WordT, typename CountT>
 void
 AdaptiveDictionary<WordT, CountT>::increaseWordCount(const WordT& word) {
-    _additionalCounts +=
-            std::make_pair(
-                boost::icl::interval<Ord>::right_open(
-                    WordT::ord(word),
-                    WordT::wordsCount
-                ),
-                1
-            );
+    auto interval = OrdInterval(WordT::ord(word), WordT::wordsCount);
+    _cumulativeWordCounts += std::make_pair(interval, Count{1});
+    ++_wordCounts.at(WordT::ord(word));
 }
 
 //----------------------------------------------------------------------------//
@@ -145,6 +154,19 @@ void
 AdaptiveDictionary<WordT, CountT>::serialize(DestT& dataConstructor) const {
     dataConstructor.putT(CountT(_ratio));
 }
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto
+AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+        Ord ord) const -> Count {
+    if (ord == Ord{0}) {
+        return 0;
+    } else {
+        return ord + _additionalCounts(ord - 1);
+    }
+}
+
 
 }  // namecpace ga::dict
 
