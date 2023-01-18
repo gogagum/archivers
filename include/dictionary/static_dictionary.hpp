@@ -1,6 +1,8 @@
 #ifndef STATIC_DICTIONARY_HPP
 #define STATIC_DICTIONARY_HPP
 
+#include "word_probability_stats.hpp"
+
 #include <vector>
 #include <boost/range/irange.hpp>
 
@@ -14,23 +16,34 @@ class StaticDictionary {
 public:
 
     using Word = WordT;
+    using Ord = typename WordT::Ord;
     using Count = CountT;
+    using ProbabilityStats = WordProbabilityStats<CountT>;
+
+private:
+
+    StaticDictionary() = default;
 
 public:
 
-    /**
-     * @brief StaticDictionary
-     * @param cumulativeWordsCountsBegin
-     * @param cumulativeWordsCountsEnd
-     */
-    template <class RangeT>
-    StaticDictionary(const RangeT& cumulativeWordsCountsRange);
+    StaticDictionary(const StaticDictionary& other) = default;
+    StaticDictionary(StaticDictionary&& other) = default;
 
     /**
-     * @brief StaticDictionary
-     * @param cumulativeWordsCounts
+     * @brief fromCumulativeCounts construct from cumulative counts.
+     * @param cumulCountsRng - cumulative count of each symbol ordered.
+     * @return
      */
-    StaticDictionary(std::vector<std::uint64_t>&& cumulativeWordsCounts);
+    template <class RangeT>
+    static StaticDictionary<WordT, CountT> fromCumulativeCounts(const RangeT& cumulCountsRng);
+
+    /**
+     * @brief fromCounts construct from simple wordsCounts
+     * @param countsRng - count of each symbol ordered.
+     * @return
+     */
+    template <class RangeT>
+    static StaticDictionary<WordT, CountT> fromCounts(const RangeT& countsRng);
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -40,30 +53,18 @@ public:
     WordT getWord(Count cumulativeNumFound) const;
 
     /**
-     * @brief getLowerCumulativeNumFound - lower letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
+     * @brief getProbabilityStats - get lower cumulative number of words,
+     * higher cumulative number of words and total count.
+     * @param word - word to get info for.
+     * @return statistics.
      */
-    std::uint64_t getLowerCumulativeNumFound(const WordT& word) const;
-
-    /**
-     * @brief getHigherCumulativeNumFound - lower or equal letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
-     */
-    std::uint64_t getHigherCumulativeNumFound(const WordT& word) const;
+    ProbabilityStats getProbabilityStats(const Word& word);
 
     /**
      * @brief totalWordsCount
      * @return
      */
-    typename Word::Ord totalWordsCount() const;
-
-    /**
-     * @brief numUniqueWords
-     * @return
-     */
-    std::uint64_t numUniqueWords() const;
+    Ord totalWordsCount() const;
 
     /**
      * @brief serialize
@@ -72,29 +73,42 @@ public:
     template <class DestT>
     void serialize(DestT& res) const;
 
+private:
+
+    std::uint64_t _getLowerCumulativeNumFound(Ord ord) const;
+    std::uint64_t _getHigherCumulativeNumFound(Ord ord) const;
+
 protected:
-    std::vector<std::uint64_t> _cumulativeNumFound;
+    std::vector<Count> _cumulativeNumFound;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 template <class RangeT>
-StaticDictionary<WordT, CountT>::StaticDictionary(
-        const RangeT& cumulativeWordsCountsRange) {
-    std::copy(cumulativeWordsCountsRange.begin(),
-              cumulativeWordsCountsRange.end(),
-              std::back_inserter(this->_cumulativeNumFound));
+StaticDictionary<WordT, CountT>
+StaticDictionary<WordT, CountT>::fromCumulativeCounts(
+        const RangeT& cumulativeCountsRange) {
+    auto ret = StaticDictionary<WordT, CountT>();
+    std::copy(cumulativeCountsRange.begin(),
+              cumulativeCountsRange.end(),
+              std::back_inserter(ret._cumulativeNumFound));
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-StaticDictionary<WordT, CountT>::StaticDictionary(
-        std::vector<std::uint64_t>&& cumulativeNumFound)
-    : _cumulativeNumFound(std::move(cumulativeNumFound)) {
-    assert(this->_cumulativeNumFound.size() == WordT::wordsCount
-           && "Vector length should be the same as number of all "
-              "possible words.");
+template <class RangeT>
+StaticDictionary<WordT, CountT>
+StaticDictionary<WordT, CountT>::fromCounts(
+        const RangeT& numFoundRange) {
+    auto ret = StaticDictionary<WordT, CountT>();
+    auto currentSum = Count{0};
+    for (auto numFound: numFoundRange) {
+        currentSum += numFound;
+        ret._cumulativeNumFound.emplace_back(currentSum);
+    }
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
@@ -107,9 +121,20 @@ StaticDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
+auto
+StaticDictionary<WordT, CountT>::getProbabilityStats(
+        const Word& word) -> ProbabilityStats {
+    auto ord = Word::ord(word);
+    auto low = _getLowerCumulativeNumFound(ord);
+    auto high = _getHigherCumulativeNumFound(ord);
+    return { low, high, *_cumulativeNumFound.rbegin() };
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
 std::uint64_t
-StaticDictionary<WordT, CountT>::getLowerCumulativeNumFound(const WordT& word) const {
-    if (std::uint64_t ord = WordT::ord(word); ord == 0) {
+StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) const {
+    if (ord == 0) {
         return 0;
     } else {
         return _cumulativeNumFound[ord - 1];
@@ -119,26 +144,14 @@ StaticDictionary<WordT, CountT>::getLowerCumulativeNumFound(const WordT& word) c
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 std::uint64_t
-StaticDictionary<WordT, CountT>::getHigherCumulativeNumFound(const WordT& word) const {
-    return _cumulativeNumFound[WordT::ord(word)];
+StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(Ord ord) const {
+    return _cumulativeNumFound[ord];
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto StaticDictionary<WordT, CountT>::totalWordsCount() const -> typename Word::Ord {
     return *_cumulativeNumFound.rbegin();
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-std::uint64_t StaticDictionary<WordT, CountT>::numUniqueWords() const {
-    std::uint64_t prevCumulativeNumFound = 0;
-    return std::ranges::count_if(_cumulativeNumFound,
-                                 [&prevCumulativeNumFound](auto count) {
-                                     auto ret = count != prevCumulativeNumFound;
-                                     prevCumulativeNumFound = count;
-                                     return ret;
-                                 });
 }
 
 //----------------------------------------------------------------------------//

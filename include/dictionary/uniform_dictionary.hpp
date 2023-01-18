@@ -23,6 +23,9 @@ public:
      */
     WordT getWord(std::uint64_t cumulativeNumFound);
 
+
+
+
     /**
      * @brief getLowerCumulativeNumFound - lower letters count.
      * @param word - key to search.
