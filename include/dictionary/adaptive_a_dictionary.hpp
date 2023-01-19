@@ -36,7 +36,7 @@ public:
      * @param word
      * @return
      */
-    ProbabilityStats getWordProbabilityStats(const WordT& word);
+    [[nodiscard]] ProbabilityStats getWordProbabilityStats(const WordT& word);
 
     /**
      * @brief totalWordsCount
@@ -62,7 +62,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-AdaptiveADictionary<WordT, CountT>::AdaptiveADictionary() {}
+AdaptiveADictionary<WordT, CountT>::AdaptiveADictionary() : _totalFoundWordsCount(0) {}
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
@@ -87,7 +87,7 @@ AdaptiveADictionary<WordT, CountT>::getWordProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     auto low = _getLowerCumulativeNumFound(ord);
-    auto high = _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 1;
+    auto high = low + (_foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 1);
     auto total = totalWordsCount();
     _increaseWordCount(ord);
     return { low, high, total };
@@ -107,6 +107,7 @@ AdaptiveADictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
     auto interval =
         bicl::interval<Ord>::right_open(ord, WordT::wordsCount);
     _cumulativeFoundWordsCount += std::make_pair(interval, Count{1});
+    ++_totalFoundWordsCount;
     if (!_foundWordsCount.contains(ord)) {
         _cumulativeFoundUniueWords += std::make_pair(interval, Count{1});
         _foundWordsCount.insert({ord, 1});
@@ -119,10 +120,10 @@ AdaptiveADictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
 template <class WordT, typename CountT>
 auto AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) const -> Count {
     if (ord == 0) {
-        return (WordT::wordsCount - _foundWordsCount.size());
+        return 0;
     }
     return (WordT::wordsCount - _foundWordsCount.size()) * _cumulativeFoundWordsCount(ord - 1)
-            + (WordT::wordsCount - _cumulativeFoundUniueWords(ord - 1));
+            + (ord - _cumulativeFoundUniueWords(ord - 1));
 }
 
 
