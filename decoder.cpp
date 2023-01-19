@@ -9,13 +9,14 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
+#include <data_parser.hpp>
+#include <arithmetic_decoder.hpp>
+#include <word/bytes_word.hpp>
+#include <word/bits_word.hpp>
+#include <dictionary/adaptive_dictionary.hpp>
+#include <byte_data_constructor.hpp>
+
 #include "file_opener.hpp"
-#include "include/data_parser.hpp"
-#include "include/arithmetic_decoder.hpp"
-#include "include/word/bytes_word.hpp"
-#include "include/word/bits_word.hpp"
-#include "include/dictionary/adaptive_dictionary.hpp"
-#include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;

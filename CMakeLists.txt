@@ -40,7 +40,7 @@ add_library(encoding_lib STATIC
     include/word/word_ord_comp.hpp
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS} include/)
 add_executable(archiever_encoder encoder.cpp file_opener.cpp)
 target_link_libraries(archiever_encoder encoding_lib)
 

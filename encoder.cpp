@@ -6,12 +6,12 @@
 #include <boost/program_options.hpp>
 
 #include "file_opener.hpp"
-#include "include/arithmetic_coder.hpp"
-#include "include/word/bytes_word.hpp"
-#include "include/flow/bytes_word_flow.hpp"
-#include "include/word/bits_word.hpp"
-#include "include/flow/bits_word_flow.hpp"
-#include "include/dictionary/adaptive_dictionary.hpp"
+#include <arithmetic_coder.hpp>
+#include <word/bytes_word.hpp>
+#include <flow/bytes_word_flow.hpp>
+#include <word/bits_word.hpp>
+#include <flow/bits_word_flow.hpp>
+#include <dictionary/adaptive_dictionary.hpp>
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
