@@ -6,12 +6,12 @@
 #include <boost/program_options.hpp>
 
 #include "file_opener.hpp"
-#include "include/arithmetic_coder.hpp"
-#include "include/word/bytes_word.hpp"
-#include "include/flow/bytes_word_flow.hpp"
-#include "include/word/bits_word.hpp"
-#include "include/flow/bits_word_flow.hpp"
-#include "include/dictionary/adaptive_dictionary.hpp"
+#include <arithmetic_coder.hpp>
+#include <word/bytes_word.hpp>
+#include <flow/bytes_word_flow.hpp>
+#include <word/bits_word.hpp>
+#include <flow/bits_word_flow.hpp>
+#include <dictionary/adaptive_dictionary.hpp>
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
@@ -89,27 +89,27 @@ int main(int argc, char* argv[]) {
 
         switch (numBits) {
             BYTES_CASE(1);
-            //BITS_CASE(9);
-            //BITS_CASE(10);
-            //BITS_CASE(11);
-            //BITS_CASE(12);
-            //BITS_CASE(13);
-            //BITS_CASE(14);
+            BITS_CASE(9);
+            BITS_CASE(10);
+            BITS_CASE(11);
+            BITS_CASE(12);
+            BITS_CASE(13);
+            BITS_CASE(14);
             BITS_CASE(15);
             BYTES_CASE(2);
-            //BITS_CASE(17);
-            //BITS_CASE(18);
-            //BITS_CASE(19);
-            //BITS_CASE(20);
-            //BITS_CASE(21);
-            //BITS_CASE(22);
-            //BITS_CASE(23);
+            BITS_CASE(17);
+            BITS_CASE(18);
+            BITS_CASE(19);
+            BITS_CASE(20);
+            BITS_CASE(21);
+            BITS_CASE(22);
+            BITS_CASE(23);
             BYTES_CASE(3);
-            //BITS_CASE(25);
-            //BITS_CASE(26);
-            //BITS_CASE(27);
-            //BITS_CASE(28);
-            //BITS_CASE(29);
+            BITS_CASE(25);
+            BITS_CASE(26);
+            BITS_CASE(27);
+            BITS_CASE(28);
+            BITS_CASE(29);
             BITS_CASE(30);
             BITS_CASE(31);
             BYTES_CASE(4);

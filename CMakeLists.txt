@@ -18,45 +18,45 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(Boost COMPONENTS system program_options REQUIRED)
 
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    add_executable(archiever_encoder encoder.cpp
-        file_opener.cpp
-        include/data_parser.cpp
-        include/arithmetic_coder.hpp
-        include/byte_data_constructor.hpp
-        include/byte_data_constructor.cpp
-        include/dictionary/uniform_dictionary.hpp
-        include/dictionary/static_dictionary.hpp
-        include/dictionary/adaptive_dictionary.hpp
-        include/dictionary/integer_random_access_iterator.hpp
-        include/flow/bytes_word_flow.hpp
-        include/word/bytes_word.hpp
-    )
-    add_executable(archiever_decoder decoder.cpp
-        file_opener.cpp
-        include/arithmetic_decoder.hpp
-        include/data_parser.hpp
-        include/data_parser.cpp
-        include/byte_data_constructor.cpp
-        include/dictionary/uniform_dictionary.hpp
-        include/dictionary/static_dictionary.hpp
-        include/dictionary/adaptive_dictionary.hpp
-        include/dictionary/integer_random_access_iterator.hpp
-        include/word/bytes_word.hpp
-    )
+add_library(encoding_lib STATIC
+    include/arithmetic_coder.hpp
+    include/arithmetic_decoder.hpp
+    include/bits_iterator.hpp
+    include/byte_data_constructor.hpp
+    include/byte_data_constructor.cpp
+    include/data_parser.hpp
+    include/data_parser.cpp
+    include/ranges_calc.hpp
+    include/dictionary/uniform_dictionary.hpp
+    include/dictionary/static_dictionary.hpp
+    include/dictionary/adaptive_dictionary.hpp
+    include/dictionary/integer_random_access_iterator.hpp
+    include/flow/int_range_word_flow.hpp
+    include/flow/bytes_word_flow.hpp
+    include/flow/bits_word_flow.hpp
+    include/word/bytes_word.hpp
+    include/word/bits_word.hpp
+    include/word/integer_word.hpp
+    include/word/word_ord_comp.hpp
+)
 
-    target_link_libraries(archiever_encoder ${Boost_LIBRARIES})
-    target_link_libraries(archiever_decoder ${Boost_LIBRARIES})
+include_directories(${Boost_INCLUDE_DIRS} include/)
+add_executable(archiever_encoder encoder.cpp file_opener.cpp)
+target_link_libraries(archiever_encoder encoding_lib)
 
-    install(TARGETS archiever_encoder archiever_decoder
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif()
+add_executable(archiever_decoder decoder.cpp file_opener.cpp)
+target_link_libraries(archiever_decoder encoding_lib)
+
+target_link_libraries(archiever_encoder ${Boost_LIBRARIES})
+target_link_libraries(archiever_decoder ${Boost_LIBRARIES})
+
+install(TARGETS archiever_encoder archiever_decoder
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 include(FetchContent)
 FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+    googletest
+    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
 )
 
 FetchContent_MakeAvailable(googletest)
@@ -79,15 +79,9 @@ add_executable(archiever_tests
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
     test/arithmetic_coder.cpp
-    include/word/bytes_word.hpp
-    include/word/integer_word.hpp
-    include/word/bits_word.hpp
-    include/word/word_ord_comp.hpp
-    include/byte_data_constructor.cpp
-    include/data_parser.cpp
-    include/flow/int_range_word_flow.hpp
 )
 
-target_link_libraries(archiever_tests LINK_PUBLIC gtest_main)
+target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)
+
 include(GoogleTest)
 gtest_discover_tests(archiever_tests)

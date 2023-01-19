@@ -9,13 +9,14 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
+#include <data_parser.hpp>
+#include <arithmetic_decoder.hpp>
+#include <word/bytes_word.hpp>
+#include <word/bits_word.hpp>
+#include <dictionary/adaptive_dictionary.hpp>
+#include <byte_data_constructor.hpp>
+
 #include "file_opener.hpp"
-#include "include/data_parser.hpp"
-#include "include/arithmetic_decoder.hpp"
-#include "include/word/bytes_word.hpp"
-#include "include/word/bits_word.hpp"
-#include "include/dictionary/adaptive_dictionary.hpp"
-#include "include/byte_data_constructor.hpp"
 
 template <std::uint8_t numBytes>
 using BytesWord = ga::w::BytesWord<numBytes>;
@@ -100,27 +101,27 @@ int main(int argc, char* argv[]) {
 
         switch (symBitLen) {
             BYTES_DECODER_CASE(1);
-            //BITS_DECODER_CASE(9);
-            //BITS_DECODER_CASE(10);
-            //BITS_DECODER_CASE(11);
-            //BITS_DECODER_CASE(12);
-            //BITS_DECODER_CASE(13);
-            //BITS_DECODER_CASE(14);
+            BITS_DECODER_CASE(9);
+            BITS_DECODER_CASE(10);
+            BITS_DECODER_CASE(11);
+            BITS_DECODER_CASE(12);
+            BITS_DECODER_CASE(13);
+            BITS_DECODER_CASE(14);
             BITS_DECODER_CASE(15);
             BYTES_DECODER_CASE(2);
-            //BITS_DECODER_CASE(17);
-            //BITS_DECODER_CASE(18);
-            //BITS_DECODER_CASE(19);
-            //BITS_DECODER_CASE(20);
-            //BITS_DECODER_CASE(21);
-            //BITS_DECODER_CASE(22);
-            //BITS_DECODER_CASE(23);
+            BITS_DECODER_CASE(17);
+            BITS_DECODER_CASE(18);
+            BITS_DECODER_CASE(19);
+            BITS_DECODER_CASE(20);
+            BITS_DECODER_CASE(21);
+            BITS_DECODER_CASE(22);
+            BITS_DECODER_CASE(23);
             BYTES_DECODER_CASE(3);
-            //BITS_DECODER_CASE(25);
-            //BITS_DECODER_CASE(26);
-            //BITS_DECODER_CASE(27);
-            //BITS_DECODER_CASE(28);
-            //BITS_DECODER_CASE(29);
+            BITS_DECODER_CASE(25);
+            BITS_DECODER_CASE(26);
+            BITS_DECODER_CASE(27);
+            BITS_DECODER_CASE(28);
+            BITS_DECODER_CASE(29);
             BITS_DECODER_CASE(30);
             BITS_DECODER_CASE(31);
             BYTES_DECODER_CASE(4);
