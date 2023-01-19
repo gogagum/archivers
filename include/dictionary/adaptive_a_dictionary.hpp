@@ -122,7 +122,8 @@ auto AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) co
     if (ord == 0) {
         return 0;
     }
-    return (WordT::wordsCount - _foundWordsCount.size()) * _cumulativeFoundWordsCount(ord - 1)
+    auto numUniqueWordsTotal = _foundWordsCount.size();
+    return (WordT::wordsCount - numUniqueWordsTotal) * _cumulativeFoundWordsCount(ord - 1)
             + (ord - _cumulativeFoundUniueWords(ord - 1));
 }
 

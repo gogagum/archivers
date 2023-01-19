@@ -77,6 +77,7 @@ add_executable(archiever_tests
     test/uniform_dictionary.cpp
     test/adaptive_dictionary.cpp
     test/adaptive_a_dictionary.cpp
+    test/adaptive_d_dictionary.cpp
     test/arithmetic_coder.cpp
     include/word/bytes_word.hpp
     include/word/integer_word.hpp
