@@ -6,36 +6,7 @@
 #include <boost/program_options.hpp>
 
 #include "file_opener.hpp"
-#include <arithmetic_coder.hpp>
-#include <word/bytes_word.hpp>
-#include <flow/bytes_word_flow.hpp>
-#include <word/bits_word.hpp>
-#include <flow/bits_word_flow.hpp>
-#include <dictionary/adaptive_dictionary.hpp>
-
-template <std::uint8_t numBytes>
-using BytesWord = ga::w::BytesWord<numBytes>;
-
-template <std::uint8_t numBytes>
-using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
-
-template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>>;
-
-template <std::uint8_t numBytes>
-using BytesCoder = ga::ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, std::uint64_t>;
-
-template <std::uint16_t numBits>
-using BitsWord = ga::w::BitsWord<numBits>;
-
-template <std::uint16_t numBits>
-using BitsFlow = ga::fl::BitsWordFlow<BitsWord<numBits>>;
-
-template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>>;
-
-template <std::uint16_t numBits>
-using BitsCoder = ga::ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, std::uint64_t>;
+#include "arithmetic_archiever_include.hpp"
 
 #define BYTES_CASE(bytes) \
     case (bytes) * 8: \
@@ -66,10 +37,10 @@ int main(int argc, char* argv[]) {
 
     try {
         appOptionsDescr.add_options()
-                ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
-                ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.")
-                ("bits,b", bpo::value(&numBits)->default_value(16), "Word bits count.")
-                ("ratio,r", bpo::value(&ratio)->default_value(2), "Dictionary ratio.");
+            ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
+            ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.")
+            ("bits,b", bpo::value(&numBits)->default_value(16), "Word bits count.")
+            ("ratio,r", bpo::value(&ratio)->default_value(2), "Dictionary ratio.");
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
@@ -112,7 +83,6 @@ int main(int argc, char* argv[]) {
             BITS_CASE(29);
             BITS_CASE(30);
             BITS_CASE(31);
-            BYTES_CASE(4);
         default:
             assert(false);
             break;

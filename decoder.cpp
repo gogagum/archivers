@@ -9,36 +9,8 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include <data_parser.hpp>
-#include <arithmetic_decoder.hpp>
-#include <word/bytes_word.hpp>
-#include <word/bits_word.hpp>
-#include <dictionary/adaptive_dictionary.hpp>
-#include <byte_data_constructor.hpp>
-
 #include "file_opener.hpp"
-
-template <std::uint8_t numBytes>
-using BytesWord = ga::w::BytesWord<numBytes>;
-
-template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDictionary<BytesWord<numBytes>>;
-
-template <std::uint8_t numBytes>
-using BytesDecoder = ga::ArithmeticDecoder<
-    BytesWord<numBytes>,
-    BytesDict<numBytes>,
-    std::uint64_t
->;
-
-template <std::uint16_t numBits>
-using BitsWord = ga::w::BitsWord<numBits>;
-
-template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>>;
-
-template <std::uint16_t numBits>
-using BitsDecoder = ga::ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, std::uint64_t>;
+#include "arithmetic_archiever_include.hpp"
 
 namespace bpo = boost::program_options;
 
@@ -67,8 +39,8 @@ int main(int argc, char* argv[]) {
 
     try {
         appOptionsDescr.add_options()
-                ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
-                ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.");
+            ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
+            ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.");
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
@@ -89,7 +61,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
 
-        const auto packIntoByteDataConstructor = [&dataConstructor, &filesOpener](auto&& decoder) {
+        const auto packIntoByteDataConstructor = [&dataConstructor, &filesOpener] (auto&& decoder) {
             auto ret = decoder.decode();
             for (auto& word: ret.syms) {
                 word.bitsOut(dataConstructor.getBitBackInserter());
@@ -124,7 +96,6 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(29);
             BITS_DECODER_CASE(30);
             BITS_DECODER_CASE(31);
-            BYTES_DECODER_CASE(4);
         default:
             throw std::runtime_error((boost::format("bit length %1% is not supported") % symBitLen).str());
             break;
