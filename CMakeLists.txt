@@ -43,6 +43,7 @@ add_library(encoding_lib STATIC
     include/word/bits_word.hpp
     include/word/integer_word.hpp
     include/word/word_ord_comp.hpp
+    include/word/uint_word.hpp
 )
 
 include_directories(${Boost_INCLUDE_DIRS} include/)
@@ -84,6 +85,7 @@ add_executable(archiever_tests
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
     test/arithmetic_coder.cpp
+    test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
 )
 

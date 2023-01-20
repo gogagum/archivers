@@ -8,7 +8,7 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
 ///
-template <class SymT>
+template <class SymT, std::uint16_t minSymsNumBits = 33>
 class RangesCalc {
 public:
 
@@ -43,10 +43,10 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT>
-constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
+template <class SymT, std::uint16_t minSymsNumBits>
+constexpr auto RangesCalc<SymT, minSymsNumBits>::_computeCorrectingConst() -> Count {
     auto correctingConst = Count{1};
-    while (correctingConst * symsNum < (1ull << 33)) {
+    while (correctingConst * symsNum < (Count{1} << Count{minSymsNumBits})) {
         correctingConst <<= 1ull;
     }
     return correctingConst;
@@ -54,8 +54,8 @@ constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
 
 
 //----------------------------------------------------------------------------//
-template <class SymT>
-auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
+template <class SymT, std::uint16_t minSymsNumBits>
+auto RangesCalc<SymT, minSymsNumBits>::recalcRange(Range r) -> Range {
     if (r.high <= symsNum_2 * correctingConst) {
         return { r.low * 2, r.high * 2 };
     } else if (r.low >= symsNum_2 * correctingConst) {

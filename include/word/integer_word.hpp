@@ -69,17 +69,9 @@ private:
     const I _value;
 
 private:
-    template <std::integral _I, _I _low, std::uint16_t __numBits>
-    friend bool operator==(
-        const IntegerWord<_I, _low, __numBits>& iw1,
-        const IntegerWord<_I, _low, __numBits>& iw2
-    );
 
-    template <std::integral _I, _I _low, std::uint16_t __numBits>
-    friend bool operator!=(
-        const IntegerWord<_I, _low, __numBits>& iw1,
-        const IntegerWord<_I, _low, __numBits>& iw2
-    );
+    friend bool operator==(const IntegerWord& w1, const IntegerWord& w2) = default;
+    friend bool operator!=(const IntegerWord& w1, const IntegerWord& w2) = default;
 
     template <std::integral _I, _I _low, std::uint16_t __numBits>
     friend std::ostream& operator<<(
@@ -128,20 +120,6 @@ std::ostream&
 operator<<(std::ostream& os, IntegerWord<I, low, _numBits>& word) {
     os << "Word(" << word._value - low << ")";
     return os;
-}
-
-//----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint16_t _numBits>
-bool operator==(const IntegerWord<I, low, _numBits>& iw1,
-                const IntegerWord<I, low, _numBits>& iw2) {
-    return iw1._value == iw2._value;
-}
-
-//----------------------------------------------------------------------------//
-template <std::integral I, I low, std::uint16_t _numBits>
-bool operator!=(const IntegerWord<I, low, _numBits>& iw1,
-                const IntegerWord<I, low, _numBits>& iw2) {
-    return iw1._value != iw2._value;
 }
 
 }

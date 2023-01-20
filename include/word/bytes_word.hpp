@@ -91,18 +91,14 @@ private:
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    template <std::uint8_t __numBytes>
-    friend bool operator==(const BytesWord<__numBytes>& bs1,
-                           const BytesWord<__numBytes>& bs2);
+    friend bool operator==(const BytesWord& bs1, const BytesWord& bs2) = default;
 
     /**
      * @brief operator == check if two symbols are equal.
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    template <std::uint8_t __numBytes>
-    friend bool operator!=(const BytesWord<__numBytes>& bs1,
-                           const BytesWord<__numBytes>& bs2);
+    friend bool operator!=(const BytesWord& bs1, const BytesWord& bs2) = default;
 
     /**
      * @brief operator << for debug output.
@@ -196,20 +192,6 @@ void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-bool operator==(const w::BytesWord<numBytes>& bs1,
-                const w::BytesWord<numBytes>& bs2) {
-    return bs1._data == bs2._data;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-bool operator!=(const w::BytesWord<numBytes>& bs1,
-                const w::BytesWord<numBytes>& bs2) {
-    return bs1._data != bs2._data;
-}
-
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 std::ostream& operator<<(std::ostream& os, w::BytesWord<numBytes> sym) {

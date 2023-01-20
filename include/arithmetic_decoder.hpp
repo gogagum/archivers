@@ -23,8 +23,8 @@ namespace bc = boost::container;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT, typename CountT = std::uint32_t>
-class ArithmeticDecoder : RangesCalc<SymT> {
+template <class SymT, class DictT, typename CountT = std::uint32_t, std::uint16_t minSymsNumBits = 33>
+class ArithmeticDecoder : RangesCalc<SymT, minSymsNumBits> {
 public:
     using Source = DataParser;
     using Tail = bc::static_vector<bool, SymT::numBits>;
@@ -79,9 +79,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
 template <class DictConstructor>
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
+ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::ArithmeticDecoder(
         Source& source, DictConstructor&& constructor)
     : _source(source),
       _dict(constructor()),
@@ -90,8 +90,8 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
       _additionalBitsCnt(_computeAdditionalBitsCnt()) {}
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
+auto ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::decode() -> Ret {
     typename RangesCalc<SymT>::Count value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
 
@@ -150,8 +150,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 }
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
+auto ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::_deserializeTail() -> Tail {
     std::uint16_t tailSize = _source.takeT<std::uint16_t>();
     Tail tail(tailSize);
     for (auto& tailBit: tail) {
@@ -161,9 +161,9 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
 }
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
 std::vector<std::uint64_t>
-ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
+ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::_deserializeWordsCounts() {
     std::vector<std::uint64_t> ret(SymT::wordsCount);
     CountT numUniqueSyms = _source.takeT<std::uint32_t>();
 
@@ -177,17 +177,17 @@ ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
 }
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-CountT ArithmeticDecoder<SymT, DictT, CountT>::_deserializeFileWordsCount() {
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
+CountT ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::_deserializeFileWordsCount() {
     return _source.takeT<CountT>();
 }
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
+template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
 std::uint8_t
-ArithmeticDecoder<SymT, DictT, CountT>::_computeAdditionalBitsCnt() const {
+ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::_computeAdditionalBitsCnt() const {
     std::uint8_t ret = 0;
-    for (; (symsNum << ret) < (1ull << 33); ++ret) {}
+    for (; (symsNum << ret) < (1ull << minSymsNumBits); ++ret) {}
     return ret;
 }
 
