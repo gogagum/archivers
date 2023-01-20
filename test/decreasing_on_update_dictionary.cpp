@@ -92,3 +92,15 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
     EXPECT_EQ(low1, 13);
     EXPECT_EQ(high1, 30);
 }
+
+//----------------------------------------------------------------------------//
+TEST(DecreasingOnUpdateDictionary, GetWord) {
+    auto freqMapping = std::array{
+        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
+        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+    };
+    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
+
+    auto word = dict.getWord(12);
+    EXPECT_EQ(word, BytesWord<2>::byOrd(42));
+}

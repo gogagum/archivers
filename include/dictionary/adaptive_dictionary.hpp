@@ -49,7 +49,7 @@ public:
      * @param word
      * @return probability estimation for a word.
      */
-    ProbabilityStats getProbabilityStats(const WordT& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(const WordT& word);
 
     /**
      * @brief getTotalWordsCount get total number of words according to model.
@@ -144,7 +144,7 @@ AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
     if (ord == Ord{0}) {
         return 0;
     } else {
-        return ord + _cumulativeWordCounts(ord - 1);
+        return ord + _cumulativeWordCounts(ord - 1) * _ratio;
     }
 }
 

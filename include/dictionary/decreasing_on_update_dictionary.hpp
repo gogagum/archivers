@@ -2,6 +2,7 @@
 #define DECREASING_ON_UPDATE_DICTIONARY_HPP
 
 #include "word_probability_stats.hpp"
+#include "integer_random_access_iterator.hpp"
 
 #include <cstdint>
 
@@ -33,14 +34,30 @@ public:
 
 public:
 
+    /**
+     * @brief DecreasingOnUpdateDictionary constructor from counts mapping
+     * @param probRng - counts mapping.
+     */
     template <class RangeT>
     DecreasingOnUpdateDictionary(const RangeT& probRng);
 
+    /**
+     * @brief getWord - word by cumulatove count.
+     * @param cumulativeNumFound - count to search for.
+     * @return found word.
+     */
+    Word getWord(Count cumulativeNumFound) const;
+
+    /**
+     * @brief getWordProbabilityStats - get stats for a word.
+     * @param word - word to get stats for.
+     * @return [low, high, total]
+     */
     ProbabilityStats getWordProbabilityStats(const Word& word);
 
     /**
-     * @brief getTotalWordsCount
-     * @return
+     * @brief getTotalWordsCount - get total words count.
+     * @return total words count in a dictionary.
      */
     Count getTotalWordsCount() const { return _totalWordsCount; };
 
@@ -71,6 +88,22 @@ DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
         _cumulativeWordCounts += std::make_pair(interval, count);
         _totalWordsCount += count;
     }
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto DecreasingOnUpdateDictionary<WordT, CountT>::getWord(
+        Count cumulativeNumFound) const -> Word {
+    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+    // TODO: replace
+    //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
+    const auto getLowerCumulNumFound_ = [this](Ord ord) {
+        return this->_getLowerCumulativeNumFound(ord + 1);
+    };
+    auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
+                                       getLowerCumulNumFound_);
+    return Word::byOrd(it - idxs.begin());
 }
 
 //----------------------------------------------------------------------------//

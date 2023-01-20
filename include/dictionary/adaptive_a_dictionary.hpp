@@ -77,7 +77,7 @@ AdaptiveADictionary<WordT, CountT>::getWord(
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](std::uint64_t ord) {
-        return this->_additionalCounts(ord) + ord + 1;
+        return this->_getLowerCumulativeNumFound(ord);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);

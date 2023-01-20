@@ -98,3 +98,19 @@ TEST(AdaptiveDictionary, IncreaseZero) {
     EXPECT_EQ(low2, 0);   // after first increase
     EXPECT_EQ(high2, 2);  // after first increase
 }
+
+//----------------------------------------------------------------------------//
+TEST(AdaptiveDictionary, GetWordOnStart) {
+    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
+    auto word = dict.getWord(42);
+    EXPECT_EQ(word, BytesWord<1>::byOrd(42));
+}
+
+//----------------------------------------------------------------------------//
+TEST(AdaptiveDictionary, GetWordAfterUpdate) {
+    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
+    [[maybe_unused]] auto stats =
+            dict.getProbabilityStats(BytesWord<1>::byOrd(42));
+    EXPECT_EQ(dict.getWord(42), BytesWord<1>::byOrd(42));
+    EXPECT_EQ(dict.getWord(43), BytesWord<1>::byOrd(42));
+}

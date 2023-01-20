@@ -72,8 +72,8 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
-    const auto getLowerCumulNumFound_ = [this](std::uint64_t ord) {
-        return this->_additionalCounts(ord) + ord + 1;
+    const auto getLowerCumulNumFound_ = [this](Ord ord) {
+        return this->_getLowerCumulativeNumFound(ord);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
