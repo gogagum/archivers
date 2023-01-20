@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
             BITS_CASE(29);
             BITS_CASE(30);
             BITS_CASE(31);
+            BYTES_CASE(4);
         default:
             throw std::runtime_error(
                 (boost::format("File is encoded with %1% bit length which is not supported.") % numBits).str());

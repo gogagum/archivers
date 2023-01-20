@@ -47,6 +47,8 @@ public:
 
 private:
 
+    Count _getLowerCumulativeFoundUniueWords(Ord ord) const;
+
     Count _getLowerCumulativeNumFound(Ord ord) const;
 
     void _increaseWordCount(Ord ord);
@@ -86,13 +88,14 @@ auto
 AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
-    auto wordCount = _foundWordsCount[ord];
+    auto wordCount = _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 0;
     auto low = _getLowerCumulativeNumFound(ord);
     auto high = low;
     if (_totalFoundWordsCount == 0) {
         ++high;
     } else {
-        high += (Word::wordsCount - _foundWordsCount.size()) * 2 * wordCount + _totalUniqueWords - Word::wordsCount * wordCount;
+        high += (Word::wordsCount - _totalUniqueWords) * 2 * wordCount
+            + _totalUniqueWords - Word::wordsCount * ((wordCount > 0) ? 1 : 0);
     }
     auto total = getTotalWordsCount();
     _increaseWordCount(ord);
@@ -115,10 +118,24 @@ void
 AdaptiveDDictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
     auto interval = boost::icl::interval<Ord>::right_open(ord, WordT::wordsCount);
     _cumulativeFoundWordsCount += std::make_pair(interval, Count{1});
+    ++_totalFoundWordsCount;
     if (!_foundWordsCount.contains(ord)) {
         _cumulativeFoundUniueWords += std::make_pair(interval, Count{1});
+        ++_totalUniqueWords;
     }
     ++_foundWordsCount[ord];
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto
+AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeFoundUniueWords(
+        Ord ord) const -> Count {
+    if (_totalFoundWordsCount == 0) {
+        return ord;
+    }
+
+    return _cumulativeFoundUniueWords(ord - 1);
 }
 
 //----------------------------------------------------------------------------//
@@ -127,7 +144,7 @@ auto
 AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
     if (_totalFoundWordsCount == 0) {
-        ord;
+        return ord;
     }
     auto cumulativeUnique = _cumulativeFoundUniueWords(ord - 1);
     return (WordT::wordsCount - cumulativeUnique) * 2 * _cumulativeFoundWordsCount(ord - 1)
