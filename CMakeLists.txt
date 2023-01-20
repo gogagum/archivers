@@ -70,6 +70,10 @@ add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp file_opene
 target_link_libraries(archiever_d_decoder encoding_lib)
 target_link_libraries(archiever_d_decoder ${Boost_LIBRARIES})
 
+add_executable(numerical_encoder numerical/encoder.cpp  file_opener.cpp)
+target_link_libraries(numerical_encoder encoding_lib)
+target_link_libraries(numerical_encoder ${Boost_LIBRARIES})
+
 include(FetchContent)
 FetchContent_Declare(
     googletest
