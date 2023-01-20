@@ -6,7 +6,7 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include "file_opener.hpp"
+#include "../file_opener.hpp"
 #include "arithmetic_archiever_include.hpp"
 
 #define BYTES_CASE(bytes) \

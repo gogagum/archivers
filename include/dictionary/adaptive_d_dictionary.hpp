@@ -37,13 +37,13 @@ public:
      * @param word
      * @return
      */
-    [[nodiscard]] ProbabilityStats getWordProbabilityStats(const WordT& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(const WordT& word);
 
     /**
      * @brief totalWordsCount
      * @return
      */
-    Count totalWordsCount() const;
+    Count getTotalWordsCount() const;
 
 private:
 
@@ -83,7 +83,7 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto
-AdaptiveDDictionary<WordT, CountT>::getWordProbabilityStats(
+AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     auto wordCount = _foundWordsCount[ord];
@@ -94,14 +94,14 @@ AdaptiveDDictionary<WordT, CountT>::getWordProbabilityStats(
     } else {
         high += (Word::wordsCount - _foundWordsCount.size()) * 2 * wordCount + _totalUniqueWords - Word::wordsCount * wordCount;
     }
-    auto total = totalWordsCount();
+    auto total = getTotalWordsCount();
     _increaseWordCount(ord);
     return { low, high, total };
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::totalWordsCount() const -> Count {
+auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
     if (_totalFoundWordsCount == 0) {
         return WordT::wordsCount;
     }

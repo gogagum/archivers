@@ -47,14 +47,22 @@ add_library(encoding_lib STATIC
 )
 
 include_directories(${Boost_INCLUDE_DIRS} include/)
-add_executable(archiever_encoder encoder.cpp file_opener.cpp)
+
+add_executable(archiever_encoder arithmetic_archiever/encoder.cpp file_opener.cpp)
 target_link_libraries(archiever_encoder encoding_lib)
-
-add_executable(archiever_decoder decoder.cpp file_opener.cpp)
-target_link_libraries(archiever_decoder encoding_lib)
-
 target_link_libraries(archiever_encoder ${Boost_LIBRARIES})
+
+add_executable(archiever_decoder arithmetic_archiever/decoder.cpp file_opener.cpp)
+target_link_libraries(archiever_decoder encoding_lib)
 target_link_libraries(archiever_decoder ${Boost_LIBRARIES})
+
+add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp file_opener.cpp)
+target_link_libraries(archiever_a_encoder encoding_lib)
+target_link_libraries(archiever_a_encoder ${Boost_LIBRARIES})
+
+add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp file_opener.cpp)
+target_link_libraries(archiever_a_decoder encoding_lib)
+target_link_libraries(archiever_a_decoder ${Boost_LIBRARIES})
 
 install(TARGETS archiever_encoder archiever_decoder
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
