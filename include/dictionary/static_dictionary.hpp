@@ -35,8 +35,7 @@ public:
      * @return
      */
     template <class RangeT>
-    static StaticDictionary<WordT, CountT> fromCountMap
-    (const RangeT& countsRng);
+    StaticDictionary(const RangeT& countsRng);
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -79,26 +78,20 @@ protected:
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 template <class RangeT>
-StaticDictionary<WordT, CountT>
-StaticDictionary<WordT, CountT>::fromCountMap(
-        const RangeT& countMap) {
-    auto ret = StaticDictionary<Word, Count>();
-    ret._cumulativeNumFound.resize(Word::wordsCount);
+StaticDictionary<WordT, CountT>::StaticDictionary(const RangeT& countMap) {
+    _cumulativeNumFound.resize(Word::wordsCount);
     auto currOrd = Ord{0};
     auto currCumulativeNumFound = Count{0};
     for (auto& [word, count]: countMap) {
         auto ord = WordT::ord(word);
         for (; currOrd < ord; ++currOrd) {
-            ret._cumulativeNumFound[currOrd] = currCumulativeNumFound;
+            _cumulativeNumFound[currOrd] = currCumulativeNumFound;
         }
         currCumulativeNumFound += count;
     }
-
     for (; currOrd < Word::wordsCount; ++currOrd) {
-        ret._cumulativeNumFound[currOrd] = currCumulativeNumFound;
+        _cumulativeNumFound[currOrd] = currCumulativeNumFound;
     }
-
-    return ret;
 }
 
 //----------------------------------------------------------------------------//

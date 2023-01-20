@@ -21,7 +21,7 @@ TEST(IntRangeFlow, iterate) {
     auto vec = std::vector<int>{3, 7, 2};
     auto flow = ga::fl::IntegerWordFlow<int, -5, 4>(std::move(vec));
 
-    for (auto word: flow) {
+    for ([[maybe_unused]] auto word: flow) {
 
     }
 }

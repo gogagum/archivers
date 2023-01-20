@@ -1,6 +1,8 @@
 #ifndef UNIFORM_DICTIONARY_HPP
 #define UNIFORM_DICTIONARY_HPP
 
+#include "word_probability_stats.hpp"
+
 #include <cstdint>
 
 namespace ga::dict {
@@ -8,11 +10,14 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The UniformDictionary class
 ///
-template <class WordT>
+template <class WordT, typename CountT = std::uint64_t>
 class UniformDictionary {
 public:
 
     using Word = WordT;
+    using Ord = typename Word::Ord;
+    using Count = CountT;
+    using ProbabilityStats = WordProbabilityStats<Count>;
 
 public:
 
@@ -21,9 +26,9 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(std::uint64_t cumulativeNumFound);
+    Word getWord(Count cumulativeNumFound);
 
-
+    ProbabilityStats getWordProbabilityStats(const Word& word);
 
 
     /**
@@ -49,29 +54,17 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT>
-WordT UniformDictionary<WordT>::getWord(std::uint64_t cumulativeNumFound) {
+template <class WordT, typename CountT>
+WordT UniformDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) {
     return WordT::byOrd(cumulativeNumFound);
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t
-UniformDictionary<WordT>::getLowerCumulativeNumFound(const WordT& word) {
-    return WordT::ord(word);
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t
-UniformDictionary<WordT>::getHigherCumulativeNumFound(const WordT& word) {
-    return WordT::ord(word) + 1;
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT>
-std::uint64_t UniformDictionary<WordT>::totalWordsCount() const {
-    return WordT::wordsCount;
+template <class WordT, typename CountT>
+auto UniformDictionary<WordT, CountT>::getWordProbabilityStats(
+        const Word& word) -> ProbabilityStats {
+    auto ord = WordT::ord(word);
+    return { ord, ord + 1, WordT::wordsCount };
 }
 
 }  // namespace ga::dict
