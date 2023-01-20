@@ -33,6 +33,7 @@ add_library(encoding_lib STATIC
     include/dictionary/adaptive_a_dictionary.hpp
     include/dictionary/adaptive_d_dictionary.hpp
     include/dictionary/decreasing_counts_dictionary.hpp
+    include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
     include/dictionary/traits.hpp
     include/flow/int_range_word_flow.hpp
@@ -83,6 +84,7 @@ add_executable(archiever_tests
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
     test/arithmetic_coder.cpp
+    test/decreasing_on_update_dictionary.cpp
 )
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)

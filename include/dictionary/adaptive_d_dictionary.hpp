@@ -129,8 +129,8 @@ AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
     if (_totalFoundWordsCount == 0) {
         ord;
     }
-    auto cumulativeUnique = _cumulativeFoundUniueWords(ord);
-    return (WordT::wordsCount - cumulativeUnique) * 2 * _cumulativeFoundWordsCount(ord)
+    auto cumulativeUnique = _cumulativeFoundUniueWords(ord - 1);
+    return (WordT::wordsCount - cumulativeUnique) * 2 * _cumulativeFoundWordsCount(ord - 1)
             + ord * _foundWordsCount.size() - WordT::wordsCount * cumulativeUnique;
 }
 

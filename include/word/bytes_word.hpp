@@ -12,7 +12,7 @@
 #include <boost/range/combine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "../bits_iterator.hpp"
+#include "bits_iterator.hpp"
 
 namespace ga::w {
 

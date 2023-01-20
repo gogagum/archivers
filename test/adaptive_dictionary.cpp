@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <word/bytes_word.hpp>
-#include <word/bits_word.hpp>
-#include <word/integer_word.hpp>
-#include <dictionary/adaptive_dictionary.hpp>
-#include <dictionary/traits.hpp>
-#include <byte_data_constructor.hpp>
+#include "word/bytes_word.hpp"
+#include "word/bits_word.hpp"
+#include "word/integer_word.hpp"
+#include "dictionary/adaptive_dictionary.hpp"
+#include "dictionary/traits.hpp"
+#include "byte_data_constructor.hpp"
 
 using ga::dict::AdaptiveDictionary;
 using ga::w::BytesWord;

@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <dictionary/static_dictionary.hpp>
-#include <word/bytes_word.hpp>
-#include <word/bits_word.hpp>
-#include <dictionary/traits.hpp>
-#include <byte_data_constructor.hpp>
+#include "dictionary/static_dictionary.hpp"
+#include "word/bytes_word.hpp"
+#include "word/bits_word.hpp"
+#include "dictionary/traits.hpp"
+#include "byte_data_constructor.hpp"
 
 using ga::dict::StaticDictionary;
 using ga::w::BytesWord;
@@ -17,9 +17,8 @@ static_assert(ga::dict::traits::needSerialize<StaticDictionary<BytesWord<1>>, ga
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(StaticDictionary, ConstructFromCumulativeNumFound) {
-    using Dict = StaticDictionary<BytesWord<1>>;
     auto cumulFreq = std::array<std::pair<BytesWord<1>, std::uint64_t>, 0>{};
-    auto dict = Dict(cumulFreq);
+    auto dict = StaticDictionary<BytesWord<1>>(cumulFreq);
 }
 
 //----------------------------------------------------------------------------//
@@ -37,8 +36,6 @@ TEST(StaticDictionary, Ord2Bytes1) {
 
 //----------------------------------------------------------------------------//
 TEST(StaticDictionary, Ord2BytesFromFreq) {
-    using Dict = StaticDictionary<BitsWord<3>>;
-
     auto countMap = std::array {
         std::make_pair(BitsWord<3>::byOrd(0), std::uint64_t(2)),  // 2
         std::make_pair(BitsWord<3>::byOrd(1), std::uint64_t(3)),  // 5
@@ -50,7 +47,7 @@ TEST(StaticDictionary, Ord2BytesFromFreq) {
         std::make_pair(BitsWord<3>::byOrd(7), std::uint64_t(0))   // 25
     };
 
-    auto dict = Dict(countMap);
+    auto dict = StaticDictionary<BitsWord<3>>(countMap);
 
     EXPECT_EQ(dict.getWord(5), BitsWord<3>::byOrd(2));
     EXPECT_EQ(dict.getWord(15), BitsWord<3>::byOrd(5));

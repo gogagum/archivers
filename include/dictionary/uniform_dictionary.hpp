@@ -28,28 +28,18 @@ public:
      */
     Word getWord(Count cumulativeNumFound);
 
+    /**
+     * @brief getWordProbabilityStats
+     * @param word
+     * @return [low, high, total]
+     */
     ProbabilityStats getWordProbabilityStats(const Word& word);
-
-
-    /**
-     * @brief getLowerCumulativeNumFound - lower letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
-     */
-    std::uint64_t getLowerCumulativeNumFound(const WordT& word);
-
-    /**
-     * @brief getHigherCumulativeNumFound - lower or equal letters count.
-     * @param word - key to search.
-     * @return cumulative lower words count.
-     */
-    std::uint64_t getHigherCumulativeNumFound(const WordT& word);
 
     /**
      * @brief totalWordsCount
      * @return
      */
-    std::uint64_t totalWordsCount() const;
+    Count totalWordsCount() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +55,12 @@ auto UniformDictionary<WordT, CountT>::getWordProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = WordT::ord(word);
     return { ord, ord + 1, WordT::wordsCount };
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto UniformDictionary<WordT, CountT>::totalWordsCount() const -> Count {
+    return WordT::wordsCount;
 }
 
 }  // namespace ga::dict

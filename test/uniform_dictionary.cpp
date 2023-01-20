@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../include/dictionary/uniform_dictionary.hpp"
-#include "../include/word/bytes_word.hpp"
+#include "dictionary/uniform_dictionary.hpp"
+#include "word/bytes_word.hpp"
 
 using ga::dict::UniformDictionary;
 using ga::w::BytesWord;
@@ -61,4 +61,12 @@ TEST(UniformDictionary, CumulativeNumFoundHighZero) {
     auto word = BytesWord<1>::byOrd(0);
     auto [_0, high, _1] = dict.getWordProbabilityStats(word);
     EXPECT_EQ(high, 1);
+}
+
+//----------------------------------------------------------------------------//
+TEST(UniformDictionary, TotalWordsCount) {
+    auto dict = UniformDictionary<BytesWord<1>>();
+    auto word = BytesWord<1>::byOrd(0);
+    auto [_0, _1, total] = dict.getWordProbabilityStats(word);
+    EXPECT_EQ(total, 256);
 }

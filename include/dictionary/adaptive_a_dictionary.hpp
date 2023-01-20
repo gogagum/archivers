@@ -122,7 +122,9 @@ AdaptiveADictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) const -> Count {
+auto
+AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+        Ord ord) const -> Count {
     if (ord == 0) {
         return 0;
     }

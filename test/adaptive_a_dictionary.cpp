@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../include/dictionary/adaptive_a_dictionary.hpp"
-#include "../include/word/bytes_word.hpp"
-#include "../include/word/bits_word.hpp"
+#include "dictionary/adaptive_a_dictionary.hpp"
+#include "word/bytes_word.hpp"
+#include "word/bits_word.hpp"
 
 using ga::w::BytesWord;
 using ga::w::BitsWord;

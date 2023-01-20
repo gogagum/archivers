@@ -4,9 +4,12 @@
 #include <vector>
 #include <boost/range/combine.hpp>
 
-#include "../include/word/bytes_word.hpp"
-#include "../include/word/word_ord_comp.hpp"
-#include "../include/byte_data_constructor.hpp"
+#include "word/bytes_word.hpp"
+#include "word/word_ord_comp.hpp"
+#include "byte_data_constructor.hpp"
+
+using ga::w::BytesWord;
+using ga::w::WordOrdComp;
 
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -22,90 +25,76 @@ static_assert(!ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor:
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, Construct) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::w::BytesWord<5>(testData.data());
+    [[maybe_unused]] auto sym = BytesWord<5>(testData.data());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, ConstructFromArray) {
     std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = ga::w::BytesWord<5>(testData);
+    [[maybe_unused]] auto sym = BytesWord<5>(testData);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder1) {
-    using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::w::BytesWord<2>;
+    auto testData1 = std::array{ std::byte{0b00000000}, std::byte{0b11111111} };
+    auto testData2 = std::array{ std::byte{0b11111111}, std::byte{0b11111111} };
 
-    SymDataT testData1 = { std::byte{0b00000000}, std::byte{0b11111111} };
-    SymDataT testData2 = { std::byte{0b11111111}, std::byte{0b11111111} };
+    auto sym1 = BytesWord<2>(testData1.data());
+    auto sym2 = BytesWord<2>(testData2.data());
 
-    auto sym1 = SymT(testData1.data());
-    auto sym2 = SymT(testData2.data());
-
-    auto comp = ga::w::WordOrdComp<SymT>();
+    auto comp = ga::w::WordOrdComp<BytesWord<2>>();
 
     ASSERT_TRUE(comp(sym1, sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder2) {
-    using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesWord<1>;
+    auto testData1 = std::array{ std::byte{0b00000111} };
+    auto testData2 = std::array{ std::byte{0b00001111} };
 
-    SymDataT testData1 = { std::byte{0b00000111} };
-    SymDataT testData2 = { std::byte{0b00001111} };
+    auto sym1 = BytesWord<1>(testData1.data());
+    auto sym2 = BytesWord<1>(testData2.data());
 
-    auto sym1 = SymT(testData1.data());
-    auto sym2 = SymT(testData2.data());
-
-    auto comp = ga::w::WordOrdComp<SymT>();
+    auto comp = ga::w::WordOrdComp<BytesWord<1>>();
 
     ASSERT_TRUE(comp(sym1, sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder3) {
-    using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesWord<1>;
+    auto testData1 = std::array{ std::byte{0b00001111} };
+    auto testData2 = std::array{ std::byte{0b00000111} };
 
-    SymDataT testData1 = { std::byte{0b00001111} };
-    SymDataT testData2 = { std::byte{0b00000111} };
+    auto sym1 = BytesWord<1>(testData1);
+    auto sym2 = BytesWord<1>(testData2);
 
-    auto sym1 = SymT(testData1);
-    auto sym2 = SymT(testData2);
-
-    auto comp = ga::w::WordOrdComp<SymT>();
+    auto comp = ga::w::WordOrdComp<BytesWord<1>>();
 
     ASSERT_FALSE(comp(sym1, sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsOrder4) {
-    using SymDataT = std::array<std::byte, 2>;
-    using SymT = ga::w::BytesWord<2>;
+    auto testData1 = std::array{ std::byte{0b10000000}, std::byte{0b00000000} };
+    auto testData2 = std::array{ std::byte{0b00001111}, std::byte{0b11111111} };
 
-    SymDataT testData1 = { std::byte{0b10000000}, std::byte{0b00000000} };
-    SymDataT testData2 = { std::byte{0b00001111}, std::byte{0b11111111} };
+    auto sym1 = BytesWord<2>(testData1);
+    auto sym2 = BytesWord<2>(testData2);
 
-    auto sym1 = SymT(testData1);
-    auto sym2 = SymT(testData2);
-
-    auto comp = ga::w::WordOrdComp<SymT>();
+    auto comp = WordOrdComp<BytesWord<2>>();
 
     ASSERT_FALSE(comp(sym1, sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsInMap) {
-    using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesWord<1>;
-    using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
+    using MapToInt64 = std::map<BytesWord<1>, std::int64_t, WordOrdComp<BytesWord<1>>>;
 
-    SymDataT testData1 = { std::byte{0b00000000} };
-    SymDataT testData2 = { std::byte{0b11111111} };
+    auto testData1 = std::array{ std::byte{0b00000000} };
+    auto testData2 = std::array{ std::byte{0b11111111} };
 
-    auto sym1 = SymT(testData1);
-    auto sym2 = SymT(testData2);
+    auto sym1 = BytesWord<1>(testData1);
+    auto sym2 = BytesWord<1>(testData2);
 
     auto m = MapToInt64();
 
@@ -120,17 +109,16 @@ TEST(BytesSymbol, BytesSymbolsInMap) {
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
-    using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesWord<1>;
-    using MapToInt64 = std::map<SymT, std::int64_t, ga::w::WordOrdComp<SymT>>;
+    using MapToInt64 =
+        std::map<BytesWord<1>, std::int64_t, WordOrdComp<BytesWord<1>>>;
 
-    SymDataT testData1 = { std::byte{0b00000000} };
-    SymDataT testData2 = { std::byte{0b00001111} };
-    SymDataT testData3 = { std::byte{0b11111111} };
+    auto testData1 = std::array{ std::byte{0b00000000} };
+    auto testData2 = std::array{ std::byte{0b00001111} };
+    auto testData3 = std::array{ std::byte{0b11111111} };
 
-    auto sym1 = SymT(testData1);
-    auto sym2 = SymT(testData2);
-    auto sym3 = SymT(testData3);
+    auto sym1 = BytesWord<1>(testData1);
+    auto sym2 = BytesWord<1>(testData2);
+    auto sym3 = BytesWord<1>(testData3);
 
     auto m = MapToInt64();
 
@@ -145,15 +133,13 @@ TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
 
 //----------------------------------------------------------------------------//
 TEST(BytesSymbol, BitsOut) {
-    using SymDataT = std::array<std::byte, 1>;
-    using SymT = ga::w::BytesWord<1>;
-    SymDataT testData = { std::byte{0b00001111} };
-    auto sym = SymT(testData);
+    auto testData = std::array{ std::byte{0b00001111} };
+    auto word = BytesWord<1>(testData);
 
     std::vector<bool> bits;
     auto bitsInserter = std::back_inserter(bits);
 
-    sym.bitsOut(bitsInserter);
+    word.bitsOut(bitsInserter);
     EXPECT_EQ(bits.size(), 8);
 
     auto combinedTestAndTested =
