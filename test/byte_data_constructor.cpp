@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../include/byte_data_constructor.hpp"
+#include "byte_data_constructor.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -14,7 +14,6 @@ TEST(ByteDataConstructor, PutBitFalse) {
     encoded.putBit(false);
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b00000000});
 }
-
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBitTrue) {

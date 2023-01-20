@@ -2,14 +2,13 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm.hpp>
 
-#include "../include/data_parser.hpp"
+#include "data_parser.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DataParser, Construct) {
     auto testData = std::array{
-        std::byte{2}, std::byte{25},
-        std::byte{17}, std::byte{11}
+        std::byte{2}, std::byte{25}, std::byte{17}, std::byte{11}
     };
     [[maybe_unused]] auto decoded = ga::DataParser(testData);
 }

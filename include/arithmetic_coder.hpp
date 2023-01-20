@@ -10,13 +10,15 @@
 #include <cstdint>
 #include <bitset>
 #include <boost/range/combine.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
-#include "dictionary/dictionary_tags.hpp"
 #include "dictionary/traits.hpp"
 
 namespace ga {
+
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
@@ -38,26 +40,12 @@ private:
 public:
 
     /**
-     * @brief ArithmeticCoder constructor from byte flow to encode.
-     * @param byteFlow - byte flow.
-     */
-    template <class DictT_ >
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_,
-            dict::tags::ConstructsFromSymsCounts
-        >
-    ArithmeticCoder(FlowT&& byteFlow);
-
-    /**
      * @brief ArithmeticCoder
      * @param byteFlow
+     * @param constructor
      */
-    template <class DictT_ = DictT>
-        requires ga::dict::traits::constructionTypeIs<
-            DictT_,
-            dict::tags::ConstructsFromNoArgs
-        >
-    ArithmeticCoder(FlowT&& byteFlow);
+    template <class DictConstructor>
+    ArithmeticCoder(FlowT&& byteFlow, DictConstructor&& constructor);
 
     /**
      * @brief encode - encode byte flow.
@@ -71,6 +59,8 @@ private:
 
     void _serializeNumBits(Res& res);
 
+    void _serializeDict(Res& res);
+
     void _serializeTail(Res& res);
 
     void _serializeFileWordsCount(Res& res);
@@ -83,26 +73,13 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-template <class DictT_>
-    requires ga::dict::traits::constructionTypeIs<
-        DictT_,
-        dict::tags::ConstructsFromSymsCounts
-    >
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
-        : _symFlow(symbolsFlow),
-          _dict(_countSyms()),
-          _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-template <class DictT_> requires ga::dict::traits::constructionTypeIs<
-    DictT_,
-    dict::tags::ConstructsFromNoArgs
->
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow)
-        : _symFlow(symbolsFlow),
-          _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
+template <class FlowT, class DictT, class CountT>
+template <class DictConstructor>
+ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
+                                                       DictConstructor&& constructor) :
+    _symFlow(symbolsFlow),
+    _dict(constructor()),
+    _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
@@ -110,12 +87,9 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     auto ret = Res();
 
     _serializeNumBits(ret);
-    _serializeTail(ret);
+    _serializeDict(ret);
     _serializeFileWordsCount(ret);
-
-    if constexpr (std::is_same_v<typename DictT::ConstructionTag, dict::tags::ConstructsFromSymsCounts>) {
-        _dict.template serialize<CountT>(ret);
-    }
+    _serializeTail(ret);
 
     auto currRange = OrdRange { 0, correctedSymsNum };
 
@@ -131,19 +105,17 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
             lastPercent = currPercent;
         }
 
-        auto range = currRange.high - currRange.low;
+        const auto range = bm::uint128_t(currRange.high - currRange.low);
+        const auto [low, high, total] = _dict.getProbabilityStats(sym);
 
-        auto h = _dict.getHigherCumulativeNumFound(sym);
-        auto l = _dict.getLowerCumulativeNumFound(sym);
+        const auto low128 = bm::uint128_t(low);
+        const auto high128 = bm::uint128_t(high);
+        const auto total128 = bm::uint128_t(total);
 
         currRange = OrdRange {
-            currRange.low + (range * l) / _dict.totalWordsCount(),
-            currRange.low + (range * h) / _dict.totalWordsCount()
+            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
+            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
         };
-
-        if constexpr (dict::traits::needWordIncrease<DictT>) {
-            _dict.increaseWordCount(sym);
-        }
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {
@@ -163,6 +135,8 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 
         ++wordsCoded;
     }
+
+    std::cout << "100%" << std::endl;
 
     if (currRange.low < correctedSymsNum_4) {
         ret.putBit(false);
@@ -196,6 +170,14 @@ std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
     res.putT<std::uint16_t>(Word::numBits);
+}
+
+//----------------------------------------------------------------------------//
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
+    if constexpr (ga::dict::traits::needSerialize<DictT, ga::ByteDataConstructor>) {
+        _dict.serialize(res);
+    }
 }
 
 //----------------------------------------------------------------------------//

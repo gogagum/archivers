@@ -3,32 +3,7 @@
 
 #include <cstdint>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
-using tp = boost::multiprecision::uint256_t;
-
 namespace ga {
-
-namespace impl {
-
-////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT>
-struct CountTChoose;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT> requires (SymT::numBits < 32)
-struct CountTChoose<SymT> {
-    using Type = std::uint64_t;
-};
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <class SymT> requires (SymT::numBits >= 32)
-struct CountTChoose<SymT> {
-    using Type = boost::multiprecision::uint256_t;
-};
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
@@ -37,7 +12,7 @@ template <class SymT>
 class RangesCalc {
 public:
 
-    using Count = typename impl::CountTChoose<SymT>::Type;
+    using Count = std::uint64_t;
     constexpr static Count _computeCorrectingConst();
 
 public:
@@ -64,6 +39,10 @@ public:
 
     static Range recalcRange(Range r);
 
+public:
+
+    constexpr static std::uint16_t _computeAdditionalBitsCnt();
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +50,7 @@ public:
 template <class SymT>
 constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
     auto correctingConst = Count{1};
-    while (correctingConst * symsNum < (1ull << 33)) {
+    while (correctingConst * symsNum < (Count{1} << Count{56})) {
         correctingConst <<= 1ull;
     }
     return correctingConst;
@@ -81,7 +60,6 @@ constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
 //----------------------------------------------------------------------------//
 template <class SymT>
 auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
-    Range ret;
     if (r.high <= symsNum_2 * correctingConst) {
         return { r.low * 2, r.high * 2 };
     } else if (r.low >= symsNum_2 * correctingConst) {
@@ -97,6 +75,14 @@ auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
         };
     }
     return r;
+}
+
+//----------------------------------------------------------------------------//
+template <class SymT>
+constexpr std::uint16_t RangesCalc<SymT>::_computeAdditionalBitsCnt() {
+    std::uint16_t ret = 0;
+    for (; (symsNum << ret) < (1ull << 56); ++ret) {}
+    return ret;
 }
 
 }

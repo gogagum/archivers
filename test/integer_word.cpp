@@ -1,43 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../include/word/integer_word.hpp"
-#include "../include/ranges_calc.hpp"
-
-namespace bm = boost::multiprecision;
-
-////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::IntegerWord<int, 0, 8>>::Type,
-        std::uint64_t
-    >
-);
-
- //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::IntegerWord<int, 0, 31>>::Type,
-        std::uint64_t
-    >
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<
-        typename ga::impl::CountTChoose<ga::w::IntegerWord<int, 0, 32>>::Type,
-        bm::uint256_t
-    >
-);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(
-    std::is_same_v<typename ga::impl::CountTChoose<
-            ga::w::IntegerWord<int, 0, 111>
-        >::Type,
-        bm::uint256_t
-    >
-);
+#include "word/integer_word.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

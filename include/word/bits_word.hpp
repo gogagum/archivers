@@ -1,8 +1,6 @@
 #ifndef BITS_SYMBOL_HPP
 #define BITS_SYMBOL_HPP
 
-#include "ord_t_choose.hpp"
-
 #include <array>
 #include <algorithm>
 #include <boost/range/irange.hpp>
@@ -20,7 +18,7 @@ template <std::uint16_t _numBits>
 class BitsWord {
 public:
 
-    using Ord = typename impl::OrdTChoose<_numBits>::Type;
+    using Ord = std::uint64_t;
 
 public:
 
@@ -81,18 +79,14 @@ private:
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    template <std::uint16_t __numBits>
-    friend bool operator==(const BitsWord<__numBits>& bs1,
-                           const BitsWord<__numBits>& bs2);
+    friend bool operator==(const BitsWord& bs1, const BitsWord& bs2) = default;
 
     /**
      * @brief operator == check if two symbols are equal.
      * @param bs1 - first byte symbol.
      * @param bs2 - second byte symbol.
      */
-    template <std::uint16_t __numBits>
-    friend bool operator!=(const BitsWord<__numBits>& bs1,
-                           const BitsWord<__numBits>& bs2);
+    friend bool operator!=(const BitsWord& bs1, const BitsWord& bs2) = default;
 
     /**
      * @brief operator <<  for debug output.
@@ -183,18 +177,6 @@ void BitsWord<_numBits>::bitsOut(IterT outIter) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-bool operator==(const BitsWord<_numBits>& bw1, const BitsWord<_numBits>& bw2) {
-    return bw1._bits == bw2._bits;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-bool operator!=(const BitsWord<_numBits>& bw1, const BitsWord<_numBits>& bw2) {
-    return bw1._bits != bw2._bits;
-}
-
 //----------------------------------------------------------------------------//
 template <std::uint16_t numBits>
 std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw) {

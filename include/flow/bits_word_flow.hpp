@@ -1,8 +1,8 @@
 #ifndef BIT_WORD_FLOW_HPP
 #define BIT_WORD_FLOW_HPP
 
-#include "../word/bits_word.hpp"
-#include "../data_parser.hpp"
+#include "word/bits_word.hpp"
+#include "data_parser.hpp"
 
 #include <span>
 #include <cstdint>
