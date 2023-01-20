@@ -64,6 +64,14 @@ add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp file_opene
 target_link_libraries(archiever_a_decoder encoding_lib)
 target_link_libraries(archiever_a_decoder ${Boost_LIBRARIES})
 
+add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp file_opener.cpp)
+target_link_libraries(archiever_d_encoder encoding_lib)
+target_link_libraries(archiever_d_encoder ${Boost_LIBRARIES})
+
+add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp file_opener.cpp)
+target_link_libraries(archiever_d_decoder encoding_lib)
+target_link_libraries(archiever_d_decoder ${Boost_LIBRARIES})
+
 install(TARGETS archiever_encoder archiever_decoder
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
