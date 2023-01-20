@@ -61,14 +61,16 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
 
-        const auto packIntoByteDataConstructor = [&dataConstructor, &filesOpener] (auto&& decoder) {
+        const auto packIntoByteDataConstructor =
+                [&dataConstructor, &filesOpener] (auto&& decoder) {
             auto ret = decoder.decode();
             for (auto& word: ret.syms) {
                 word.bitsOut(dataConstructor.getBitBackInserter());
             }
             std::copy(ret.tail.begin(), ret.tail.end(),
                       dataConstructor.getBitBackInserter());
-            filesOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
+            filesOpener.getOutFileStream().write(
+                        dataConstructor.data<char>(), dataConstructor.size());
         };
 
         switch (symBitLen) {
@@ -97,7 +99,8 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(30);
             BITS_DECODER_CASE(31);
         default:
-            throw std::runtime_error((boost::format("bit length %1% is not supported") % symBitLen).str());
+            throw std::runtime_error(
+                (boost::format("Bit length %1% is not supported.") % symBitLen).str());
             break;
         }
     } catch (const std::runtime_error&  error) {

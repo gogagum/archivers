@@ -13,6 +13,9 @@ namespace ga::dict {
 
 namespace bicl = boost::icl;
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The AdaptiveADictionary class
+///
 template <class WordT, typename CountT = std::uint64_t>
 class AdaptiveADictionary {
 public:
@@ -29,14 +32,14 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(Count cumulativeNumFound) const;
+    Word getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats
      * @param word
      * @return
      */
-    [[nodiscard]] ProbabilityStats getWordProbabilityStats(const WordT& word);
+    [[nodiscard]] ProbabilityStats getWordProbabilityStats(const Word& word);
 
     /**
      * @brief totalWordsCount
@@ -52,7 +55,7 @@ private:
 
     void _increaseWordCount(Ord word);
 
-public:
+private:
     bicl::interval_map<Ord, Count> _cumulativeFoundWordsCount;
     Count _totalFoundWordsCount;
     bicl::interval_map<Ord, Count> _cumulativeFoundUniueWords;
@@ -66,8 +69,9 @@ AdaptiveADictionary<WordT, CountT>::AdaptiveADictionary() : _totalFoundWordsCoun
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-WordT
-AdaptiveADictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
+auto
+AdaptiveADictionary<WordT, CountT>::getWord(
+        Count cumulativeNumFound) const -> Word {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
@@ -77,7 +81,7 @@ AdaptiveADictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
-    return WordT::byOrd(it - idxs.begin());
+    return Word::byOrd(it - idxs.begin());
 }
 
 //----------------------------------------------------------------------------//

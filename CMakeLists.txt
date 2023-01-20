@@ -30,6 +30,9 @@ add_library(encoding_lib STATIC
     include/dictionary/uniform_dictionary.hpp
     include/dictionary/static_dictionary.hpp
     include/dictionary/adaptive_dictionary.hpp
+    include/dictionary/adaptive_a_dictionary.hpp
+    include/dictionary/adaptive_d_dictionary.hpp
+    include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
     include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp

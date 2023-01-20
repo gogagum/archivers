@@ -30,20 +30,13 @@ public:
     StaticDictionary(StaticDictionary&& other) = default;
 
     /**
-     * @brief fromCumulativeCounts construct from cumulative counts.
-     * @param cumulCountsRng - cumulative count of each symbol ordered.
-     * @return
-     */
-    template <class RangeT>
-    static StaticDictionary<WordT, CountT> fromCumulativeCounts(const RangeT& cumulCountsRng);
-
-    /**
      * @brief fromCounts construct from simple wordsCounts
      * @param countsRng - count of each symbol ordered.
      * @return
      */
     template <class RangeT>
-    static StaticDictionary<WordT, CountT> fromCounts(const RangeT& countsRng);
+    static StaticDictionary<WordT, CountT> fromCountMap
+    (const RangeT& countsRng);
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -87,27 +80,24 @@ protected:
 template <class WordT, typename CountT>
 template <class RangeT>
 StaticDictionary<WordT, CountT>
-StaticDictionary<WordT, CountT>::fromCumulativeCounts(
-        const RangeT& cumulativeCountsRange) {
-    auto ret = StaticDictionary<WordT, CountT>();
-    std::copy(cumulativeCountsRange.begin(),
-              cumulativeCountsRange.end(),
-              std::back_inserter(ret._cumulativeNumFound));
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-template <class RangeT>
-StaticDictionary<WordT, CountT>
-StaticDictionary<WordT, CountT>::fromCounts(
-        const RangeT& numFoundRange) {
-    auto ret = StaticDictionary<WordT, CountT>();
-    auto currentSum = Count{0};
-    for (auto numFound: numFoundRange) {
-        currentSum += numFound;
-        ret._cumulativeNumFound.emplace_back(currentSum);
+StaticDictionary<WordT, CountT>::fromCountMap(
+        const RangeT& countMap) {
+    auto ret = StaticDictionary<Word, Count>();
+    ret._cumulativeNumFound.resize(Word::wordsCount);
+    auto currOrd = Ord{0};
+    auto currCumulativeNumFound = Count{0};
+    for (auto& [word, count]: countMap) {
+        auto ord = WordT::ord(word);
+        for (; currOrd < ord; ++currOrd) {
+            ret._cumulativeNumFound[currOrd] = currCumulativeNumFound;
+        }
+        currCumulativeNumFound += count;
     }
+
+    for (; currOrd < Word::wordsCount; ++currOrd) {
+        ret._cumulativeNumFound[currOrd] = currCumulativeNumFound;
+    }
+
     return ret;
 }
 

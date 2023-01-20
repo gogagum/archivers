@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <boost/program_options.hpp>
+#include <boost/format.hpp>
 
 #include "file_opener.hpp"
 #include "arithmetic_archiever_include.hpp"
@@ -84,7 +85,8 @@ int main(int argc, char* argv[]) {
             BITS_CASE(30);
             BITS_CASE(31);
         default:
-            assert(false);
+            throw std::runtime_error(
+                (boost::format("File is encoded with %1% bit length which is not supported.") % numBits).str());
             break;
         }
     } catch (const std::runtime_error& error) {
