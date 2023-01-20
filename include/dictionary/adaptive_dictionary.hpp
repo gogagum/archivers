@@ -94,7 +94,7 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
-    const auto getLowerCumulNumFound_ = [this](std::uint64_t index) {
+    const auto getLowerCumulNumFound_ = [this](Ord index) {
         return _cumulativeWordCounts(index) * _ratio + index + 1;
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
@@ -105,7 +105,7 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto AdaptiveDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
-    return WordT::wordsCount + _totalWordsCount;
+    return _totalWordsCount;
 }
 
 //----------------------------------------------------------------------------//
@@ -113,7 +113,7 @@ template <class WordT, typename CountT>
 auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(const WordT& word) -> ProbabilityStats {
     auto ord = WordT::ord(word);
     auto low = _getLowerCumulativeNumFound(ord);
-    auto ret = ProbabilityStats{ low, low + _wordCounts[ord] + 1, getTotalWordsCount() };
+    auto ret = ProbabilityStats{ low, low + _wordCounts[ord] * _ratio + 1, getTotalWordsCount() };
     _updateCumulativeNumWords(ord);
     return ret;
 }
@@ -125,7 +125,7 @@ AdaptiveDictionary<WordT, CountT>::_updateCumulativeNumWords(Ord ord) {
     auto interval = OrdInterval(ord, WordT::wordsCount);
     _cumulativeWordCounts += std::make_pair(interval, Count{1});
     ++_wordCounts[ord];
-    ++_totalWordsCount;
+    _totalWordsCount += _ratio;
 }
 
 //----------------------------------------------------------------------------//

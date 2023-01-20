@@ -66,7 +66,7 @@ TEST(AdaptiveADictionary, GetStatsAfterUpdate) {
     [[maybe_unused]] auto stats0 = dict.getProbabilityStats(word);
     auto [low, high, total] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 0);
-    EXPECT_EQ(high, 1);
+    EXPECT_EQ(high, 7);
     EXPECT_EQ(total, 14);
     // Unuform probability. Each letter 1/8.
 }
@@ -126,4 +126,27 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherBeginCenter) {
     EXPECT_EQ(low, 11);
     EXPECT_EQ(high, 12);
     EXPECT_EQ(total, 14);
+}
+
+//----------------------------------------------------------------------------//
+TEST(AdaptiveADictionary, Example) {
+    auto dict = AdaptiveADictionary<BytesWord<1>>();
+    auto [low0, high0, total0] = dict.getProbabilityStats(BytesWord<1>::byOrd(8));
+    EXPECT_EQ(high0 - low0, 1);
+    EXPECT_EQ(total0, 256);
+    auto [low1, high1, total1] = dict.getProbabilityStats(BytesWord<1>::byOrd(12));
+    EXPECT_EQ(high1 - low1, 1);
+    EXPECT_EQ(total1, 255 * 2);
+    auto [low2, high2, total2] = dict.getProbabilityStats(BytesWord<1>::byOrd(45));
+    EXPECT_EQ(high2 - low2, 1);
+    EXPECT_EQ(total2, 254 * 3);
+    auto [low3, high3, total3] = dict.getProbabilityStats(BytesWord<1>::byOrd(23));
+    EXPECT_EQ(high3 - low3, 1);
+    EXPECT_EQ(total3, 253 * 4);
+    auto [low4, high4, total4] = dict.getProbabilityStats(BytesWord<1>::byOrd(46));
+    EXPECT_EQ(high4 - low4, 1);
+    EXPECT_EQ(total4, 252 * 5);
+    auto [low5, high5, total5] = dict.getProbabilityStats(BytesWord<1>::byOrd(45));
+    EXPECT_EQ(high5 - low5, 251);
+    EXPECT_EQ(total5, 251 * 6);
 }

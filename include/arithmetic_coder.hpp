@@ -10,12 +10,15 @@
 #include <cstdint>
 #include <bitset>
 #include <boost/range/combine.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 #include "dictionary/traits.hpp"
 
 namespace ga {
+
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
@@ -29,11 +32,11 @@ public:
     using Res = ByteDataConstructor;
 
 private:
-    using RangesCalc<Word>::correctedSymsNum;
-    using RangesCalc<Word>::correctedSymsNum_2;
-    using RangesCalc<Word>::correctedSymsNum_4;
-    using RangesCalc<Word>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<Word>::Range;
+    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum;
+    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_2;
+    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_4;
+    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_3to4;
+    using OrdRange = typename RangesCalc<Word, minSymsNumBits>::Range;
 public:
 
     /**
@@ -102,12 +105,16 @@ auto ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::encode() -> Res {
             lastPercent = currPercent;
         }
 
-        auto range = currRange.high - currRange.low;
-        auto [low, high, totalWords] = _dict.getProbabilityStats(sym);
+        const auto range = bm::uint128_t(currRange.high - currRange.low);
+        const auto [low, high, total] = _dict.getProbabilityStats(sym);
+
+        const auto low128 = bm::uint128_t(low);
+        const auto high128 = bm::uint128_t(high);
+        const auto total128 = bm::uint128_t(total);
 
         currRange = OrdRange {
-            currRange.low + (range * low) / totalWords,
-            currRange.low + (range * high) / totalWords
+            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
+            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
         };
 
         while (true) {
@@ -123,7 +130,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::encode() -> Res {
             } else {
                 break;
             }
-            currRange = RangesCalc<Word>::recalcRange(currRange);
+            currRange = RangesCalc<Word, minSymsNumBits>::recalcRange(currRange);
         }
 
         ++wordsCoded;

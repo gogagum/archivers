@@ -5,6 +5,7 @@
 
 #include <boost/container/static_vector.hpp>
 #include <boost/range/irange.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include <iostream>
 #include <map>
@@ -19,6 +20,7 @@
 namespace ga {
 
 namespace bc = boost::container;
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
@@ -52,12 +54,12 @@ public:
 
 private:
 
-    using RangesCalc<SymT>::symsNum;
-    using RangesCalc<SymT>::correctedSymsNum;
-    using RangesCalc<SymT>::correctedSymsNum_2;
-    using RangesCalc<SymT>::correctedSymsNum_4;
-    using RangesCalc<SymT>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<SymT>::Range;
+    using RangesCalc<SymT, minSymsNumBits>::symsNum;
+    using RangesCalc<SymT, minSymsNumBits>::correctedSymsNum;
+    using RangesCalc<SymT, minSymsNumBits>::correctedSymsNum_2;
+    using RangesCalc<SymT, minSymsNumBits>::correctedSymsNum_4;
+    using RangesCalc<SymT, minSymsNumBits>::correctedSymsNum_3to4;
+    using OrdRange = typename RangesCalc<SymT, minSymsNumBits>::Range;
 
 private:
 
@@ -92,7 +94,7 @@ ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::ArithmeticDecoder(
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
 auto ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::decode() -> Ret {
-    typename RangesCalc<SymT>::Count value = 0;
+    typename RangesCalc<SymT, minSymsNumBits>::Count value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
@@ -113,18 +115,23 @@ auto ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::decode() -> Ret {
             lastPercent = currPercent;
         }
 
-        auto range = currRange.high - currRange.low;
-        auto aux =
+        const auto range = currRange.high - currRange.low;
+        const auto range128 = bm::uint128_t(range);
+        const auto aux =
                 ((value - currRange.low + 1) * _dict.getTotalWordsCount() - 1) / range;
 
-        auto sym = _dict.getWord(aux);
+        const auto sym = _dict.getWord(aux);
         ret.syms.push_back(sym);
 
-        auto [low, high, totalWordsCount] = _dict.getProbabilityStats(sym);
+        auto [low, high, total] = _dict.getProbabilityStats(sym);
+
+        const auto low128 = bm::uint128_t(low);
+        const auto high128 = bm::uint128_t(high);
+        const auto total128 = bm::uint128_t(total);
 
         currRange = OrdRange {
-            currRange.low + (range * low) / totalWordsCount,
-            currRange.low + (range * high) / totalWordsCount
+            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
+            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
         };
 
         while (true) {
@@ -141,7 +148,7 @@ auto ArithmeticDecoder<SymT, DictT, CountT, minSymsNumBits>::decode() -> Ret {
             } else {
                 break;
             }
-            currRange = RangesCalc<SymT>::recalcRange(currRange);
+            currRange = RangesCalc<SymT, minSymsNumBits>::recalcRange(currRange);
         }
     }
 

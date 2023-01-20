@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(archiever_encoder LANGUAGES CXX)
-project(archiever_decoder LANGUAGES CXX)
-project(archiever_tests LANGUAGES CXX)
+project(archievers LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -71,9 +69,6 @@ target_link_libraries(archiever_d_encoder ${Boost_LIBRARIES})
 add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp file_opener.cpp)
 target_link_libraries(archiever_d_decoder encoding_lib)
 target_link_libraries(archiever_d_decoder ${Boost_LIBRARIES})
-
-install(TARGETS archiever_encoder archiever_decoder
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 include(FetchContent)
 FetchContent_Declare(
