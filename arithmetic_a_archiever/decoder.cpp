@@ -89,13 +89,6 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(22);
             BITS_DECODER_CASE(23);
             BYTES_DECODER_CASE(3);
-            BITS_DECODER_CASE(25);
-            BITS_DECODER_CASE(26);
-            BITS_DECODER_CASE(27);
-            BITS_DECODER_CASE(28);
-            BITS_DECODER_CASE(29);
-            BITS_DECODER_CASE(30);
-            BITS_DECODER_CASE(31);
         default:
             throw std::runtime_error(
                 (boost::format("Bit length %1% is not supported.") % symBitLen).str());

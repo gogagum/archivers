@@ -23,8 +23,8 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT, class DictT, typename CountT = std::uint32_t, std::uint16_t minSymsNumBits = 33>
-class ArithmeticCoder : RangesCalc<typename FlowT::Word, minSymsNumBits> {
+template <class FlowT, class DictT, typename CountT = std::uint32_t>
+class ArithmeticCoder : RangesCalc<typename FlowT::Word> {
 public:
 
     using Word = typename FlowT::Word;
@@ -32,11 +32,11 @@ public:
     using Res = ByteDataConstructor;
 
 private:
-    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum;
-    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_2;
-    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_4;
-    using RangesCalc<Word, minSymsNumBits>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<Word, minSymsNumBits>::Range;
+    using RangesCalc<Word>::correctedSymsNum;
+    using RangesCalc<Word>::correctedSymsNum_2;
+    using RangesCalc<Word>::correctedSymsNum_4;
+    using RangesCalc<Word>::correctedSymsNum_3to4;
+    using OrdRange = typename RangesCalc<Word>::Range;
 public:
 
     /**
@@ -73,17 +73,17 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, class CountT, std::uint16_t minSymsNumBits>
+template <class FlowT, class DictT, class CountT>
 template <class DictConstructor>
-ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::ArithmeticCoder(FlowT&& symbolsFlow,
+ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
                                                        DictConstructor&& constructor) :
     _symFlow(symbolsFlow),
     _dict(constructor()),
     _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-auto ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::encode() -> Res {
+template <class FlowT, class DictT, typename CountT>
+auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     auto ret = Res();
 
     _serializeNumBits(ret);
@@ -130,7 +130,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::encode() -> Res {
             } else {
                 break;
             }
-            currRange = RangesCalc<Word, minSymsNumBits>::recalcRange(currRange);
+            currRange = RangesCalc<Word>::recalcRange(currRange);
         }
 
         ++wordsCoded;
@@ -150,8 +150,8 @@ auto ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::encode() -> Res {
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_countSyms() {
+template <class FlowT, class DictT, typename CountT>
+std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
     std::vector<std::uint64_t> numFound(Word::wordsCount, 0);
     for (auto word: _symFlow) {
         numFound[Word::ord(word)]++;
@@ -167,22 +167,22 @@ std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-void ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_serializeNumBits(Res& res) {
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
     res.putT<std::uint16_t>(Word::numBits);
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-void ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_serializeDict(Res& res) {
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
     if constexpr (ga::dict::traits::needSerialize<DictT, ga::ByteDataConstructor>) {
         _dict.serialize(res);
     }
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-void ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_serializeTail(Res& res) {
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
     auto tail = _symFlow.getTail();
     res.putT<std::uint16_t>(tail.size());
 
@@ -192,8 +192,8 @@ void ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_serializeTail(Res& 
 }
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT, std::uint16_t minSymsNumBits>
-void ArithmeticCoder<FlowT, DictT, CountT, minSymsNumBits>::_serializeFileWordsCount(Res& res) {
+template <class FlowT, class DictT, typename CountT>
+void ArithmeticCoder<FlowT, DictT, CountT>::_serializeFileWordsCount(Res& res) {
     res.putT<CountT>(_fileWordsCount);
 }
 
