@@ -64,7 +64,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-AdaptiveDDictionary<WordT, CountT>::AdaptiveDDictionary() : _totalFoundWordsCount(0), _totalUniqueWords(0) {}
+AdaptiveDDictionary<WordT, CountT>::AdaptiveDDictionary()
+    : _totalFoundWordsCount(0), _totalUniqueWords(0) {}
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
