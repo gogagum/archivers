@@ -9,7 +9,7 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include "../file_opener.hpp"
+#include "../common.hpp"
 #include "arithmetic_d_archiever_include.hpp"
 
 namespace bpo = boost::program_options;
@@ -36,25 +36,26 @@ int main(int argc, char* argv[]) {
     std::string outFileName;
 
     try {
-        appOptionsDescr.add_options()
-            ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
-            ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.");
+        appOptionsDescr.add_options() (
+            "input-file,i",
+            bpo::value(&inFileName)->required(),
+            "In file name."
+        ) (
+            "out-filename,o",
+            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            "Out file name."
+        );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
-    } catch (const std::logic_error& error) {
-        std::cout << error.what() << std::endl;
-        return 1;
-    }
 
-    try {
         auto filesOpener = FileOpener(inFileName, outFileName);
 
         auto decoded = ga::DataParser(filesOpener.getInData());
         auto symBitLen = decoded.takeT<std::uint16_t>();
 
-        std::cout << "Word bits length: "
+        std::cerr << "Word bits length: "
                   << static_cast<unsigned int>(symBitLen) << std::endl;
 
         auto dataConstructor = ga::ByteDataConstructor();
@@ -62,13 +63,9 @@ int main(int argc, char* argv[]) {
         const auto packIntoByteDataConstructor =
                 [&dataConstructor, &filesOpener] (auto&& decoder) {
             auto ret = decoder.decode();
-            for (auto& word: ret.syms) {
+            for (auto& word: ret) {
                 word.bitsOut(dataConstructor.getBitBackInserter());
             }
-            std::copy(ret.tail.begin(), ret.tail.end(),
-                      dataConstructor.getBitBackInserter());
-            filesOpener.getOutFileStream().write(
-                        dataConstructor.data<char>(), dataConstructor.size());
         };
 
         switch (symBitLen) {
@@ -98,13 +95,21 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(31);
             BYTES_DECODER_CASE(4);
         default:
-            throw std::runtime_error(
-                (boost::format("Bit length %1% is not supported.") % symBitLen).str());
+            throw UnsupportedDecodeBitsMode(symBitLen);
             break;
         }
-    } catch (const std::runtime_error&  error) {
+
+        auto tailSize = decoded.takeT<std::uint16_t>();
+        std::cerr << "Tail size: "
+                  << static_cast<int>(tailSize) << std::endl;
+        auto bitBeginIter = decoded.getCurrPosBitsIter();
+        std::copy(bitBeginIter, bitBeginIter + tailSize,
+                  dataConstructor.getBitBackInserter());
+        filesOpener.getOutFileStream().write(
+                    dataConstructor.data<char>(), dataConstructor.size());
+    } catch (const std::exception&  error) {
         std::cout << error.what();
-        return 2;
+        return 1;
     }
 
     return 0;

@@ -50,7 +50,7 @@ public:
 template <class SymT>
 constexpr auto RangesCalc<SymT>::_computeCorrectingConst() -> Count {
     auto correctingConst = Count{1};
-    while (correctingConst * symsNum < (Count{1} << Count{56})) {
+    while (correctingConst * symsNum < (Count{1} << Count{33})) {
         correctingConst <<= 1ull;
     }
     return correctingConst;
@@ -81,7 +81,7 @@ auto RangesCalc<SymT>::recalcRange(Range r) -> Range {
 template <class SymT>
 constexpr std::uint16_t RangesCalc<SymT>::_computeAdditionalBitsCnt() {
     std::uint16_t ret = 0;
-    for (; (symsNum << ret) < (1ull << 56); ++ret) {}
+    for (; (symsNum << ret) < (1ull << 33); ++ret) {}
     return ret;
 }
 

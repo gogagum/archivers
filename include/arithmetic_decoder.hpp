@@ -3,7 +3,6 @@
 #ifndef ARITHMETIC_DECODER_HPP
 #define ARITHMETIC_DECODER_HPP
 
-#include <boost/container/static_vector.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -29,17 +28,7 @@ template <class SymT, class DictT, typename CountT = std::uint32_t>
 class ArithmeticDecoder : RangesCalc<SymT> {
 public:
     using Source = DataParser;
-    using Tail = bc::static_vector<bool, SymT::numBits>;
-
-public:
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The Ret class
-    ///
-    struct Ret {
-        std::vector<SymT> syms;
-        Tail tail;
-    };
+    using Ret = std::vector<SymT>;
 
 public:
 
@@ -63,8 +52,6 @@ private:
 
 private:
 
-    Tail _deserializeTail();
-
     std::vector<std::uint64_t> _deserializeWordsCounts();
 
     CountT _deserializeFileWordsCount();
@@ -76,7 +63,6 @@ private:
     Source& _source;
     DictT _dict;                                 // #1 to deserialize.
     CountT _fileWordsCount;                      // #2 to deserialize.
-    const Tail _tail;                            // #3 to deserialize.
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,8 +73,7 @@ ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
         Source& source, DictConstructor&& constructor)
     : _source(source),
       _dict(constructor()),
-      _fileWordsCount(_deserializeFileWordsCount()),
-      _tail(_deserializeTail()) {}
+      _fileWordsCount(_deserializeFileWordsCount()) {}
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
@@ -103,7 +88,6 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
     auto currRange = OrdRange { 0, correctedSymsNum };
 
     Ret ret;
-    ret.tail = _tail;
 
     int lastPercent = -1;
 
@@ -120,7 +104,7 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
                 ((value - currRange.low + 1) * _dict.getTotalWordsCount() - 1) / range;
 
         const auto sym = _dict.getWord(aux);
-        ret.syms.push_back(sym);
+        ret.push_back(sym);
 
         auto [low, high, total] = _dict.getProbabilityStats(sym);
 
@@ -157,17 +141,6 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
-    std::uint16_t tailSize = _source.takeT<std::uint16_t>();
-    Tail tail(tailSize);
-    for (auto& tailBit: tail) {
-        tailBit = _source.takeBit();
-    }
-    return tail;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
 std::vector<std::uint64_t>
 ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
     std::vector<std::uint64_t> ret(SymT::wordsCount);
@@ -185,7 +158,9 @@ ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
 CountT ArithmeticDecoder<SymT, DictT, CountT>::_deserializeFileWordsCount() {
-    return _source.takeT<CountT>();
+    auto wordsCount = _source.takeT<CountT>();
+    std::cerr << "Words count: " << wordsCount << std::endl;
+    return wordsCount;
 }
 
 }  // namespace ga

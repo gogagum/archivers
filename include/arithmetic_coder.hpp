@@ -45,28 +45,22 @@ public:
      * @param constructor
      */
     template <class DictConstructor>
-    ArithmeticCoder(FlowT&& byteFlow, DictConstructor&& constructor);
+    ArithmeticCoder(FlowT& byteFlow, DictConstructor&& constructor);
 
     /**
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
-    Res encode();
+    void encode(ByteDataConstructor& dataConstructor);
 
 private:
 
-    std::vector<std::uint64_t> _countSyms();
+    void _serializeDict(ByteDataConstructor& res);
 
-    void _serializeNumBits(Res& res);
-
-    void _serializeDict(Res& res);
-
-    void _serializeTail(Res& res);
-
-    void _serializeFileWordsCount(Res& res);
+    void _serializeFileWordsCount(ByteDataConstructor& res);
 
 private:
-    FlowT _symFlow;
+    FlowT& _symFlow;
     DictT _dict;
     CountT _fileWordsCount;
 };
@@ -75,7 +69,7 @@ private:
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, class CountT>
 template <class DictConstructor>
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
+ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT& symbolsFlow,
                                                        DictConstructor&& constructor) :
     _symFlow(symbolsFlow),
     _dict(constructor()),
@@ -83,13 +77,9 @@ ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT&& symbolsFlow,
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
-    auto ret = Res();
-
-    _serializeNumBits(ret);
-    _serializeDict(ret);
-    _serializeFileWordsCount(ret);
-    _serializeTail(ret);
+void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataConstructor) {
+    _serializeDict(dataConstructor);
+    _serializeFileWordsCount(dataConstructor);
 
     auto currRange = OrdRange { 0, correctedSymsNum };
 
@@ -101,7 +91,7 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
     for (auto sym : _symFlow) {
         if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.getNumberOfWords();
                 currPercent != lastPercent) {
-            std::cout << static_cast<int>(currPercent) << "%" << std::endl;
+            std::cerr << static_cast<int>(currPercent) << "%" << std::endl;
             lastPercent = currPercent;
         }
 
@@ -119,11 +109,11 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {
-                ret.putBit(false);
-                ret.putBitsRepeatWithReset(true, btf);
+                dataConstructor.putBit(false);
+                dataConstructor.putBitsRepeatWithReset(true, btf);
             } else if (currRange.low >= correctedSymsNum_2) {
-                ret.putBit(true);
-                ret.putBitsRepeatWithReset(false, btf);
+                dataConstructor.putBit(true);
+                dataConstructor.putBitsRepeatWithReset(false, btf);
             } else if (currRange.low >= correctedSymsNum_4
                        && currRange.high <= correctedSymsNum_3to4) {
                 ++btf;
@@ -136,40 +126,15 @@ auto ArithmeticCoder<FlowT, DictT, CountT>::encode() -> Res {
         ++wordsCoded;
     }
 
-    std::cout << "100%" << std::endl;
+    std::cerr << "100%" << std::endl;
 
     if (currRange.low < correctedSymsNum_4) {
-        ret.putBit(false);
-        ret.putBitsRepeat(true, btf + 1);
+        dataConstructor.putBit(false);
+        dataConstructor.putBitsRepeat(true, btf + 1);
     } else {
-        ret.putBit(true);
-        ret.putBitsRepeat(false, btf + 1);
+        dataConstructor.putBit(true);
+        dataConstructor.putBitsRepeat(false, btf + 1);
     }
-
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-std::vector<std::uint64_t> ArithmeticCoder<FlowT, DictT, CountT>::_countSyms() {
-    std::vector<std::uint64_t> numFound(Word::wordsCount, 0);
-    for (auto word: _symFlow) {
-        numFound[Word::ord(word)]++;
-    }
-    std::vector<std::uint64_t> numFoundCumulative(Word::wordsCount, 0);
-    std::uint64_t currCumulativeNumFound = 0;
-    for (auto&& [numFound, numFoundCumulative]
-         : boost::range::combine(numFound, numFoundCumulative)) {
-        currCumulativeNumFound += numFound;
-        numFoundCumulative = currCumulativeNumFound;
-    }
-    return numFoundCumulative;
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::_serializeNumBits(Res& res) {
-    res.putT<std::uint16_t>(Word::numBits);
 }
 
 //----------------------------------------------------------------------------//
@@ -182,18 +147,8 @@ void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::_serializeTail(Res& res) {
-    auto tail = _symFlow.getTail();
-    res.putT<std::uint16_t>(tail.size());
-
-    for (auto tailBit : tail) {
-        res.putBit(tailBit);
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::_serializeFileWordsCount(Res& res) {
+    std::cerr << "Words count: " << _fileWordsCount << std::endl;
     res.putT<CountT>(_fileWordsCount);
 }
 

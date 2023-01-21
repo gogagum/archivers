@@ -8,6 +8,7 @@
 #include <ranges>
 #include <span>
 #include <vector>
+#include <stdexcept>
 
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -23,6 +24,10 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     /// \brief The BitIterator class
     class BitsIterator;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The OutOfRange class
+    class OutOfRange;
 
 public:
 
@@ -130,6 +135,10 @@ public:
     bool equal(const type& other) const;
     //------------------------------------------------------------------------//
     void increment()                    { ++_bitsPosition; }
+    //------------------------------------------------------------------------//
+    BitsIterator operator+(std::size_t offset) {
+        return BitsIterator(*_owner, _bitsPosition + offset);
+    }
 private:
     DataParser* _owner;
     std::size_t _bitsPosition;
