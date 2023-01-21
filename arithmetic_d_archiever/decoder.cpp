@@ -51,19 +51,22 @@ int main(int argc, char* argv[]) {
         bpo::notify(vm);
 
         auto filesOpener = FileOpener(inFileName, outFileName);
-
         auto decoded = ga::DataParser(filesOpener.getInData());
-        auto symBitLen = decoded.takeT<std::uint16_t>();
 
-        std::cerr << "Word bits length: "
-                  << static_cast<unsigned int>(symBitLen) << std::endl;
+        auto symBitLen = decoded.takeT<std::uint16_t>();
+        std::cerr << "Word bits length: " << symBitLen << std::endl;
+
+        auto tailSize = decoded.takeT<std::uint16_t>();
+        std::cerr << "Tail size: " << tailSize << std::endl;
+
+        auto tailBeginIter = decoded.getCurrPosBitsIter();
+        auto tailEndIter = tailBeginIter + tailSize;
 
         auto dataConstructor = ga::ByteDataConstructor();
 
         const auto packIntoByteDataConstructor =
-                [&dataConstructor, &filesOpener] (auto&& decoder) {
-            auto ret = decoder.decode();
-            for (auto& word: ret) {
+                [&dataConstructor] (auto&& decoder) {
+            for (auto& word: decoder.decode()) {
                 word.bitsOut(dataConstructor.getBitBackInserter());
             }
         };
@@ -99,11 +102,7 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        auto tailSize = decoded.takeT<std::uint16_t>();
-        std::cerr << "Tail size: "
-                  << static_cast<int>(tailSize) << std::endl;
-        auto bitBeginIter = decoded.getCurrPosBitsIter();
-        std::copy(bitBeginIter, bitBeginIter + tailSize,
+        std::copy(tailBeginIter, tailEndIter,
                   dataConstructor.getBitBackInserter());
         filesOpener.getOutFileStream().write(
                     dataConstructor.data<char>(), dataConstructor.size());
