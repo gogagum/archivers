@@ -1,9 +1,14 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
+#include "flow/bytes_word_flow.hpp"
+
 #include "../file_opener.hpp"
 
 namespace bpo = boost::program_options;
+
+using ga::fl::BytesWordFlow;
+using ga::w::BytesWord;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -26,7 +31,18 @@ int main(int argc, char* argv[]) {
 
     try {
         auto fileOpener = FileOpener(inFileName, outFileName);
+        auto inFileBytes = fileOpener.getInData();
+        auto wordFlow = BytesWordFlow<BytesWord<1>>(inFileBytes);
 
+        auto countsMap = std::map<BytesWord<1>::Ord, std::uint64_t>();
+
+        for (auto word : wordFlow) {
+            ++countsMap[BytesWord<1>::ord(word)];
+        }
+
+        std::uint32_t numWords = countsMap.size();
+        fileOpener.getOutFileStream().write(reinterpret_cast<char*>(&numWords),
+                                            sizeof(std::uint32_t));
 
 
 

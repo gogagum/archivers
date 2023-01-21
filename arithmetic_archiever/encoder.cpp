@@ -56,7 +56,8 @@ int main(int argc, char* argv[]) {
 
         const auto encodeImpl = [&fileOpener](auto&& coder) {
             auto encoded = coder.encode();
-            fileOpener.getOutFileStream().write(encoded.template data<char>(), encoded.size());
+            fileOpener.getOutFileStream().write(
+                        encoded.template data<char>(), encoded.size());
         };
 
         switch (numBits) {
