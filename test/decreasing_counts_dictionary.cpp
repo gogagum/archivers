@@ -14,20 +14,20 @@ TEST(DecreasingCountDictionary, Construct) {
 //----------------------------------------------------------------------------//
 TEST(DecreasingCountDictionary, TotalCount) {
     auto dict = DecreasingCountDictionary(42);
-    EXPECT_EQ(dict.totalWordsCount(), 42);
+    EXPECT_EQ(dict.getTotalWordsCount(), 42);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingCountDictionary, TotalAfterUpdate) {
     auto dict = DecreasingCountDictionary<std::uint32_t>(42);
-    [[maybe_unused]] auto _ = dict.getWordProbabilityStats(UIntWord<std::uint32_t>(14));
-    EXPECT_EQ(dict.totalWordsCount(), 14);
+    [[maybe_unused]] auto _ = dict.getProbabilityStats(UIntWord<std::uint32_t>(14));
+    EXPECT_EQ(dict.getTotalWordsCount(), 14);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingCountDictionary, StatsAfterUpdate) {
     auto dict = DecreasingCountDictionary<std::uint32_t>(42);
-    auto [low, high, total] = dict.getWordProbabilityStats(UIntWord<std::uint32_t>(14));
+    auto [low, high, total] = dict.getProbabilityStats(UIntWord<std::uint32_t>(14));
     EXPECT_EQ(low, 14);
     EXPECT_EQ(high, 15);
     EXPECT_EQ(total, 42);
@@ -38,7 +38,7 @@ TEST(DecreasingCountDictionary, NonDecreasingWord0) {
     auto dict = DecreasingCountDictionary<std::uint32_t>(42);
     EXPECT_THROW( \
         [[maybe_unused]] auto stats = \
-            dict.getWordProbabilityStats(UIntWord<std::uint32_t>(56)), \
+            dict.getProbabilityStats(UIntWord<std::uint32_t>(56)), \
         DecreasingCountDictionary<std::uint32_t>::NonDecreasingWord \
     );
 }

@@ -14,7 +14,6 @@
 
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
-#include "dictionary/traits.hpp"
 
 namespace ga {
 
@@ -44,8 +43,7 @@ public:
      * @param byteFlow
      * @param constructor
      */
-    template <class DictConstructor>
-    ArithmeticCoder(FlowT& byteFlow, DictConstructor&& constructor);
+    ArithmeticCoder(FlowT& byteFlow, DictT&& dict);
 
     /**
      * @brief encode - encode byte flow.
@@ -54,8 +52,6 @@ public:
     void encode(ByteDataConstructor& dataConstructor);
 
 private:
-
-    void _serializeDict(ByteDataConstructor& res);
 
     void _serializeFileWordsCount(ByteDataConstructor& res);
 
@@ -68,17 +64,15 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, class CountT>
-template <class DictConstructor>
 ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT& symbolsFlow,
-                                                       DictConstructor&& constructor) :
+                                                       DictT&& dict) :
     _symFlow(symbolsFlow),
-    _dict(constructor()),
+    _dict(std::forward<DictT>(dict)),
     _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
 
 //----------------------------------------------------------------------------//
 template <class FlowT, class DictT, typename CountT>
 void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataConstructor) {
-    _serializeDict(dataConstructor);
     _serializeFileWordsCount(dataConstructor);
 
     auto currRange = OrdRange { 0, correctedSymsNum };
@@ -134,14 +128,6 @@ void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataCons
     } else {
         dataConstructor.putBit(true);
         dataConstructor.putBitsRepeat(false, btf + 1);
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::_serializeDict(Res& res) {
-    if constexpr (ga::dict::traits::needSerialize<DictT, ga::ByteDataConstructor>) {
-        _dict.serialize(res);
     }
 }
 

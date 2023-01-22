@@ -13,7 +13,7 @@ struct FileBytesDAdaptiveEncodeImpl
     using Base = BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8>;
     static void process(FileOpener& fileOpener) {
         auto flow = BytesFlow<bytesNum>(fileOpener.getInData());
-        auto coder = BytesCoder<bytesNum>(flow, []() { return BytesDict<bytesNum>(); });
+        auto coder = BytesCoder<bytesNum>(flow, BytesDict<bytesNum>());
         Base::processImpl(fileOpener, flow.getTail(), coder);
     }
 };
@@ -26,7 +26,7 @@ struct FileBitsDAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
     using Base = BaseAdaptiveEncodeImpl<bitsNum>;
     static void process(FileOpener& fileOpener) {
         auto flow = BitsFlow<bitsNum>(fileOpener.getInData());
-        auto coder = BitsCoder<bitsNum>(flow, []() { return BitsDict<bitsNum>(); });
+        auto coder = BitsCoder<bitsNum>(flow, BitsDict<bitsNum>());
         Base::processImpl(fileOpener, flow.getTail(), coder);
     }
 };

@@ -11,6 +11,8 @@
 
 namespace ga::dict {
 
+namespace bicl = boost::icl;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDDictionary class
 ///
@@ -49,11 +51,17 @@ private:
 
     Count _getLowerCumulativeFoundUniueWords(Ord ord) const;
 
+    Count _getWordCount(Ord ord) const;
+
     Count _getLowerCumulativeNumFound(Ord ord) const;
 
     void _increaseWordCount(Ord ord);
 
-public:
+private:
+
+    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
+
+private:
     boost::icl::interval_map<Ord, Count> _cumulativeFoundWordsCount;
     Count _totalFoundWordsCount;
     boost::icl::interval_map<Ord, Count> _cumulativeFoundUniueWords;
@@ -76,7 +84,7 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
-        return this->_getLowerCumulativeNumFound(ord);
+        return this->_getLowerCumulativeNumFound(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
@@ -89,15 +97,8 @@ auto
 AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
-    auto wordCount = _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 0;
     auto low = _getLowerCumulativeNumFound(ord);
-    auto high = low;
-    if (_totalFoundWordsCount == 0) {
-        ++high;
-    } else {
-        high += (Word::wordsCount - _totalUniqueWords) * 2 * wordCount
-            + _totalUniqueWords - Word::wordsCount * ((wordCount > 0) ? 1 : 0);
-    }
+    auto high = low + _getWordCount(ord);
     auto total = getTotalWordsCount();
     _increaseWordCount(ord);
     return { low, high, total };
@@ -117,13 +118,13 @@ auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
 template <class WordT, typename CountT>
 void
 AdaptiveDDictionary<WordT, CountT>::_increaseWordCount(Ord ord) {
-    auto interval = boost::icl::interval<Ord>::right_open(ord, WordT::wordsCount);
+    auto interval = OrdInterval(ord, WordT::wordsCount);
     _cumulativeFoundWordsCount += std::make_pair(interval, Count{1});
-    ++_totalFoundWordsCount;
     if (!_foundWordsCount.contains(ord)) {
         _cumulativeFoundUniueWords += std::make_pair(interval, Count{1});
         ++_totalUniqueWords;
     }
+    ++_totalFoundWordsCount;
     ++_foundWordsCount[ord];
 }
 
@@ -141,8 +142,7 @@ AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeFoundUniueWords(
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto
-AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
     if (_totalFoundWordsCount == 0) {
         return ord;
@@ -150,6 +150,18 @@ AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
     auto cumulativeUnique = _cumulativeFoundUniueWords(ord - 1);
     return (WordT::wordsCount - cumulativeUnique) * 2 * _cumulativeFoundWordsCount(ord - 1)
             + ord * _foundWordsCount.size() - WordT::wordsCount * cumulativeUnique;
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto AdaptiveDDictionary<WordT, CountT>::_getWordCount(Ord ord) const -> Count {
+    if (_totalFoundWordsCount == 0) {
+        return 1;
+    }
+    auto realWordCount =
+        _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 0;
+    return (Word::wordsCount - _totalUniqueWords) * 2 * realWordCount
+        + _totalUniqueWords - Word::wordsCount * ((realWordCount > 0) ? 1 : 0);
 }
 
 

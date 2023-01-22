@@ -17,14 +17,14 @@ namespace bpo = boost::program_options;
 #define BITS_DECODER_CASE(bits) \
     case (bits): \
         packIntoByteDataConstructor(BitsDecoder<(bits)>( \
-            decoded, []() { return BitsDict<(bits)>(); } \
+            decoded, BitsDict<(bits)>() \
         )); \
         break;
 
 #define BYTES_DECODER_CASE(bytes) \
     case (bytes * 8): \
         packIntoByteDataConstructor(BytesDecoder<(bytes)>( \
-            decoded, []() { return BytesDict<(bytes)>(); } \
+            decoded, BytesDict<(bytes)>() \
         )); \
         break;
 

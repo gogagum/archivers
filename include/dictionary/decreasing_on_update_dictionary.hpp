@@ -29,7 +29,15 @@ public:
     ///
     class NoSuchWord : public std::runtime_error {
     public:
-        NoSuchWord() : std::runtime_error("No such word.") {}  // TODO: message with a word
+        NoSuchWord(const Word& word) :
+            std::runtime_error(_formMessage(word)) {}
+    private:
+        std::string _formMessage(const Word& word) {
+            std::string ret;
+            auto retStream = std::stringstream(ret);
+            retStream << "No such word: " << word;
+            return ret;
+        }
     };
 
 public:
@@ -113,7 +121,7 @@ DecreasingOnUpdateDictionary<WordT, CountT>::getWordProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     if (!_wordsCounts.contains(ord) || _wordsCounts.at(ord) == Count(0)) {
-        throw NoSuchWord();
+        throw NoSuchWord(word);
     }
     auto low = _getLowerCumulativeNumFound(ord);
     auto high = low + _wordsCounts[ord];

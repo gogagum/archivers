@@ -17,24 +17,14 @@ namespace bpo = boost::program_options;
 #define BITS_DECODER_CASE(bits) \
     case (bits): \
         packIntoByteDataConstructor(BitsDecoder<(bits)>( \
-            decoded, \
-            [&decoded]() { \
-                auto ratio = decoded.takeT<std::uint64_t>(); \
-                std::cerr << "Ratio: " << ratio << std::endl; \
-                return BitsDict<(bits)>(ratio); \
-            } \
+            decoded, BitsDict<(bits)>(ratio) \
         )); \
         break;
 
 #define BYTES_DECODER_CASE(bytes) \
     case (bytes * 8): \
         packIntoByteDataConstructor(BytesDecoder<(bytes)>( \
-            decoded, \
-            [&decoded]() { \
-                auto ratio = decoded.takeT<std::uint64_t>(); \
-                std::cerr << "Ratio: " << ratio << std::endl; \
-                return BytesDict<(bytes)>(ratio); \
-            } \
+            decoded, BytesDict<(bytes)>(ratio) \
         )); \
         break;
 
@@ -68,6 +58,9 @@ int main(int argc, char* argv[]) {
 
         auto tailSize = decoded.takeT<std::uint16_t>();
         std::cerr << "Tail size: " << tailSize << std::endl;
+
+        auto ratio = decoded.takeT<std::uint64_t>();
+        std::cerr << "Ratio: " << ratio << std::endl;
 
         auto tailBeginIter = decoded.getCurrPosBitsIter();
         auto tailEndIter = tailBeginIter + tailSize;

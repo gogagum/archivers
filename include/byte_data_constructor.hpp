@@ -73,8 +73,8 @@ public:
     const T* data() const;
 
     /**
-     * @brief size
-     * @return
+     * @brief size - number of bytes in a file.
+     * @return file size.
      */
     std::size_t size() const;
 

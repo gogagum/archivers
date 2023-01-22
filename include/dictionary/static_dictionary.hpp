@@ -56,19 +56,12 @@ public:
      * @brief totalWordsCount
      * @return
      */
-    Ord totalWordsCount() const;
-
-    /**
-     * @brief serialize
-     * @param res
-     */
-    template <class DestT>
-    void serialize(DestT& res) const;
+    Ord getTotalWordsCount() const;
 
 private:
 
-    std::uint64_t _getLowerCumulativeNumFound(Ord ord) const;
-    std::uint64_t _getHigherCumulativeNumFound(Ord ord) const;
+    Count _getLowerCumulativeNumFound(Ord ord) const;
+    Count _getHigherCumulativeNumFound(Ord ord) const;
 
 protected:
     std::vector<Count> _cumulativeNumFound;
@@ -115,8 +108,9 @@ StaticDictionary<WordT, CountT>::getProbabilityStats(
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-std::uint64_t
-StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) const {
+auto
+StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+        Ord ord) const -> Count {
     if (ord == 0) {
         return 0;
     } else {
@@ -126,29 +120,16 @@ StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(Ord ord) const {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-std::uint64_t
-StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(Ord ord) const {
+auto
+StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(
+        Ord ord) const -> Count {
     return _cumulativeNumFound[ord];
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto StaticDictionary<WordT, CountT>::totalWordsCount() const -> typename Word::Ord {
+auto StaticDictionary<WordT, CountT>::getTotalWordsCount() const -> Ord {
     return *_cumulativeNumFound.rbegin();
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-template <class DestT>
-void StaticDictionary<WordT, CountT>::serialize(DestT& res) const {
-    res.template putT<std::uint32_t>(this->numUniqueWords());
-
-    // Unique words and their counts
-    for (auto i : boost::irange<std::size_t>(0, this->_cumulativeNumFound.size())) {
-        auto w = WordT::byOrd(i);
-        res.template putT<WordT>(w);
-        res.template putT<std::uint64_t>(this->_cumulativeNumFound[i]);
-    }
 }
 
 }  // namespace ga::dict

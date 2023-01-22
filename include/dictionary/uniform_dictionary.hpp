@@ -26,20 +26,20 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    Word getWord(Count cumulativeNumFound);
+    [[nodiscard]] Word getWord(Count cumulativeNumFound);
 
     /**
      * @brief getWordProbabilityStats
      * @param word
      * @return [low, high, total]
      */
-    ProbabilityStats getWordProbabilityStats(const Word& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word);
 
     /**
      * @brief totalWordsCount
      * @return
      */
-    Count totalWordsCount() const;
+    [[nodiscard]] Count getTotalWordsCount() const;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ WordT UniformDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto UniformDictionary<WordT, CountT>::getWordProbabilityStats(
+auto UniformDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = WordT::ord(word);
     return { ord, ord + 1, WordT::wordsCount };
@@ -59,7 +59,7 @@ auto UniformDictionary<WordT, CountT>::getWordProbabilityStats(
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto UniformDictionary<WordT, CountT>::totalWordsCount() const -> Count {
+auto UniformDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
     return WordT::wordsCount;
 }
 

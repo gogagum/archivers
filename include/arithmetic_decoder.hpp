@@ -32,8 +32,7 @@ public:
 
 public:
 
-    template <class DictConstructor>
-    ArithmeticDecoder(Source& source, DictConstructor&& constructor);
+    ArithmeticDecoder(Source& source, DictT&& dict);
 
     /**
      * @brief decode - decode source as a vector of bytes.
@@ -61,18 +60,17 @@ private:
 
 private:
     Source& _source;
-    DictT _dict;                                 // #1 to deserialize.
-    CountT _fileWordsCount;                      // #2 to deserialize.
+    DictT _dict;
+    CountT _fileWordsCount;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class SymT, class DictT, typename CountT>
-template <class DictConstructor>
 ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
-        Source& source, DictConstructor&& constructor)
+        Source& source, DictT&& dict)
     : _source(source),
-      _dict(constructor()),
+      _dict(std::forward<DictT>(dict)),
       _fileWordsCount(_deserializeFileWordsCount()) {}
 
 //----------------------------------------------------------------------------//

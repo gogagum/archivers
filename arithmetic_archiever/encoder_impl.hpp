@@ -8,14 +8,18 @@
 /// \brief The FileBytesAdaptiveEncodeImpl class
 ///
 template <std::uint8_t bytesNum>
-struct FileBytesAdaptiveEncodeImpl
-        : public BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8> {
-    using Base = BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8>;
+struct FileBytesAdaptiveEncodeImpl {
     static void process(FileOpener& fileOpener, std::uint64_t ratio) {
         auto flow = BytesFlow<bytesNum>(fileOpener.getInData());
-        auto coder = BytesCoder<bytesNum>(
-            flow, [ratio]() { return BytesDict<bytesNum>(ratio); });
-        Base::processImpl(fileOpener, flow.getTail(), coder);
+        auto coder = BytesCoder<bytesNum>(flow, BytesDict<bytesNum>(ratio));
+        auto tail = flow.getTail();
+        auto encoded = ga::ByteDataConstructor();
+        encoded.putT<std::uint16_t>(bytesNum * 8);
+        encoded.putT<std::uint16_t>(tail.size());
+        encoded.putT<std::uint64_t>(ratio);
+        std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
+        coder.encode(encoded);
+        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
     }
 };
 
@@ -23,13 +27,18 @@ struct FileBytesAdaptiveEncodeImpl
 /// \brief The FileBitsAdaptiveEncodeImpl class
 ///
 template <std::uint16_t bitsNum>
-struct FileBitsAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
-    using Base = BaseAdaptiveEncodeImpl<bitsNum>;
+struct FileBitsAdaptiveEncodeImpl {
     static void process(FileOpener& fileOpener, std::uint64_t ratio) {
         auto flow = BitsFlow<bitsNum>(fileOpener.getInData());
-        auto coder = BitsCoder<bitsNum>(
-                    flow, [ratio]() { return BitsDict<bitsNum>(ratio); });
-        Base::processImpl(fileOpener, flow.getTail(), coder);
+        auto coder = BitsCoder<bitsNum>(flow, BitsDict<bitsNum>(ratio));
+        auto tail = flow.getTail();
+        auto encoded = ga::ByteDataConstructor();
+        encoded.putT<std::uint16_t>(bitsNum);
+        encoded.putT<std::uint16_t>(tail.size());
+        encoded.putT<std::uint64_t>(ratio);
+        std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
+        coder.encode(encoded);
+        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
     }
 };
 
