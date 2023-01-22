@@ -33,7 +33,6 @@ add_library(encoding_lib STATIC
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
-    include/dictionary/traits.hpp
     include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp

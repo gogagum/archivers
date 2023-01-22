@@ -121,8 +121,8 @@ ArithmeticDecoder<SymT, DictT>::decode(Source& source,
         const auto total128 = bm::uint128_t(total);
 
         currRange = OrdRange {
-            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
+            currRange.low + ((range128 * low128) / total128).template convert_to<std::uint64_t>(),
+            currRange.low + ((range128 * high128) / total128).template convert_to<std::uint64_t>()
         };
 
         while (true) {

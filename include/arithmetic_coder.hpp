@@ -81,7 +81,7 @@ auto ArithmeticCoder<FlowT, DictT>::encode(
 
     for (auto sym : _symFlow) {
         ++ret.wordsCount;
-        if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.getNumberOfWords();
+        if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.getWordsCount();
                 currPercent != lastPercent) {
             std::cerr << static_cast<int>(currPercent) << "%" << std::endl;
             lastPercent = currPercent;
