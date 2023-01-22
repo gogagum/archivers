@@ -109,7 +109,7 @@ T DataParser::takeT() {
 
     auto ret = T();
     auto& bytes = reinterpret_cast<TBytes&>(ret);
-    for (auto& byte: boost::adaptors::reverse(bytes)) {
+    for (auto& byte: bytes) {
         byte = takeByte();
     }
     return ret;

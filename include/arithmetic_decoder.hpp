@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstring>
 #include <algorithm>
+#include <limits>
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
@@ -24,7 +25,7 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT, typename CountT = std::uint32_t>
+template <class SymT, class DictT>
 class ArithmeticDecoder : RangesCalc<SymT> {
 public:
     using Source = DataParser;
@@ -32,13 +33,18 @@ public:
 
 public:
 
-    ArithmeticDecoder(Source& source, DictT&& dict);
+    ArithmeticDecoder(DictT&& dict);
 
     /**
-     * @brief decode - decode source as a vector of bytes.
+     * @brief decode
+     * @param source
+     * @param wordsCount
+     * @param bitsLimit
      * @return
      */
-    Ret decode();
+    Ret decode(Source& source,
+               std::size_t wordsCount,
+               std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
 
 private:
 
@@ -53,34 +59,38 @@ private:
 
     std::vector<std::uint64_t> _deserializeWordsCounts();
 
-    CountT _deserializeFileWordsCount();
-
     constexpr const static std::uint16_t _additionalBitsCnt =
             RangesCalc<SymT>::_computeAdditionalBitsCnt();
 
 private:
-    Source& _source;
     DictT _dict;
-    CountT _fileWordsCount;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
-        Source& source, DictT&& dict)
-    : _source(source),
-      _dict(std::forward<DictT>(dict)),
-      _fileWordsCount(_deserializeFileWordsCount()) {}
+template <class SymT, class DictT>
+ArithmeticDecoder<SymT, DictT>::ArithmeticDecoder(DictT&& dict)
+    : _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
+template <class SymT, class DictT>
+auto
+ArithmeticDecoder<SymT, DictT>::decode(Source& source,
+                                       std::size_t wordsCount,
+                                       std::size_t bitsLimit) -> Ret {
+    const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
+        if (bitsLimit == 0) {
+            return false;
+        }
+        --bitsLimit;
+        return source.takeBit();
+    };
+
     typename RangesCalc<SymT>::Count value = 0;
     std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
 
     for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
-        value = (value << 1) + (_source.takeBit() ? 1 : 0);
+        value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
     auto currRange = OrdRange { 0, correctedSymsNum };
@@ -89,8 +99,8 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
     int lastPercent = -1;
 
-    for (auto i : boost::irange<CountT>(0, _fileWordsCount)) {
-        if (int currPercent = (100 * i) / _fileWordsCount;
+    for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
+        if (int currPercent = (100 * i) / wordsCount;
                 currPercent != lastPercent) {
             std::cerr << currPercent << '%' << std::endl;
             lastPercent = currPercent;
@@ -117,14 +127,14 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {
-                bool bit = _source.takeBit();
+                bool bit = takeBitLimited();
                 value = value * 2 + (bit ? 1 : 0);
             } else if (currRange.low >= correctedSymsNum_2) {
-                bool bit = _source.takeBit();
+                bool bit = takeBitLimited();
                 value = value * 2 - correctedSymsNum + (bit ? 1 : 0);
             } else if (currRange.low >= correctedSymsNum_4
                        && currRange.high <= correctedSymsNum_3to4) {
-                bool bit = _source.takeBit();
+                bool bit = takeBitLimited();
                 value = value * 2 - correctedSymsNum_2 + (bit ? 1 : 0);
             } else {
                 break;
@@ -135,30 +145,6 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
     std::cerr << "100%" << std::endl;
     return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-std::vector<std::uint64_t>
-ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
-    std::vector<std::uint64_t> ret(SymT::wordsCount);
-    CountT numUniqueSyms = _source.takeT<std::uint32_t>();
-
-    for (auto _ : boost::irange<CountT>(0, numUniqueSyms)) {
-        auto sym = _source.takeT<SymT>();
-        auto numFound = _source.takeT<CountT>();
-        ret[SymT::ord(sym)] = numFound;
-    }
-
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-CountT ArithmeticDecoder<SymT, DictT, CountT>::_deserializeFileWordsCount() {
-    auto wordsCount = _source.takeT<CountT>();
-    std::cerr << "Words count: " << wordsCount << std::endl;
-    return wordsCount;
 }
 
 }  // namespace ga

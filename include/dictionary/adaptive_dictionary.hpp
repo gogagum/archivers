@@ -89,7 +89,7 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
-        return _getLowerCumulativeNumFound(ord);
+        return _getLowerCumulativeNumFound(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);

@@ -1,7 +1,8 @@
 #ifndef ARITHMETIC_CODER_ENCODED_HPP
 #define ARITHMETIC_CODER_ENCODED_HPP
 
-#include <boost/range/adaptor/reversed.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/range/irange.hpp>
 #include <vector>
 #include <array>
 #include <cstdint>
@@ -25,6 +26,11 @@ public:
     /// \brief The BitBackInserter class
     ///
     class BitBackInserter;
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// \brief The BytesAfterBits class
+    ///
+    class BytesAfterBits;
 
 public:
 
@@ -66,6 +72,13 @@ public:
     void putT(auto s);
 
     /**
+     * @brief putTToPosition
+     * @param s
+     * @param position
+     */
+    void putTToPosition(auto s, std::size_t position);
+
+    /**auto& bytes = reinterpret_cast<TBytes<decltype(s)>&>(s);
      * @brief data - get data pointer
      * @return data pointer
      */
@@ -92,6 +105,18 @@ public:
      */
     ByteBackInserter getByteBackInserter();
 
+    /**
+     * @brief saveBytesSpace
+     * @param bytesCount
+     * @return bytesPosition
+     */
+    std::size_t saveBytesSpace(std::size_t bytesCount);
+
+private:
+
+    template <class T>
+    using TBytes = std::array<std::byte, sizeof(T)>;
+
 private:
 
     void _moveBitFlag();
@@ -99,24 +124,8 @@ private:
 private:
     std::vector<std::byte> _data;
     std::byte _currBitFlag;
+    std::uint8_t _currBitOffset;
 };
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-void ByteDataConstructor::putT(auto s) {
-    using SizeTBytes = std::array<std::byte, sizeof(s)>;
-
-    auto& bytes = reinterpret_cast<SizeTBytes&>(s);
-    for (auto byte: boost::adaptors::reverse(bytes)) {
-        putByte(byte);
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-const T* ByteDataConstructor::data() const {
-    return reinterpret_cast<const T*>(_data.data());
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteDataConstructor::ByteBackInserter class
@@ -151,7 +160,35 @@ private:
     ByteDataConstructor* _owner;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The ByteDataConstructor::BytesAfterBits class
+///
+class ByteDataConstructor::BytesAfterBits : std::logic_error {
+public:
+    using std::logic_error::logic_error;
+};
 
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+void ByteDataConstructor::putT(auto s) {
+    auto& bytes = reinterpret_cast<TBytes<decltype(s)>&>(s);
+    std::copy(bytes.begin(), bytes.end(), getByteBackInserter());
+}
+
+//----------------------------------------------------------------------------//
+void ByteDataConstructor::putTToPosition(auto s, std::size_t position) {
+    if (position + sizeof(s) >= _data.size()) {
+        throw std::out_of_range("Can not write to position this count of bytes.");
+    }
+    auto& bytes = reinterpret_cast<TBytes<decltype(s)>&>(s);
+    std::copy(bytes.begin(), bytes.end(), _data.begin() + position);
+}
+
+//----------------------------------------------------------------------------//
+template <class T>
+const T* ByteDataConstructor::data() const {
+    return reinterpret_cast<const T*>(_data.data());
+}
 
 } // namespace ga
 

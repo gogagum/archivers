@@ -22,13 +22,16 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT, class DictT, typename CountT = std::uint32_t>
+template <class FlowT, class DictT>
 class ArithmeticCoder : RangesCalc<typename FlowT::Word> {
 public:
 
     using Word = typename FlowT::Word;
 
-    using Res = ByteDataConstructor;
+    struct EncodeRet {
+        std::size_t wordsCount;
+        std::size_t bitsEncoded;
+    };
 
 private:
     using RangesCalc<Word>::correctedSymsNum;
@@ -49,32 +52,26 @@ public:
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
-    void encode(ByteDataConstructor& dataConstructor);
-
-private:
-
-    void _serializeFileWordsCount(ByteDataConstructor& res);
+    EncodeRet encode(ByteDataConstructor& dataConstructor);
 
 private:
     FlowT& _symFlow;
     DictT _dict;
-    CountT _fileWordsCount;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, class CountT>
-ArithmeticCoder<FlowT, DictT, CountT>::ArithmeticCoder(FlowT& symbolsFlow,
-                                                       DictT&& dict) :
+template <class FlowT, class DictT>
+ArithmeticCoder<FlowT, DictT>::ArithmeticCoder(FlowT& symbolsFlow,
+                                               DictT&& dict) :
     _symFlow(symbolsFlow),
-    _dict(std::forward<DictT>(dict)),
-    _fileWordsCount(static_cast<CountT>(_symFlow.getNumberOfWords())) {}
+    _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataConstructor) {
-    _serializeFileWordsCount(dataConstructor);
-
+template <class FlowT, class DictT>
+auto ArithmeticCoder<FlowT, DictT>::encode(
+        ByteDataConstructor& dataConstructor) -> EncodeRet {
+    auto ret = EncodeRet();
     auto currRange = OrdRange { 0, correctedSymsNum };
 
     std::size_t btf = 0;
@@ -83,6 +80,7 @@ void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataCons
     std::size_t wordsCoded = 0;
 
     for (auto sym : _symFlow) {
+        ++ret.wordsCount;
         if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.getNumberOfWords();
                 currPercent != lastPercent) {
             std::cerr << static_cast<int>(currPercent) << "%" << std::endl;
@@ -103,9 +101,11 @@ void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataCons
 
         while (true) {
             if (currRange.high <= correctedSymsNum_2) {
+                ret.bitsEncoded += btf + 1;
                 dataConstructor.putBit(false);
                 dataConstructor.putBitsRepeatWithReset(true, btf);
             } else if (currRange.low >= correctedSymsNum_2) {
+                ret.bitsEncoded += btf + 1;
                 dataConstructor.putBit(true);
                 dataConstructor.putBitsRepeatWithReset(false, btf);
             } else if (currRange.low >= correctedSymsNum_4
@@ -122,6 +122,7 @@ void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataCons
 
     std::cerr << "100%" << std::endl;
 
+    ret.bitsEncoded += btf + 2;
     if (currRange.low < correctedSymsNum_4) {
         dataConstructor.putBit(false);
         dataConstructor.putBitsRepeat(true, btf + 1);
@@ -129,13 +130,8 @@ void ArithmeticCoder<FlowT, DictT, CountT>::encode(ByteDataConstructor& dataCons
         dataConstructor.putBit(true);
         dataConstructor.putBitsRepeat(false, btf + 1);
     }
-}
 
-//----------------------------------------------------------------------------//
-template <class FlowT, class DictT, typename CountT>
-void ArithmeticCoder<FlowT, DictT, CountT>::_serializeFileWordsCount(Res& res) {
-    std::cerr << "Words count: " << _fileWordsCount << std::endl;
-    res.putT<CountT>(_fileWordsCount);
+    return ret;
 }
 
 }  // namespace ga
