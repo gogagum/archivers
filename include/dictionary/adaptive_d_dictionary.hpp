@@ -110,7 +110,10 @@ auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
     if (_totalFoundWordsCount == 0) {
         return WordT::wordsCount;
     }
-    return 2 * (WordT::wordsCount - _foundWordsCount.size())
+    if (_totalUniqueWords == WordT::wordsCount) {
+        return _totalFoundWordsCount;
+    }
+    return 2 * (WordT::wordsCount - _totalUniqueWords)
             * _totalFoundWordsCount;
 }
 
@@ -133,10 +136,6 @@ template <class WordT, typename CountT>
 auto
 AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeFoundUniueWords(
         Ord ord) const -> Count {
-    if (_totalFoundWordsCount == 0) {
-        return ord;
-    }
-
     return _cumulativeFoundUniueWords(ord - 1);
 }
 
@@ -147,8 +146,11 @@ auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
     if (_totalFoundWordsCount == 0) {
         return ord;
     }
+    if (_totalUniqueWords == WordT::wordsCount) {
+        return _cumulativeFoundWordsCount(ord - 1);
+    }
     auto cumulativeUnique = _cumulativeFoundUniueWords(ord - 1);
-    return (WordT::wordsCount - cumulativeUnique) * 2 * _cumulativeFoundWordsCount(ord - 1)
+    return (WordT::wordsCount - _totalUniqueWords) * 2 * _cumulativeFoundWordsCount(ord - 1)
             + ord * _foundWordsCount.size() - WordT::wordsCount * cumulativeUnique;
 }
 
@@ -157,6 +159,9 @@ template <class WordT, typename CountT>
 auto AdaptiveDDictionary<WordT, CountT>::_getWordCount(Ord ord) const -> Count {
     if (_totalFoundWordsCount == 0) {
         return 1;
+    }
+    if (_totalUniqueWords == WordT::wordsCount) {
+        return _foundWordsCount.at(ord);
     }
     auto realWordCount =
         _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 0;

@@ -107,6 +107,9 @@ AdaptiveADictionary<WordT, CountT>::getProbabilityStats(
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto AdaptiveADictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
+    if (WordT::wordsCount == _foundWordsCount.size()) {
+        return _totalFoundWordsCount;
+    }
     return (WordT::wordsCount - _foundWordsCount.size())
             * (_totalFoundWordsCount + 1);
 }
@@ -131,6 +134,9 @@ template <class WordT, typename CountT>
 auto
 AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
+    if (WordT::wordsCount == _foundWordsCount.size()) {
+        return _cumulativeFoundWordsCount(ord - 1);
+    }
     auto numUniqueWordsTotal = _foundWordsCount.size();
     return (WordT::wordsCount - numUniqueWordsTotal)
             * _cumulativeFoundWordsCount(ord - 1)
@@ -142,6 +148,9 @@ template <class WordT, typename CountT>
 auto
 AdaptiveADictionary<WordT, CountT>::_getNumFound(
         Ord ord) const -> Count {
+    if (WordT::wordsCount == _foundWordsCount.size()) {
+        return _foundWordsCount.at(ord);
+    }
     auto numUniqueWordsTotal = _foundWordsCount.size();
     return _foundWordsCount.contains(ord)
             ? _foundWordsCount.at(ord)

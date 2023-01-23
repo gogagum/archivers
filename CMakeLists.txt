@@ -47,22 +47,22 @@ add_library(common STATIC common.hpp common.cpp)
 
 include_directories(${Boost_INCLUDE_DIRS} include/)
 
-add_executable(archiever_encoder arithmetic_archiever/encoder.cpp common.cpp)
+add_executable(archiever_encoder arithmetic_archiever/encoder.cpp)
 target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_decoder arithmetic_archiever/decoder.cpp common.cpp)
+add_executable(archiever_decoder arithmetic_archiever/decoder.cpp)
 target_link_libraries(archiever_decoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp common.cpp)
+add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp)
 target_link_libraries(archiever_a_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp common.cpp)
+add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp)
 target_link_libraries(archiever_a_decoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp common.cpp)
+add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp)
 target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp common.cpp)
+add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
 target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
 
 include(FetchContent)

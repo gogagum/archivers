@@ -50,23 +50,23 @@ int main(int argc, char* argv[]) {
         auto filesOpener = FileOpener(inFileName, outFileName);
         auto decoded = ga::DataParser(filesOpener.getInData());
 
-        auto symBitLen = decoded.takeT<std::uint16_t>();
+        const auto symBitLen = decoded.takeT<std::uint16_t>();
         std::cerr << "Word bits length: " << symBitLen << std::endl;
 
-        auto tailSize = decoded.takeT<std::uint16_t>();
+        const auto tailSize = decoded.takeT<std::uint16_t>();
         std::cerr << "Tail size: " << tailSize << std::endl;
 
-        auto wordsCount = decoded.takeT<std::uint64_t>();
-        std::cerr << "Words count" << wordsCount << std::endl;
+        const auto wordsCount = decoded.takeT<std::uint64_t>();
+        std::cerr << "Words count: " << wordsCount << std::endl;
 
-        auto tailBeginIter = decoded.getCurrPosBitsIter();
-        auto tailEndIter = tailBeginIter + tailSize;
+        const auto bitsCount = decoded.takeT<std::uint64_t>();
+        std::cerr << "Bits count: " << bitsCount << std::endl;
 
         auto dataConstructor = ga::ByteDataConstructor();
 
         const auto packIntoByteDataConstructor =
-                [&dataConstructor, &decoded, wordsCount] (auto&& decoder) {
-            for (auto& word: decoder.decode(decoded, wordsCount)) {
+                [&dataConstructor, &decoded, wordsCount, bitsCount] (auto&& decoder) {
+            for (auto& word: decoder.decode(decoded, wordsCount, bitsCount)) {
                 word.bitsOut(dataConstructor.getBitBackInserter());
             }
         };
@@ -102,7 +102,9 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        std::copy(tailBeginIter, tailEndIter, dataConstructor.getBitBackInserter());
+        std::copy(decoded.getCurrPosBitsIter(),
+                  decoded.getCurrPosBitsIter() + tailSize,
+                  dataConstructor.getBitBackInserter());
 
         filesOpener.getOutFileStream().write(
                     dataConstructor.data<char>(), dataConstructor.size());

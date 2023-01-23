@@ -18,10 +18,12 @@ protected:
         auto encoded = ga::ByteDataConstructor();
         encoded.putT<std::uint16_t>(bitsNum);
         encoded.putT<std::uint16_t>(tail.size());
-        const auto wordsCoutPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
+        const auto wordsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
+        const auto bitsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
+        auto [wordsCount, bitsCount] = coder.encode(encoded);
+        encoded.putTToPosition<std::uint64_t>(wordsCount, wordsCountPos);
+        encoded.putTToPosition<std::uint64_t>(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
-        auto [numWords, _numBits] = coder.encode(encoded);
-        encoded.putTToPosition<std::uint64_t>(wordsCoutPos, numWords);
         fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
     }
 };

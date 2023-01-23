@@ -25,8 +25,8 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT>
-class ArithmeticDecoder : RangesCalc<SymT> {
+template <class SymT, class DictT, std::uint16_t rangeBits>
+class ArithmeticDecoder : RangesCalc<rangeBits> {
 public:
     using Source = DataParser;
     using Ret = std::vector<SymT>;
@@ -48,19 +48,8 @@ public:
 
 private:
 
-    using RangesCalc<SymT>::symsNum;
-    using RangesCalc<SymT>::correctedSymsNum;
-    using RangesCalc<SymT>::correctedSymsNum_2;
-    using RangesCalc<SymT>::correctedSymsNum_4;
-    using RangesCalc<SymT>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<SymT>::Range;
-
-private:
-
-    std::vector<std::uint64_t> _deserializeWordsCounts();
-
-    constexpr const static std::uint16_t _additionalBitsCnt =
-            RangesCalc<SymT>::_computeAdditionalBitsCnt();
+    using RC = RangesCalc<rangeBits>;
+    using OrdRange = typename RC::Range;
 
 private:
     DictT _dict;
@@ -68,14 +57,14 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT>
-ArithmeticDecoder<SymT, DictT>::ArithmeticDecoder(DictT&& dict)
+template <class SymT, class DictT, std::uint16_t rangeBits>
+ArithmeticDecoder<SymT, DictT, rangeBits>::ArithmeticDecoder(DictT&& dict)
     : _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT>
+template <class SymT, class DictT, std::uint16_t rangeBits>
 auto
-ArithmeticDecoder<SymT, DictT>::decode(Source& source,
+ArithmeticDecoder<SymT, DictT, rangeBits>::decode(Source& source,
                                        std::size_t wordsCount,
                                        std::size_t bitsLimit) -> Ret {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
@@ -86,14 +75,13 @@ ArithmeticDecoder<SymT, DictT>::decode(Source& source,
         return source.takeBit();
     };
 
-    typename RangesCalc<SymT>::Count value = 0;
-    std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
+    typename RC::Count value = 0;
 
-    for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
+    for (auto _ : boost::irange<std::size_t>(0, RC::numBits)) {
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    auto currRange = OrdRange { 0, correctedSymsNum };
+    auto currRange = OrdRange { 0, RC::total };
 
     Ret ret;
 
@@ -108,8 +96,11 @@ ArithmeticDecoder<SymT, DictT>::decode(Source& source,
 
         const auto range = currRange.high - currRange.low;
         const auto range128 = bm::uint128_t(range);
+        const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCount());
+        const auto offset128 = bm::uint128_t(value - currRange.low + 1);
+
         const auto aux =
-                ((value - currRange.low + 1) * _dict.getTotalWordsCount() - 1) / range;
+                ((offset128 * dictTotalWords128 - 1) / range128).template convert_to<std::uint64_t>();
 
         const auto sym = _dict.getWord(aux);
         ret.push_back(sym);
@@ -126,20 +117,20 @@ ArithmeticDecoder<SymT, DictT>::decode(Source& source,
         };
 
         while (true) {
-            if (currRange.high <= correctedSymsNum_2) {
+            if (currRange.high <= RC::half) {
                 bool bit = takeBitLimited();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (currRange.low >= correctedSymsNum_2) {
+            } else if (currRange.low >= RC::half) {
                 bool bit = takeBitLimited();
-                value = value * 2 - correctedSymsNum + (bit ? 1 : 0);
-            } else if (currRange.low >= correctedSymsNum_4
-                       && currRange.high <= correctedSymsNum_3to4) {
+                value = value * 2 - RC::total + (bit ? 1 : 0);
+            } else if (currRange.low >= RC::quater
+                       && currRange.high <= RC::threeQuaters) {
                 bool bit = takeBitLimited();
-                value = value * 2 - correctedSymsNum_2 + (bit ? 1 : 0);
+                value = value * 2 - RC::half + (bit ? 1 : 0);
             } else {
                 break;
             }
-            currRange = RangesCalc<SymT>::recalcRange(currRange);
+            currRange = RC::recalcRange(currRange);
         }
     }
 
