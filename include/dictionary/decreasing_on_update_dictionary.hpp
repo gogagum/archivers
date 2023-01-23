@@ -61,7 +61,7 @@ public:
      * @param word - word to get stats for.
      * @return [low, high, total]
      */
-    ProbabilityStats getWordProbabilityStats(const Word& word);
+    ProbabilityStats getProbabilityStats(const Word& word);
 
     /**
      * @brief getTotalWordsCount - get total words count.
@@ -117,7 +117,7 @@ auto DecreasingOnUpdateDictionary<WordT, CountT>::getWord(
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto
-DecreasingOnUpdateDictionary<WordT, CountT>::getWordProbabilityStats(
+DecreasingOnUpdateDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     if (!_wordsCounts.contains(ord) || _wordsCounts.at(ord) == Count(0)) {

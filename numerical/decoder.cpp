@@ -3,6 +3,7 @@
 
 #include "../common.hpp"
 #include "data_parser.hpp"
+#include "byte_data_constructor.hpp"
 #include "word/uint_word.hpp"
 #include "word/bytes_word.hpp"
 #include "dictionary/decreasing_counts_dictionary.hpp"
@@ -19,6 +20,7 @@ using ga::dict::DecreasingOnUpdateDictionary;
 
 using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 
 using DictWordsDecoder = ga::ArithmeticDecoder<BytesWord<1>,
                                                DictWordsDictionary,
@@ -26,6 +28,9 @@ using DictWordsDecoder = ga::ArithmeticDecoder<BytesWord<1>,
 using CountsDecoder = ga::ArithmeticDecoder<UIntWord<std::uint64_t>,
                                             CountsDictionary,
                                             40>;
+using ContentDecoder = ga::ArithmeticDecoder<BytesWord<1>,
+                                             ContentDictionary,
+                                             40>;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -70,7 +75,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Content words number: "
                   << contentWordsNumber << std::endl;
 
-
         ////////////////////////////////////////////////////////////////////////
 
         auto countsDictionary = CountsDictionary(contentWordsNumber);
@@ -94,13 +98,27 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////
 
-        // Create content dictionary
-        // Create content decoder
-        // Decode content
-        // Form decoded file data
-        // Write data
+        auto contentDictionaryInitialCounts = std::vector<std::pair<BytesWord<1>, std::uint64_t>>();
 
+        for (auto [word, countWord] : boost::range::combine(words, counts)) {
+            contentDictionaryInitialCounts.emplace_back(word, countWord.getValue());
+        }
 
+        auto contentDictionary = ContentDictionary(contentDictionaryInitialCounts);
+        auto contentDecoder = ContentDecoder(std::move(contentDictionary));
+
+        auto contentWords = contentDecoder.decode(decoded, contentWordsNumber, contentBitsNumber);
+
+        ////////////////////////////////////////////////////////////////////////
+
+        auto dataConstructor = ga::ByteDataConstructor();
+
+        for (auto& word: contentWords) {
+            word.bitsOut(dataConstructor.getBitBackInserter());
+        }
+
+        filesOpener.getOutFileStream().write(
+                    dataConstructor.data<char>(), dataConstructor.size());
 
     } catch (const std::exception&  error) {
         std::cout << error.what();

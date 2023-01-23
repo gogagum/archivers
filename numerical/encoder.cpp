@@ -28,7 +28,7 @@ using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow,
 using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow,
                                            DictWordsDictionary,
                                            40>;
-using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<BytesWord<1>>,
+using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>,
                                          ContentDictionary,
                                          40>;
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
         auto fileOpener = FileOpener(inFileName, outFileName);
         auto inFileBytes = fileOpener.getInData();
-        auto wordFlow = BytesWordFlow<BytesWord<1>>(inFileBytes);
+        auto wordFlow = BytesWordFlow<1>(inFileBytes);
 
         auto countsMap = std::map<BytesWord<1>::Ord, std::uint64_t>();
 
@@ -87,14 +87,9 @@ int main(int argc, char* argv[]) {
 
         dataConstructor.putT<std::uint64_t>(counts.size());
 
-        auto dictWordsCountsBitsPosition
-                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
-
-        auto dictWordsBitsPosition
-                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
-
-        auto contentWordsBitsCountPosition
-                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
+        const auto dictWordsCountsBitsPos= dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto dictWordsBitsPos = dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto contentWordsBitsCountPos = dataConstructor.saveSpaceForT<std::uint64_t>();
 
         dataConstructor.putT<std::uint64_t>(wordFlow.size());
 
@@ -103,7 +98,7 @@ int main(int argc, char* argv[]) {
             auto countsCoder = CountsCoder(countsWords, std::move(countsDictionary));
 
             auto [_0, countsBits] = countsCoder.encode(dataConstructor);
-            dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPosition);
+            dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
@@ -117,7 +112,7 @@ int main(int argc, char* argv[]) {
             auto dictWordsCoder = DictWordsCoder(dictWords, std::move(dictionaryWordsDictionary));
 
             auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor);
-            dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPosition);
+            dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
         {
@@ -126,8 +121,11 @@ int main(int argc, char* argv[]) {
 
             auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor);
 
-            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPosition);
+            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
+
+        fileOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
+
     } catch (const std::runtime_error& error) {
         std::cout << error.what() << std::endl;
         return 2;

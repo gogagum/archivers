@@ -18,7 +18,7 @@ constexpr static const std::uint16_t rangeNumBits = 56;
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
-using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
+using BytesFlow = ga::fl::BytesWordFlow<numBytes>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
@@ -35,7 +35,7 @@ using BytesDecoder =
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsFlow = ga::fl::BitsWordFlow<BitsWord<numBits>>;
+using BitsFlow = ga::fl::BitsWordFlow<numBits>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>

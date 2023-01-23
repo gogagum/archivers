@@ -36,6 +36,7 @@ add_library(encoding_lib STATIC
     include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
+    include/flow/traits.hpp
     include/word/bytes_word.hpp
     include/word/bits_word.hpp
     include/word/integer_word.hpp
@@ -99,6 +100,7 @@ add_executable(archiever_tests
     test/arithmetic_coder.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
+    test/traits.cpp
 )
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)

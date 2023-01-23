@@ -11,9 +11,9 @@ TEST(ArithmeticCoder, LambdaConstruct0) {
     using Word = ga::w::BitsWord<3>;
     using Dict = ga::dict::AdaptiveDictionary<Word>;
     auto dataBytes = std::array<std::byte, 32>{};
-    auto flow = ga::fl::BitsWordFlow<Word>(dataBytes);
+    auto flow = ga::fl::BitsWordFlow<3>(dataBytes);
     auto coder =
-        ga::ArithmeticCoder<ga::fl::BitsWordFlow<Word>, Dict, 40>(flow, Dict(12));
+        ga::ArithmeticCoder<ga::fl::BitsWordFlow<3>, Dict, 40>(flow, Dict(12));
 }
 
 //----------------------------------------------------------------------------//
@@ -21,8 +21,8 @@ TEST(ArithmeticCoder, LambdaConstruct2) {
     using Word = ga::w::BitsWord<31>;
     using Dict = ga::dict::AdaptiveADictionary<Word>;
     auto dataBytes = std::array<std::byte, 32>{};
-    auto flow = ga::fl::BitsWordFlow<Word>(dataBytes);
+    auto flow = ga::fl::BitsWordFlow<31>(dataBytes);
     auto coder =
-        ga::ArithmeticCoder<ga::fl::BitsWordFlow<Word>, Dict, 40>(flow, Dict());
+        ga::ArithmeticCoder<ga::fl::BitsWordFlow<31>, Dict, 40>(flow, Dict());
 }
 
