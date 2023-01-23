@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include <boost/icl/interval_map.hpp>
+#include <boost/range/irange.hpp>
 
 namespace ga::dict {
 
@@ -46,8 +47,15 @@ public:
      * @brief DecreasingOnUpdateDictionary constructor from counts mapping
      * @param probRng - counts mapping.
      */
-    template <class RangeT>
+    template <std::ranges::input_range RangeT>
     DecreasingOnUpdateDictionary(const RangeT& probRng);
+
+    /**
+     * @brief DecreasingOnUpdateDictionary - generate uniform with `count for
+     * each word.
+     * @param count
+     */
+    DecreasingOnUpdateDictionary(Count count);
 
     /**
      * @brief getWord - word by cumulatove count.
@@ -86,7 +94,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-template <class RangeT>
+template <std::ranges::input_range RangeT>
 DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
         const RangeT& countRng) : _totalWordsCount(0) {
     for (const auto& [word, count] : countRng) {
@@ -95,6 +103,17 @@ DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
         auto interval = OrdInterval(ord, WordT::wordsCount);
         _cumulativeWordCounts += std::make_pair(interval, count);
         _totalWordsCount += count;
+    }
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
+        Count count) : _totalWordsCount(WordT::wordsCount * count) {
+    for (auto ord : boost::irange<typename WordT::Ord>(0, WordT::wordsCount)) {
+        _wordsCounts[ord] = count;
+        auto interval = OrdInterval(ord, WordT::wordsCount);
+        _cumulativeWordCounts += std::make_pair(interval, count);
     }
 }
 

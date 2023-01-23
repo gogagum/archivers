@@ -12,6 +12,7 @@
 #include <boost/range/combine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "flow/traits.hpp"
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
@@ -26,7 +27,7 @@ template <class FlowT, class DictT, std::uint16_t rangeBits>
 class ArithmeticCoder : RangesCalc<rangeBits> {
 public:
 
-    using Word = std::decay_t<decltype(*std::declval<FlowT>().begin())>;
+    using Word = ga::fl::traits::WordT<FlowT>;
 
     struct EncodeRet {
         std::size_t wordsCount;

@@ -22,15 +22,14 @@ using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 
-using DictWordsDecoder = ga::ArithmeticDecoder<BytesWord<1>,
-                                               DictWordsDictionary,
-                                               40>;
-using CountsDecoder = ga::ArithmeticDecoder<UIntWord<std::uint64_t>,
-                                            CountsDictionary,
-                                            40>;
-using ContentDecoder = ga::ArithmeticDecoder<BytesWord<1>,
-                                             ContentDictionary,
-                                             40>;
+using DictWordsDecoder = ga::ArithmeticDecoder<DictWordsDictionary, 40>;
+using CountsDecoder = ga::ArithmeticDecoder<CountsDictionary, 40>;
+using ContentDecoder = ga::ArithmeticDecoder<ContentDictionary, 40>;
+
+struct CountMappingRow {
+    BytesWord<1> word;
+    std::uint64_t count;
+};
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -84,30 +83,26 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////
 
-        auto dictionaryInitialWordsCounts = std::vector<std::pair<BytesWord<1>, std::uint64_t>>();
+        auto dictWordsDictionary = DictWordsDictionary(1);
+        auto dictWordsDecoder = DictWordsDecoder(std::move(dictWordsDictionary));
 
-        for (auto ord : boost::irange<BytesWord<1>::Ord>(0, BytesWord<1>::wordsCount)) {
-            auto word = BytesWord<1>::byOrd(ord);
-            dictionaryInitialWordsCounts.emplace_back(word, 1);
-        }
-
-        auto dictionaryWordsDictionary = DictWordsDictionary(dictionaryInitialWordsCounts);
-        auto dictWordsDecoder = DictWordsDecoder(std::move(dictionaryWordsDictionary));
-
-        auto words = dictWordsDecoder.decode(decoded, dictWordsCount, dictWordsBitsNumber);
+        auto words = dictWordsDecoder.decode(
+                    decoded, dictWordsCount, dictWordsBitsNumber);
 
         ////////////////////////////////////////////////////////////////////////
 
-        auto contentDictionaryInitialCounts = std::vector<std::pair<BytesWord<1>, std::uint64_t>>();
+        auto contentDictInitialCounts = std::vector<CountMappingRow>();
+        std::transform(words.begin(), words.end(), counts.begin(),
+                       std::back_inserter(contentDictInitialCounts),
+                       [](const auto& word, const auto& countWord) -> CountMappingRow {
+                           return { word, countWord.getValue() };
+                       });
 
-        for (auto [word, countWord] : boost::range::combine(words, counts)) {
-            contentDictionaryInitialCounts.emplace_back(word, countWord.getValue());
-        }
-
-        auto contentDictionary = ContentDictionary(contentDictionaryInitialCounts);
+        auto contentDictionary = ContentDictionary(contentDictInitialCounts);
         auto contentDecoder = ContentDecoder(std::move(contentDictionary));
 
-        auto contentWords = contentDecoder.decode(decoded, contentWordsNumber, contentBitsNumber);
+        auto contentWords = contentDecoder.decode(
+                    decoded, contentWordsNumber, contentBitsNumber);
 
         ////////////////////////////////////////////////////////////////////////
 

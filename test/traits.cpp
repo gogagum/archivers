@@ -15,28 +15,28 @@ using ga::w::BitsWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(std::is_same_v<typename ga::fl::traits::Word<WordVec>, Word>);
+static_assert(std::is_same_v<typename ga::fl::traits::WordT<WordVec>, Word>);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(std::is_same_v<typename ga::fl::traits::Word<const WordVec>, Word>);
+static_assert(std::is_same_v<typename ga::fl::traits::WordT<const WordVec>, Word>);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(std::is_same_v<
-    typename ga::fl::traits::Word<BytesWordFlow<3>>, BytesWord<3>
+    typename ga::fl::traits::WordT<BytesWordFlow<3>>, BytesWord<3>
 >);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(std::is_same_v<
-    typename ga::fl::traits::Word<BitsWordFlow<45>>, BitsWord<45>
+    typename ga::fl::traits::WordT<BitsWordFlow<45>>, BitsWord<45>
 >);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(std::is_same_v<
-    typename ga::fl::traits::Word<const BytesWordFlow<3>>, BytesWord<3>
+    typename ga::fl::traits::WordT<const BytesWordFlow<3>>, BytesWord<3>
 >);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 static_assert(std::is_same_v<
-    typename ga::fl::traits::Word<const BitsWordFlow<45>>, BitsWord<45>
+    typename ga::fl::traits::WordT<const BitsWordFlow<45>>, BitsWord<45>
 >);
 

@@ -31,7 +31,7 @@ using BytesCoder = ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, ran
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
-using BytesDecoder = ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, rangeNumBits>;
+using BytesDecoder = ArithmeticDecoder<BytesDict<numBytes>, rangeNumBits>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
@@ -47,6 +47,6 @@ using BitsCoder = ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, rangeNum
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsDecoder = ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, rangeNumBits>;
+using BitsDecoder = ArithmeticDecoder<BitsDict<numBits>, rangeNumBits>;
 
 #endif // ARITHMETIC_D_ARCHIEVER_INCLUDE_HPP

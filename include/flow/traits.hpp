@@ -6,7 +6,7 @@
 namespace ga::fl::traits {
 
 template <class FlowT>
-using Word = std::decay_t<decltype(*std::declval<FlowT>().begin())>;
+using WordT = std::decay_t<decltype(*std::declval<FlowT>().begin())>;
 
 }
 

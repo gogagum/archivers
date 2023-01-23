@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ranges>
 #include <boost/program_options.hpp>
 
 #include "arithmetic_coder.hpp"
@@ -17,20 +18,16 @@ using ga::w::UIntWord;
 using ga::dict::DecreasingCountDictionary;
 using ga::dict::DecreasingOnUpdateDictionary;
 
-using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
-using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using CountsDict = DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using ContentDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
+
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
-using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow,
-                                        CountsDictionary,
-                                        40>;
-using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow,
-                                           DictWordsDictionary,
-                                           40>;
-using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>,
-                                         ContentDictionary,
-                                         40>;
+
+using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow, CountsDict, 40>;
+using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow, DictWordsDict, 40>;
+using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>, ContentDict, 40>;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -87,40 +84,30 @@ int main(int argc, char* argv[]) {
 
         dataConstructor.putT<std::uint64_t>(counts.size());
 
-        const auto dictWordsCountsBitsPos= dataConstructor.saveSpaceForT<std::uint64_t>();
-        const auto dictWordsBitsPos = dataConstructor.saveSpaceForT<std::uint64_t>();
-        const auto contentWordsBitsCountPos = dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto dictWordsCountsBitsPos =
+                dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto dictWordsBitsPos =
+                dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto contentWordsBitsCountPos =
+                dataConstructor.saveSpaceForT<std::uint64_t>();
 
         dataConstructor.putT<std::uint64_t>(wordFlow.size());
 
         {
-            auto countsDictionary = CountsDictionary(wordFlow.size());
-            auto countsCoder = CountsCoder(countsWords, std::move(countsDictionary));
-
+            auto countsCoder = CountsCoder(countsWords, CountsDict(wordFlow.size()));
             auto [_0, countsBits] = countsCoder.encode(dataConstructor);
             dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
-            auto dictionaryInitialWordsCounts = std::vector<std::pair<BytesWord<1>, std::uint64_t>>();
-
-            for (auto word : dictWords) {
-                dictionaryInitialWordsCounts.emplace_back(word, 1);
-            }
-
-            auto dictionaryWordsDictionary = DictWordsDictionary(dictionaryInitialWordsCounts);
-            auto dictWordsCoder = DictWordsCoder(dictWords, std::move(dictionaryWordsDictionary));
-
+            auto dictWordsCoder = DictWordsCoder(dictWords, DictWordsDict(1));
             auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor);
             dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
         {
-            auto textDictionary = ContentDictionary(counts);
-            auto contentCoder = ContentCoder(wordFlow, std::move(textDictionary));
-
+            auto contentCoder = ContentCoder(wordFlow, ContentDict(counts));
             auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor);
-
             dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
 
