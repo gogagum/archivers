@@ -49,7 +49,7 @@ public:
      * @brief getNumberOfWords - get number of words in data.
      * @return number of words.
      */
-    std::size_t getNumberOfWords() const;
+    std::size_t size() const;
 
     /**
      * @brief getTail get tail bits.
@@ -77,20 +77,20 @@ auto BitsWordFlow<w::BitsWord<_numBits>>::begin() -> Iterator {
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::end() -> Iterator {
-    _data.seek(getNumberOfWords() * _numBits);
+    _data.seek(size() * _numBits);
     return Iterator(_data.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-std::size_t BitsWordFlow<w::BitsWord<_numBits>>::getNumberOfWords() const {
+std::size_t BitsWordFlow<w::BitsWord<_numBits>>::size() const {
     return _data.getNumBytes() * 8 / numBits;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWordFlow<w::BitsWord<_numBits>>::getTail() const -> Tail {
-     _data.seek(getNumberOfWords() * _numBits);
+     _data.seek(size() * _numBits);
      return Tail(_data.getCurrPosBitsIter(), _data.getEndBitsIter());
 }
 

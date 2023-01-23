@@ -33,7 +33,6 @@ add_library(encoding_lib STATIC
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
-    include/dictionary/traits.hpp
     include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
@@ -44,31 +43,27 @@ add_library(encoding_lib STATIC
     include/word/uint_word.hpp
 )
 
+add_library(common STATIC common.hpp common.cpp)
+
 include_directories(${Boost_INCLUDE_DIRS} include/)
 
-add_executable(archiever_encoder arithmetic_archiever/encoder.cpp file_opener.cpp)
-target_link_libraries(archiever_encoder encoding_lib)
-target_link_libraries(archiever_encoder ${Boost_LIBRARIES})
+add_executable(archiever_encoder arithmetic_archiever/encoder.cpp)
+target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_decoder arithmetic_archiever/decoder.cpp file_opener.cpp)
-target_link_libraries(archiever_decoder encoding_lib)
-target_link_libraries(archiever_decoder ${Boost_LIBRARIES})
+add_executable(archiever_decoder arithmetic_archiever/decoder.cpp)
+target_link_libraries(archiever_decoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp file_opener.cpp)
-target_link_libraries(archiever_a_encoder encoding_lib)
-target_link_libraries(archiever_a_encoder ${Boost_LIBRARIES})
+add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp)
+target_link_libraries(archiever_a_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp file_opener.cpp)
-target_link_libraries(archiever_a_decoder encoding_lib)
-target_link_libraries(archiever_a_decoder ${Boost_LIBRARIES})
+add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp)
+target_link_libraries(archiever_a_decoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp file_opener.cpp)
-target_link_libraries(archiever_d_encoder encoding_lib)
-target_link_libraries(archiever_d_encoder ${Boost_LIBRARIES})
+add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp)
+target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp file_opener.cpp)
-target_link_libraries(archiever_d_decoder encoding_lib)
-target_link_libraries(archiever_d_decoder ${Boost_LIBRARIES})
+add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
+target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
 
 add_executable(numerical_encoder numerical/encoder.cpp file_opener.cpp)
 target_link_libraries(numerical_encoder encoding_lib)

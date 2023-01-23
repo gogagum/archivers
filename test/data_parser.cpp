@@ -102,7 +102,7 @@ TEST(DataParser, UInt16T) {
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeT<std::uint16_t>(),
-              std::uint16_t{0b0110001000100110});
+              std::uint16_t{0b0010011001100010});
 }
 
 //----------------------------------------------------------------------------//

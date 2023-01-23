@@ -84,14 +84,14 @@ TEST(ByteDataConstructor, PutInt64) {
 
     encoded.putT(tested);
     EXPECT_EQ(encoded.size(), 8);
-    EXPECT_EQ(encoded.data<std::byte>()[0], std::byte(0b00000000));
-    EXPECT_EQ(encoded.data<std::byte>()[1], std::byte{0b00100000});
-    EXPECT_EQ(encoded.data<std::byte>()[2], std::byte{0b10000000});
-    EXPECT_EQ(encoded.data<std::byte>()[3], std::byte{0b00001000});
-    EXPECT_EQ(encoded.data<std::byte>()[4], std::byte{0b00000000});
-    EXPECT_EQ(encoded.data<std::byte>()[5], std::byte{0b00000010});
-    EXPECT_EQ(encoded.data<std::byte>()[6], std::byte{0b00000000});
-    EXPECT_EQ(encoded.data<std::byte>()[7], std::byte{0b00100000});
+    EXPECT_EQ(encoded.data<std::byte>()[7], std::byte(0b00000000));
+    EXPECT_EQ(encoded.data<std::byte>()[6], std::byte{0b00100000});
+    EXPECT_EQ(encoded.data<std::byte>()[5], std::byte{0b10000000});
+    EXPECT_EQ(encoded.data<std::byte>()[4], std::byte{0b00001000});
+    EXPECT_EQ(encoded.data<std::byte>()[3], std::byte{0b00000000});
+    EXPECT_EQ(encoded.data<std::byte>()[2], std::byte{0b00000010});
+    EXPECT_EQ(encoded.data<std::byte>()[1], std::byte{0b00000000});
+    EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b00100000});
 }
 
 //----------------------------------------------------------------------------//
@@ -102,9 +102,9 @@ TEST(ByteDataConstructor, PutUInt32) {
 
     encoded.putT(tested);
     EXPECT_EQ(encoded.size(), 4);
-    EXPECT_EQ(encoded.data<std::byte>()[0], std::byte(0b00000000));
-    EXPECT_EQ(encoded.data<std::byte>()[1], std::byte{0b00100000});
-    EXPECT_EQ(encoded.data<std::byte>()[2], std::byte{0b10000000});
-    EXPECT_EQ(encoded.data<std::byte>()[3], std::byte{0b00001000});
+    EXPECT_EQ(encoded.data<std::byte>()[3], std::byte(0b00000000));
+    EXPECT_EQ(encoded.data<std::byte>()[2], std::byte{0b00100000});
+    EXPECT_EQ(encoded.data<std::byte>()[1], std::byte{0b10000000});
+    EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b00001000});
 }
 

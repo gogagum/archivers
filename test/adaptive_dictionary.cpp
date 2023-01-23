@@ -4,7 +4,6 @@
 #include "word/bits_word.hpp"
 #include "word/integer_word.hpp"
 #include "dictionary/adaptive_dictionary.hpp"
-#include "dictionary/traits.hpp"
 #include "byte_data_constructor.hpp"
 
 using ga::dict::AdaptiveDictionary;
@@ -12,10 +11,6 @@ using ga::w::BytesWord;
 using ga::w::BitsWord;
 using ga::w::IntegerWord;
 using ga::ByteDataConstructor;
-
-////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(ga::dict::traits::needSerialize<AdaptiveDictionary<BytesWord<2>>, ByteDataConstructor>);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

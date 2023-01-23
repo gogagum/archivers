@@ -1,34 +1,21 @@
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
+#include <cstdint>
 
 #include <boost/program_options.hpp>
-#include <boost/format.hpp>
 
-#include "../file_opener.hpp"
-#include "arithmetic_archiever_include.hpp"
+#include "../common.hpp"
+#include "encoder_impl.hpp"
 
-#define BYTES_CASE(bytes) \
-    case (bytes) * 8: \
-        encodeImpl(BytesCoder<(bytes)>( \
-            BytesFlow<(bytes)>(fileOpener.getInData()), \
-            [ratio]() { return BytesDict<(bytes)>(ratio); }) \
-        ); \
-        break;
+#define BYTES_CASE(bytes, fileOpener, ratio) \
+    case (bytes) * 8: FileBytesAdaptiveEncodeImpl<bytes>::process((fileOpener), (ratio)); break;
 
-#define BITS_CASE(bits) \
-    case (bits): \
-        encodeImpl(BitsCoder<(bits)>( \
-            BitsFlow<(bits)>(fileOpener.getInData()), \
-            [ratio]() { return BitsDict<(bits)>(ratio); }) \
-        ); \
-    break;
+#define BITS_CASE(bits, fileOpener, ratio) \
+    case (bits): FileBitsAdaptiveEncodeImpl<bits>::process((fileOpener), (ratio)); break;
 
 namespace bpo = boost::program_options;
 
 int main(int argc, char* argv[]) {
-
     bpo::options_description appOptionsDescr("Console options.");
 
     std::string inFileName;
@@ -37,59 +24,58 @@ int main(int argc, char* argv[]) {
     std::uint64_t ratio;
 
     try {
-        appOptionsDescr.add_options()
-            ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
-            ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.")
-            ("bits,b", bpo::value(&numBits)->default_value(16), "Word bits count.")
-            ("ratio,r", bpo::value(&ratio)->default_value(2), "Dictionary ratio.");
+        appOptionsDescr.add_options() (
+                "input-file,i",
+                bpo::value(&inFileName)->required(),
+                "In file name."
+            ) (
+                "out-filename,o",
+                bpo::value(&outFileName)->default_value(inFileName + "-out"),
+                "Out file name."
+            ) (
+                "bits,b",
+                bpo::value(&numBits)->default_value(16),
+                "Word bits count."
+            ) (
+                "ratio,r",
+                bpo::value(&ratio)->default_value(2),
+                "Dictionary ratio."
+            );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
-    } catch (const std::logic_error& error) {
-        std::cout << error.what() << std::endl;
-        return 1;
-    }
 
-    try {
         auto fileOpener = FileOpener(inFileName, outFileName);
 
-        const auto encodeImpl = [&fileOpener](auto&& coder) {
-            auto encoded = coder.encode();
-            fileOpener.getOutFileStream().write(
-                        encoded.template data<char>(), encoded.size());
-        };
-
         switch (numBits) {
-            BYTES_CASE(1);
-            BITS_CASE(9);
-            BITS_CASE(10);
-            BITS_CASE(11);
-            BITS_CASE(12);
-            BITS_CASE(13);
-            BITS_CASE(14);
-            BITS_CASE(15);
-            BYTES_CASE(2);
-            BITS_CASE(17);
-            BITS_CASE(18);
-            BITS_CASE(19);
-            BITS_CASE(20);
-            BITS_CASE(21);
-            BITS_CASE(22);
-            BITS_CASE(23);
-            BYTES_CASE(3);
-            BITS_CASE(25);
-            BITS_CASE(26);
-            BITS_CASE(27);
-            BITS_CASE(28);
-            BITS_CASE(29);
-            BITS_CASE(30);
-            BITS_CASE(31);
-            BYTES_CASE(4);
+            BYTES_CASE(1, fileOpener, ratio);
+            BITS_CASE(9, fileOpener, ratio);
+            BITS_CASE(10, fileOpener, ratio);
+            BITS_CASE(11, fileOpener, ratio);
+            BITS_CASE(12, fileOpener, ratio);
+            BITS_CASE(13, fileOpener, ratio);
+            BITS_CASE(14, fileOpener, ratio);
+            BITS_CASE(15, fileOpener, ratio);
+            BYTES_CASE(2, fileOpener, ratio);
+            BITS_CASE(17, fileOpener, ratio);
+            BITS_CASE(18, fileOpener, ratio);
+            BITS_CASE(19, fileOpener, ratio);
+            BITS_CASE(20, fileOpener, ratio);
+            BITS_CASE(21, fileOpener, ratio);
+            BITS_CASE(22, fileOpener, ratio);
+            BITS_CASE(23, fileOpener, ratio);
+            BYTES_CASE(3, fileOpener, ratio);
+            BITS_CASE(25, fileOpener, ratio);
+            BITS_CASE(26, fileOpener, ratio);
+            BITS_CASE(27, fileOpener, ratio);
+            BITS_CASE(28, fileOpener, ratio);
+            BITS_CASE(29, fileOpener, ratio);
+            BITS_CASE(30, fileOpener, ratio);
+            BITS_CASE(31, fileOpener, ratio);
+            BYTES_CASE(4, fileOpener, ratio);
         default:
-            throw std::runtime_error(
-                (boost::format("File is encoded with %1% bit length which is not supported.") % numBits).str());
-            break;
+            throw UnsupportedEncodeBitsMode(numBits); break;
         }
     } catch (const std::runtime_error& error) {
         std::cout << error.what() << std::endl;

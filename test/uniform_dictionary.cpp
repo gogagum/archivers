@@ -35,7 +35,7 @@ TEST(UniformDictionary, OrdLongOrd) {
 TEST(UniformDictionary, CumulativeNumFoundLow) {
     auto dict = UniformDictionary<BytesWord<1>>();
     auto word = BytesWord<1>::byOrd(37);
-    auto [low, _0, _1] = dict.getWordProbabilityStats(word);
+    auto [low, _0, _1] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 37);
 }
 
@@ -43,7 +43,7 @@ TEST(UniformDictionary, CumulativeNumFoundLow) {
 TEST(UniformDictionary, CumulativeNumFoundLowZero) {
     auto dict = UniformDictionary<BytesWord<1>>();
     auto word = BytesWord<1>::byOrd(0);
-    auto [low, _0, _1] = dict.getWordProbabilityStats(word);
+    auto [low, _0, _1] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 0);
 }
 
@@ -51,7 +51,7 @@ TEST(UniformDictionary, CumulativeNumFoundLowZero) {
 TEST(UniformDictionary, CumulativeNumFoundHigh) {
     auto dict = UniformDictionary<BytesWord<1>>();
     auto word = BytesWord<1>::byOrd(37);
-    auto [_0, high, _1] = dict.getWordProbabilityStats(word);
+    auto [_0, high, _1] = dict.getProbabilityStats(word);
     EXPECT_EQ(high, 38);
 }
 
@@ -59,7 +59,7 @@ TEST(UniformDictionary, CumulativeNumFoundHigh) {
 TEST(UniformDictionary, CumulativeNumFoundHighZero) {
     auto dict = UniformDictionary<BytesWord<1>>();
     auto word = BytesWord<1>::byOrd(0);
-    auto [_0, high, _1] = dict.getWordProbabilityStats(word);
+    auto [_0, high, _1] = dict.getProbabilityStats(word);
     EXPECT_EQ(high, 1);
 }
 
@@ -67,6 +67,6 @@ TEST(UniformDictionary, CumulativeNumFoundHighZero) {
 TEST(UniformDictionary, TotalWordsCount) {
     auto dict = UniformDictionary<BytesWord<1>>();
     auto word = BytesWord<1>::byOrd(0);
-    auto [_0, _1, total] = dict.getWordProbabilityStats(word);
+    auto [_0, _1, total] = dict.getProbabilityStats(word);
     EXPECT_EQ(total, 256);
 }
