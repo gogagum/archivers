@@ -3,7 +3,7 @@
 
 #include "flow/bytes_word_flow.hpp"
 
-#include "../file_opener.hpp"
+#include "../common.hpp"
 
 namespace bpo = boost::program_options;
 
@@ -39,6 +39,21 @@ int main(int argc, char* argv[]) {
         for (auto word : wordFlow) {
             ++countsMap[BytesWord<1>::ord(word)];
         }
+
+        std::vector<std::pair<BytesWord<1>, std::uint64_t>> counts;
+
+        for (auto [ord, count] : countsMap) {
+            counts.emplace_back(BytesWord<1>::byOrd(ord), count);
+        }
+
+        std::sort(counts.begin(), counts.end(),
+                  [](const auto& c0, const auto& c1){
+                      return c0.second > c1.second;
+                  });
+
+        auto dataCounstructor = ga::ByteDataConstructor();
+
+
 
         std::uint32_t numWords = countsMap.size();
         fileOpener.getOutFileStream().write(reinterpret_cast<char*>(&numWords),
