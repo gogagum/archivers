@@ -26,7 +26,7 @@ template <class FlowT, class DictT, std::uint16_t rangeBits>
 class ArithmeticCoder : RangesCalc<rangeBits> {
 public:
 
-    using Word = typename FlowT::Word;
+    using Word = std::decay_t<decltype(*std::declval<FlowT>().begin())>;
 
     struct EncodeRet {
         std::size_t wordsCount;

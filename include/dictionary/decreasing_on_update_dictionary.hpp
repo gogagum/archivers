@@ -40,7 +40,7 @@ public:
         }
     };
 
-public:
+public:    
 
     /**
      * @brief DecreasingOnUpdateDictionary constructor from counts mapping

@@ -1,7 +1,11 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
+#include "arithmetic_coder.hpp"
 #include "flow/bytes_word_flow.hpp"
+#include "word/uint_word.hpp"
+#include "dictionary/decreasing_counts_dictionary.hpp"
+#include "dictionary/decreasing_on_update_dictionary.hpp"
 
 #include "../common.hpp"
 
@@ -9,6 +13,21 @@ namespace bpo = boost::program_options;
 
 using ga::fl::BytesWordFlow;
 using ga::w::BytesWord;
+using ga::dict::DecreasingCountDictionary;
+using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDictionary = ga::dict::DecreasingOnUpdateDictionary<BytesWord<1>>;
+using ContentDictionary = ga::dict::DecreasingOnUpdateDictionary<BytesWord<1>>;
+using UIntWordsFlow = std::vector<ga::w::UIntWord<std::uint64_t>>;
+using DictWordsFlow = std::vector<BytesWord<1>>;
+using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow,
+                                        CountsDictionary,
+                                        40>;
+using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow,
+                                           DictWordsDictionary,
+                                           40>;
+using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<BytesWord<1>>,
+                                         ContentDictionary,
+                                         40>;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -17,9 +36,15 @@ int main(int argc, char* argv[]) {
     std::string outFileName;
 
     try {
-        appOptionsDescr.add_options()
-            ("input-file,i", bpo::value(&inFileName)->required(), "In file name.")
-            ("out-filename,o", bpo::value(&outFileName)->default_value(inFileName + "-out"), "Out file name.");
+        appOptionsDescr.add_options() (
+            "input-file,i",
+            bpo::value(&inFileName)->required(),
+            "In file name."
+        ) (
+            "out-filename,o",
+            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            "Out file name."
+        );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
@@ -51,17 +76,62 @@ int main(int argc, char* argv[]) {
                       return c0.second > c1.second;
                   });
 
-        auto dataCounstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ga::ByteDataConstructor();
 
 
+        UIntWordsFlow countsWords;
+        DictWordsFlow dictWords;
 
-        std::uint32_t numWords = countsMap.size();
-        fileOpener.getOutFileStream().write(reinterpret_cast<char*>(&numWords),
-                                            sizeof(std::uint32_t));
+        for (auto [word, count] : counts) {
+            countsWords.emplace_back(count);
+            dictWords.push_back(word);
+        }
 
+        dataConstructor.putT<std::uint64_t>(countsWords.size());
 
+        auto dictWordsCountsBitsPosition
+                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
 
+        auto dictWordsBitsPosition
+                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
 
+        auto contentWordsBitsPosition
+                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
+
+        auto contentWordsCountBitsPosition
+                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
+
+        {
+            auto countsDictionary = CountsDictionary(wordFlow.size());
+            auto countsCoder = CountsCoder(countsWords, std::move(countsDictionary));
+
+            auto [_0, countsBits] = countsCoder.encode(dataConstructor);
+            dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPosition);
+        }
+
+        {
+            auto dictionaryInitialWordsCounts = std::vector<std::pair<BytesWord<1>, std::uint64_t>>();
+
+            for (auto word : dictWords) {
+                dictionaryInitialWordsCounts.emplace_back(word, 1);
+            }
+
+            auto dictionaryWordsDictionary = DictWordsDictionary(dictionaryInitialWordsCounts);
+            auto dictWordsCoder = DictWordsCoder(dictWords, std::move(dictionaryWordsDictionary));
+
+            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor);
+            dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPosition);
+        }
+
+        {
+            auto textDictionary = ContentDictionary(counts);
+            auto contentCoder = ContentCoder(wordFlow, std::move(textDictionary));
+
+            auto [wordsCount, contentWordsBits] = contentCoder.encode(dataConstructor);
+
+            dataConstructor.putTToPosition(wordsCount, contentWordsCountBitsPosition);
+            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsPosition);
+        }
     } catch (const std::runtime_error& error) {
         std::cout << error.what() << std::endl;
         return 2;
