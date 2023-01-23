@@ -13,7 +13,7 @@ TEST(IntRangeFlow, construct) {
 TEST(IntRangeFlow, numWords) {
     auto vec = std::vector<int>{3, 7, 2};
     auto flow = ga::fl::IntegerWordFlow<int, -5, 8>(std::move(vec));
-    EXPECT_EQ(flow.getNumberOfWords(), 3);
+    EXPECT_EQ(flow.size(), 3);
 }
 
 //----------------------------------------------------------------------------//

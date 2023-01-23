@@ -1,7 +1,20 @@
+#include "common.hpp"
 #include <iostream>
 #include <boost/format.hpp>
 
-#include "file_opener.hpp"
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+UnsupportedEncodeBitsMode::UnsupportedEncodeBitsMode(std::uint16_t numBits) :
+    std::invalid_argument((
+        boost::format("Encoding with %1% bit length is not supported.") % numBits
+    ).str()) {}
+
+////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------------------------//
+UnsupportedDecodeBitsMode::UnsupportedDecodeBitsMode(std::uint16_t numBits) :
+    std::invalid_argument((
+        boost::format("Decodeing with %1% bits mode is not supported.") % numBits
+    ).str()) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -43,4 +56,3 @@ std::vector<std::byte> FileOpener::_openInFile(const std::string& fileInName) {
     fin.read(reinterpret_cast<char*>(ret.data()), finSize);
     return ret;
 }
-

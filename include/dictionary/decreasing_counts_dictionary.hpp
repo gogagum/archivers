@@ -43,13 +43,13 @@ public:
      * @param word - number to get stats for.
      * @return [low, high, total] counts.
      */
-    [[nodiscard]] ProbabilityStats getWordProbabilityStats(Word word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Word word);
 
     /**
-     * @brief totalWordsCount - current number of words.
+     * @brief getTotalWordsCount - current number of words.
      * @return number of words. In fact, it is last decoded/encoded word.
      */
-    Count totalWordsCount() const;
+    [[nodiscard]] Count getTotalWordsCount() const;
 
 private:
     Count _currentCount;
@@ -73,7 +73,7 @@ auto DecreasingCountDictionary<CountT>::getWord(
 
 //----------------------------------------------------------------------------//
 template <typename CountT>
-auto DecreasingCountDictionary<CountT>::getWordProbabilityStats(
+auto DecreasingCountDictionary<CountT>::getProbabilityStats(
         Word word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     if (ord > _currentCount) {
@@ -86,7 +86,7 @@ auto DecreasingCountDictionary<CountT>::getWordProbabilityStats(
 
 //----------------------------------------------------------------------------//
 template <typename CountT>
-auto DecreasingCountDictionary<CountT>::totalWordsCount() const -> Count {
+auto DecreasingCountDictionary<CountT>::getTotalWordsCount() const -> Count {
     return _currentCount;
 }
 

@@ -50,7 +50,7 @@ public:
      * @brief countNumberOfWords.
      * @return number of words.
      */
-    std::size_t getNumberOfWords() const;
+    std::size_t size() const;
 
     /**
      * @brief getTail
@@ -82,12 +82,12 @@ auto BytesWordFlow<w::BytesWord<numBytes>>::begin() const -> Iterator {
 //----------------------------------------------------------------------------//
 template<std::uint8_t numBytes>
 auto BytesWordFlow<w::BytesWord<numBytes>>::end() const -> Iterator {
-    return Iterator(_bytes.data() + getNumberOfWords() * numBytes);
+    return Iterator(_bytes.data() + size() * numBytes);
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::size_t BytesWordFlow<w::BytesWord<numBytes>>::getNumberOfWords() const {
+std::size_t BytesWordFlow<w::BytesWord<numBytes>>::size() const {
     return _bytes.size() / numBytes;
 }
 
@@ -99,7 +99,7 @@ std::uint8_t BytesWordFlow<w::BytesWord<numBytes>>::_getTailBytesSize() const {
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-auto BytesWordFlow<w::BytesWord<numBytes>>::getTail() const ->Tail {
+auto BytesWordFlow<w::BytesWord<numBytes>>::getTail() const -> Tail {
     Tail ret;
     auto bytesRng = std::span<const std::byte>(_bytes.end() - _getTailBytesSize(),
                                                _bytes.end());

@@ -3,7 +3,6 @@
 #ifndef ARITHMETIC_DECODER_HPP
 #define ARITHMETIC_DECODER_HPP
 
-#include <boost/container/static_vector.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -13,6 +12,7 @@
 #include <cstddef>
 #include <cstring>
 #include <algorithm>
+#include <limits>
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
@@ -25,90 +25,70 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT, typename CountT = std::uint32_t>
-class ArithmeticDecoder : RangesCalc<SymT> {
+template <class SymT, class DictT, std::uint16_t rangeBits>
+class ArithmeticDecoder : RangesCalc<rangeBits> {
 public:
     using Source = DataParser;
-    using Tail = bc::static_vector<bool, SymT::numBits>;
+    using Ret = std::vector<SymT>;
 
 public:
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The Ret class
-    ///
-    struct Ret {
-        std::vector<SymT> syms;
-        Tail tail;
-    };
-
-public:
-
-    template <class DictConstructor>
-    ArithmeticDecoder(Source& source, DictConstructor&& constructor);
+    ArithmeticDecoder(DictT&& dict);
 
     /**
-     * @brief decode - decode source as a vector of bytes.
+     * @brief decode
+     * @param source
+     * @param wordsCount
+     * @param bitsLimit
      * @return
      */
-    Ret decode();
+    Ret decode(Source& source,
+               std::size_t wordsCount,
+               std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
 
 private:
 
-    using RangesCalc<SymT>::symsNum;
-    using RangesCalc<SymT>::correctedSymsNum;
-    using RangesCalc<SymT>::correctedSymsNum_2;
-    using RangesCalc<SymT>::correctedSymsNum_4;
-    using RangesCalc<SymT>::correctedSymsNum_3to4;
-    using OrdRange = typename RangesCalc<SymT>::Range;
+    using RC = RangesCalc<rangeBits>;
+    using OrdRange = typename RC::Range;
 
 private:
-
-    Tail _deserializeTail();
-
-    std::vector<std::uint64_t> _deserializeWordsCounts();
-
-    CountT _deserializeFileWordsCount();
-
-    constexpr const static std::uint16_t _additionalBitsCnt =
-            RangesCalc<SymT>::_computeAdditionalBitsCnt();
-
-private:
-    Source& _source;
-    DictT _dict;                                 // #1 to deserialize.
-    CountT _fileWordsCount;                      // #2 to deserialize.
-    const Tail _tail;                            // #3 to deserialize.
+    DictT _dict;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-template <class DictConstructor>
-ArithmeticDecoder<SymT, DictT, CountT>::ArithmeticDecoder(
-        Source& source, DictConstructor&& constructor)
-    : _source(source),
-      _dict(constructor()),
-      _fileWordsCount(_deserializeFileWordsCount()),
-      _tail(_deserializeTail()) {}
+template <class SymT, class DictT, std::uint16_t rangeBits>
+ArithmeticDecoder<SymT, DictT, rangeBits>::ArithmeticDecoder(DictT&& dict)
+    : _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
-    typename RangesCalc<SymT>::Count value = 0;
-    std::size_t valueBits = SymT::numBits + _additionalBitsCnt;
+template <class SymT, class DictT, std::uint16_t rangeBits>
+auto
+ArithmeticDecoder<SymT, DictT, rangeBits>::decode(Source& source,
+                                       std::size_t wordsCount,
+                                       std::size_t bitsLimit) -> Ret {
+    const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
+        if (bitsLimit == 0) {
+            return false;
+        }
+        --bitsLimit;
+        return source.takeBit();
+    };
 
-    for (auto _ : boost::irange<std::size_t>(0, valueBits)) {
-        value = (value << 1) + (_source.takeBit() ? 1 : 0);
+    typename RC::Count value = 0;
+
+    for (auto _ : boost::irange<std::size_t>(0, RC::numBits)) {
+        value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    auto currRange = OrdRange { 0, correctedSymsNum };
+    auto currRange = OrdRange { 0, RC::total };
 
     Ret ret;
-    ret.tail = _tail;
 
     int lastPercent = -1;
 
-    for (auto i : boost::irange<CountT>(0, _fileWordsCount)) {
-        if (int currPercent = (100 * i) / _fileWordsCount;
+    for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
+        if (int currPercent = (100 * i) / wordsCount;
                 currPercent != lastPercent) {
             std::cerr << currPercent << '%' << std::endl;
             lastPercent = currPercent;
@@ -116,11 +96,14 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
 
         const auto range = currRange.high - currRange.low;
         const auto range128 = bm::uint128_t(range);
+        const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCount());
+        const auto offset128 = bm::uint128_t(value - currRange.low + 1);
+
         const auto aux =
-                ((value - currRange.low + 1) * _dict.getTotalWordsCount() - 1) / range;
+                ((offset128 * dictTotalWords128 - 1) / range128).template convert_to<std::uint64_t>();
 
         const auto sym = _dict.getWord(aux);
-        ret.syms.push_back(sym);
+        ret.push_back(sym);
 
         auto [low, high, total] = _dict.getProbabilityStats(sym);
 
@@ -129,63 +112,30 @@ auto ArithmeticDecoder<SymT, DictT, CountT>::decode() -> Ret {
         const auto total128 = bm::uint128_t(total);
 
         currRange = OrdRange {
-            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
+            currRange.low + ((range128 * low128) / total128).template convert_to<std::uint64_t>(),
+            currRange.low + ((range128 * high128) / total128).template convert_to<std::uint64_t>()
         };
 
         while (true) {
-            if (currRange.high <= correctedSymsNum_2) {
-                bool bit = _source.takeBit();
+            if (currRange.high <= RC::half) {
+                bool bit = takeBitLimited();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (currRange.low >= correctedSymsNum_2) {
-                bool bit = _source.takeBit();
-                value = value * 2 - correctedSymsNum + (bit ? 1 : 0);
-            } else if (currRange.low >= correctedSymsNum_4
-                       && currRange.high <= correctedSymsNum_3to4) {
-                bool bit = _source.takeBit();
-                value = value * 2 - correctedSymsNum_2 + (bit ? 1 : 0);
+            } else if (currRange.low >= RC::half) {
+                bool bit = takeBitLimited();
+                value = value * 2 - RC::total + (bit ? 1 : 0);
+            } else if (currRange.low >= RC::quater
+                       && currRange.high <= RC::threeQuaters) {
+                bool bit = takeBitLimited();
+                value = value * 2 - RC::half + (bit ? 1 : 0);
             } else {
                 break;
             }
-            currRange = RangesCalc<SymT>::recalcRange(currRange);
+            currRange = RC::recalcRange(currRange);
         }
     }
 
     std::cerr << "100%" << std::endl;
     return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-auto ArithmeticDecoder<SymT, DictT, CountT>::_deserializeTail() -> Tail {
-    std::uint16_t tailSize = _source.takeT<std::uint16_t>();
-    Tail tail(tailSize);
-    for (auto& tailBit: tail) {
-        tailBit = _source.takeBit();
-    }
-    return tail;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-std::vector<std::uint64_t>
-ArithmeticDecoder<SymT, DictT, CountT>::_deserializeWordsCounts() {
-    std::vector<std::uint64_t> ret(SymT::wordsCount);
-    CountT numUniqueSyms = _source.takeT<std::uint32_t>();
-
-    for (auto _ : boost::irange<CountT>(0, numUniqueSyms)) {
-        auto sym = _source.takeT<SymT>();
-        auto numFound = _source.takeT<CountT>();
-        ret[SymT::ord(sym)] = numFound;
-    }
-
-    return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, typename CountT>
-CountT ArithmeticDecoder<SymT, DictT, CountT>::_deserializeFileWordsCount() {
-    return _source.takeT<CountT>();
 }
 
 }  // namespace ga

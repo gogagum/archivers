@@ -64,6 +64,16 @@ auto ByteDataConstructor::getByteBackInserter() -> ByteBackInserter {
 }
 
 //----------------------------------------------------------------------------//
+std::size_t ByteDataConstructor::saveBytesSpace(std::size_t bytesCnt) {
+    if (_currBitFlag != std::byte{0b10000000}) {
+        throw BytesAfterBits("Tried saving bytes with bit flag != 0b10000000.");
+    }
+    auto ret = _data.size();
+    _data.resize(_data.size() + bytesCnt);
+    return ret;
+}
+
+//----------------------------------------------------------------------------//
 void ByteDataConstructor::_moveBitFlag() {
     _currBitFlag >>= 1;
     if (_currBitFlag == std::byte{0b00000000}) {

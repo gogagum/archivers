@@ -26,7 +26,7 @@ std::byte DataParser::takeByte() {
 
 //----------------------------------------------------------------------------//
 bool DataParser::takeBit() {
-    if (_dataIter == _data.end()) {
+    if (_dataIter >= _data.end()) {
         return false;
     }
     bool ret = (*_dataIter & _getByteFlag()) != std::byte{0};

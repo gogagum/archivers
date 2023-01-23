@@ -62,7 +62,7 @@ public:
      * @brief countNumberOfWords.
      * @return number of words.
      */
-    std::size_t getNumberOfWords() const;
+    std::size_t size() const;
 
     /**
      * @brief getTail
@@ -94,7 +94,7 @@ auto IntegerWordFlow<I, low, numBits>::end() const -> Iterator {
 
 //----------------------------------------------------------------------------//
 template <class I, I low, std::uint16_t numBits>
-std::size_t IntegerWordFlow<I, low, numBits>::getNumberOfWords() const {
+std::size_t IntegerWordFlow<I, low, numBits>::size() const {
     return _ints.size();
 }
 

@@ -57,12 +57,6 @@ public:
      */
     Count getTotalWordsCount() const;
 
-    /**
-     * @brief serialize
-     */
-    template <class DestT>
-    void serialize(DestT& dataConstructor) const;
-
 private:
 
     Count _getLowerCumulativeNumFound(Ord ord) const;
@@ -94,8 +88,8 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
-    const auto getLowerCumulNumFound_ = [this](Ord index) {
-        return _cumulativeWordCounts(index) * _ratio + index + 1;
+    const auto getLowerCumulNumFound_ = [this](Ord ord) {
+        return _getLowerCumulativeNumFound(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
@@ -110,12 +104,14 @@ auto AdaptiveDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(const WordT& word) -> ProbabilityStats {
+auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(
+        const WordT& word) -> ProbabilityStats {
     auto ord = WordT::ord(word);
     auto low = _getLowerCumulativeNumFound(ord);
-    auto ret = ProbabilityStats{ low, low + _wordCounts[ord] * _ratio + 1, getTotalWordsCount() };
+    auto high = low + _wordCounts[ord] * _ratio + 1;
+    auto total = getTotalWordsCount();
     _updateCumulativeNumWords(ord);
-    return ret;
+    return { low, high, total };
 }
 
 //----------------------------------------------------------------------------//
@@ -130,22 +126,10 @@ AdaptiveDictionary<WordT, CountT>::_updateCumulativeNumWords(Ord ord) {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-template <class DestT>
-void
-AdaptiveDictionary<WordT, CountT>::serialize(DestT& dataConstructor) const {
-    dataConstructor.putT(CountT(_ratio));
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
 auto
 AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
-    if (ord == Ord{0}) {
-        return 0;
-    } else {
-        return ord + _cumulativeWordCounts(ord - 1) * _ratio;
-    }
+    return ord + _cumulativeWordCounts(ord - 1) * _ratio;
 }
 
 

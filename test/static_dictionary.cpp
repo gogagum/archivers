@@ -3,16 +3,11 @@
 #include "dictionary/static_dictionary.hpp"
 #include "word/bytes_word.hpp"
 #include "word/bits_word.hpp"
-#include "dictionary/traits.hpp"
 #include "byte_data_constructor.hpp"
 
 using ga::dict::StaticDictionary;
 using ga::w::BytesWord;
 using ga::w::BitsWord;
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-static_assert(ga::dict::traits::needSerialize<StaticDictionary<BytesWord<1>>, ga::ByteDataConstructor>);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
