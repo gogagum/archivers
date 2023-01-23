@@ -13,11 +13,14 @@ namespace bpo = boost::program_options;
 
 using ga::fl::BytesWordFlow;
 using ga::w::BytesWord;
+using ga::w::UIntWord;
 using ga::dict::DecreasingCountDictionary;
+using ga::dict::DecreasingOnUpdateDictionary;
+
 using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDictionary = ga::dict::DecreasingOnUpdateDictionary<BytesWord<1>>;
-using ContentDictionary = ga::dict::DecreasingOnUpdateDictionary<BytesWord<1>>;
-using UIntWordsFlow = std::vector<ga::w::UIntWord<std::uint64_t>>;
+using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow,
                                         CountsDictionary,
@@ -49,12 +52,7 @@ int main(int argc, char* argv[]) {
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
-    } catch (const std::logic_error& error) {
-        std::cout << error.what() << std::endl;
-        return 1;
-    }
 
-    try {
         auto fileOpener = FileOpener(inFileName, outFileName);
         auto inFileBytes = fileOpener.getInData();
         auto wordFlow = BytesWordFlow<BytesWord<1>>(inFileBytes);
@@ -87,7 +85,7 @@ int main(int argc, char* argv[]) {
             dictWords.push_back(word);
         }
 
-        dataConstructor.putT<std::uint64_t>(countsWords.size());
+        dataConstructor.putT<std::uint64_t>(counts.size());
 
         auto dictWordsCountsBitsPosition
                 = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
@@ -95,11 +93,10 @@ int main(int argc, char* argv[]) {
         auto dictWordsBitsPosition
                 = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
 
-        auto contentWordsBitsPosition
+        auto contentWordsBitsCountPosition
                 = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
 
-        auto contentWordsCountBitsPosition
-                = dataConstructor.saveBytesSpace(sizeof(std::uint64_t));
+        dataConstructor.putT<std::uint64_t>(wordFlow.size());
 
         {
             auto countsDictionary = CountsDictionary(wordFlow.size());
@@ -127,10 +124,9 @@ int main(int argc, char* argv[]) {
             auto textDictionary = ContentDictionary(counts);
             auto contentCoder = ContentCoder(wordFlow, std::move(textDictionary));
 
-            auto [wordsCount, contentWordsBits] = contentCoder.encode(dataConstructor);
+            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor);
 
-            dataConstructor.putTToPosition(wordsCount, contentWordsCountBitsPosition);
-            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsPosition);
+            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPosition);
         }
     } catch (const std::runtime_error& error) {
         std::cout << error.what() << std::endl;
