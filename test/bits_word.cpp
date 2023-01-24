@@ -67,3 +67,21 @@ TEST(BitsWord, BitsOut) {
     }
 }
 
+//----------------------------------------------------------------------------//
+TEST(BitsWord, ByOrdOrd) {
+    auto arr = std::array<bool, 5>{true, false, false, true, true};
+    const auto word = BitsWord<5>(arr.begin());
+    const auto ord = BitsWord<5>::ord(word);
+
+    EXPECT_EQ(BitsWord<5>::byOrd(ord), word);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsWord, OrdByOrd) {
+    const auto ord = 42;
+    const auto word = BitsWord<7>::byOrd(ord);
+
+    EXPECT_EQ(BitsWord<7>::ord(word), ord);
+}
+
+
