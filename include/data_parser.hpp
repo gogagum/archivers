@@ -78,8 +78,6 @@ public:
 
     BitsIterator getEndBitsIter();
 
-    boost::iterator_range<BitsIterator> getCurrTailRange();
-
 private:
 
     void _moveInByteOffset();

@@ -92,8 +92,7 @@ bool BitsIterator<T>::dereference() const {
 //----------------------------------------------------------------------------//
 template <class T>
 bool BitsIterator<T>::equal(const type& other) const {
-    return &_iterated == &other._iterated
-        && _offset == other._offset;
+    return &_iterated == &other._iterated && _offset == other._offset;
 }
 
 

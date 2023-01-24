@@ -59,11 +59,6 @@ auto DataParser::getEndBitsIter() -> BitsIterator {
     return BitsIterator(*this, _data.size() * 8);
 }
 
-//----------------------------------------------------------------------------//
-auto DataParser::getCurrTailRange() -> boost::iterator_range<BitsIterator> {
-    return boost::make_iterator_range(getCurrPosBitsIter(), getEndBitsIter());
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 bool operator==(const DataParser& dp1, const DataParser& dp2) {
@@ -76,8 +71,7 @@ bool operator==(const DataParser& dp1, const DataParser& dp2) {
 //----------------------------------------------------------------------------//
 bool DataParser::BitsIterator::dereference() const {
     _owner->seek(_bitsPosition);
-    bool retBit = _owner->takeBit();
-    return retBit;
+    return _owner->takeBit();
 }
 
 //----------------------------------------------------------------------------//

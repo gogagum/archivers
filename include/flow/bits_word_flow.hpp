@@ -31,7 +31,7 @@ public:
      * @brief BitsWordFlow constructor from span.
      * @param data - bytes to create words.
      */
-    BitsWordFlow(std::span<const std::byte> data);
+    BitsWordFlow(std::span<const std::byte> data) : _data(data) {}
 
     /**
      * @brief begin - get iterator to begin.
@@ -49,7 +49,8 @@ public:
      * @brief getNumberOfWords - get number of words in data.
      * @return number of words.
      */
-    std::size_t size() const;
+    std::size_t
+    size() const { return _data.getNumBytes() * 8 / numBits; }
 
     /**
      * @brief getTail get tail bits.
@@ -64,11 +65,6 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-BitsWordFlow<_numBits>::BitsWordFlow(std::span<const std::byte> data)
-    : _data(data) {}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
 auto BitsWordFlow<_numBits>::begin() const -> Iterator {
     _data.seek(0);
     return Iterator(_data.getCurrPosBitsIter());
@@ -79,12 +75,6 @@ template <std::uint16_t _numBits>
 auto BitsWordFlow<_numBits>::end() const -> Iterator {
     _data.seek(size() * _numBits);
     return Iterator(_data.getCurrPosBitsIter());
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-std::size_t BitsWordFlow<_numBits>::size() const {
-    return _data.getNumBytes() * 8 / numBits;
 }
 
 //----------------------------------------------------------------------------//
@@ -105,39 +95,26 @@ class BitsWordFlow<_numBits>::Iterator : public bi::iterator_facade<
 > {
 public:
     using type = Iterator;
+private:
+    using BitsIterator = DataParser::BitsIterator;
 public:
     //------------------------------------------------------------------------//
-    Iterator(DataParser::BitsIterator bitsIteratar)
-        : _bitsIterator(bitsIteratar) {}
+    Iterator(BitsIterator bitsIteratar) : _bitsIter(bitsIteratar) {}
 protected:
     //------------------------------------------------------------------------//
-    _Word dereference() const;
+    _Word dereference() const
+    { return { const_cast<BitsIterator&>(_bitsIter) }; }
     //------------------------------------------------------------------------//
-    bool equal(const type& other) const;
+    bool equal(const type& other) const
+    { return _bitsIter == other._bitsIter; }
     //------------------------------------------------------------------------//
-    void increment()                    { }
+    void increment()               { }
 private:
-    DataParser::BitsIterator _bitsIterator;
+    BitsIterator _bitsIter;
 private:
     friend class boost::iterators::iterator_core_access;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-auto
-BitsWordFlow<_numBits>::Iterator::dereference() const -> _Word {
-    return w::BitsWord<_numBits>(
-                const_cast<DataParser::BitsIterator&>(_bitsIterator));
 }
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-bool BitsWordFlow<_numBits>::Iterator::equal(const Iterator& other) const {
-    return _bitsIterator == other._bitsIterator;
-}
-
-}
-
 
 #endif // BIT_WORD_FLOW_HPP

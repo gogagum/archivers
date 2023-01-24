@@ -11,6 +11,8 @@
 
 namespace ga::w{
 
+namespace rng = std::ranges;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWord class
 ///
@@ -53,14 +55,7 @@ public:
      * @param inputIter - input iterator to take bits form.
      */
     template <std::input_iterator IterT>
-    explicit BitsWord(IterT& inputIter);
-
-    /**
-     * @brief BitsWord - constructor from bits input iterator.
-     * @param inputIter - input iterator to take bits form.
-     */
-    template <std::input_iterator IterT>
-    explicit BitsWord(IterT&& inputIter);
+    BitsWord(IterT inputIter) { std::copy_n(inputIter, _numBits, _bits.begin()); }
 
     /**
      * @brief bitsOut - give bits of a word out.
@@ -69,10 +64,7 @@ public:
     template <std::output_iterator<bool> IterT>
     void bitsOut(IterT outIter) const;
 
-private:
-    std::array<bool, numBits> _bits;
-
-private:
+public:
 
     /**
      * @brief operator == check if two symbols are equal.
@@ -88,6 +80,11 @@ private:
      */
     friend bool operator!=(const BitsWord& bs1, const BitsWord& bs2) = default;
 
+private:
+    std::array<bool, numBits> _bits;
+
+private:
+
     /**
      * @brief operator <<  for debug output.
      * @param os - output stream.
@@ -98,24 +95,6 @@ private:
     template <std::uint16_t __numBits>
     friend std::ostream& operator<<(std::ostream& os, BitsWord<__numBits> word);
 };
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief operator ==
-/// \param bw1 - first compared bit symbol.
-/// \param bw2 - second compared bit symbol.
-/// \return `true if symbols are equal, else `false.
-///
-template <std::uint16_t numBits>
-bool operator==(const BitsWord<numBits>& bw1, const BitsWord<numBits>& bw2);
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief operator ==
-/// \param bw1 - first compared bit symbol.
-/// \param bw2 - second compared bit symbol.
-/// \return `true if symbols are not equal, else `false.
-///
-template <std::uint16_t numBits>
-bool operator!=(const BitsWord<numBits>& bw1, const BitsWord<numBits>& bw2);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
@@ -151,26 +130,6 @@ BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT& iter) {
-    for (auto& bit : _bits) {
-        bit = *iter;
-        ++iter;
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-template <std::input_iterator IterT>
-BitsWord<_numBits>::BitsWord(IterT&& iter) {
-    for (auto& bit : _bits) {
-        bit = *iter;
-        ++iter;
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
 template <std::output_iterator<bool> IterT>
 void BitsWord<_numBits>::bitsOut(IterT outIter) const {
     std::ranges::copy(_bits, outIter);
@@ -180,9 +139,7 @@ void BitsWord<_numBits>::bitsOut(IterT outIter) const {
 //----------------------------------------------------------------------------//
 template <std::uint16_t numBits>
 std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw) {
-    for (auto bit: bw._bits) {
-        os << bit;
-    }
+    std::ranges::for_each(bw._bits, [&](auto bit) { os << (bit ? 1 : 0); });
     return os;
 }
 

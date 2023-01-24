@@ -176,31 +176,3 @@ TEST(DataParser, EqCompare2) {
 
     EXPECT_NE(p0, p1);
 }
-
-//----------------------------------------------------------------------------//
-TEST(DataParser, IterateThroughTail0) {
-    auto testData = std::array{std::byte{0b00110101}};
-    auto parser = ga::DataParser(testData);
-    for ([[maybe_unused]] auto _: boost::irange(0, 5)) {
-        parser.takeBit();
-    }
-    std::vector<bool> testBits;
-    for (auto tailBit: parser.getCurrTailRange()) {
-        testBits.push_back(tailBit);
-    }
-    auto expectedTail = std::vector{true, false, true};
-    EXPECT_EQ(testBits, expectedTail);
-}
-
-//----------------------------------------------------------------------------//
-TEST(DataParser, IterateThroughTail1) {
-    auto testData = std::array{std::byte{0b00110101}, std::byte{0b00011101}};
-    auto parser = ga::DataParser(testData);
-    for ([[maybe_unused]] auto _: boost::irange(0, 12)) {
-        parser.takeBit();
-    }
-    std::vector<bool> testBits;
-    boost::range::copy(parser.getCurrTailRange(), std::back_inserter(testBits));
-    auto expectedTail = std::vector{true, true, false, true};
-    EXPECT_EQ(testBits, expectedTail);
-}
