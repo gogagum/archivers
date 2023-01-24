@@ -68,7 +68,7 @@ auto DecreasingCountDictionary<CountT>::getWord(
     if (cumulativeNumFound > _currentCount) {
         throw NonDecreasingWord();
     }
-    return Word(cumulativeNumFound);
+    return Word(cumulativeNumFound + 1);
 }
 
 //----------------------------------------------------------------------------//
@@ -79,7 +79,7 @@ auto DecreasingCountDictionary<CountT>::getProbabilityStats(
     if (ord > _currentCount) {
         throw NonDecreasingWord();
     }
-    auto ret = ProbabilityStats{ ord, ord + 1, _currentCount };
+    auto ret = ProbabilityStats{ ord - 1, ord, _currentCount };
     _currentCount = ord;
     return ret;
 }

@@ -25,11 +25,11 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT, std::uint16_t rangeBits>
+template <class DictT, std::uint16_t rangeBits>
 class ArithmeticDecoder : RangesCalc<rangeBits> {
 public:
     using Source = DataParser;
-    using Ret = std::vector<SymT>;
+    using Ret = std::vector<typename DictT::Word>;
 
 public:
 
@@ -57,16 +57,16 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, std::uint16_t rangeBits>
-ArithmeticDecoder<SymT, DictT, rangeBits>::ArithmeticDecoder(DictT&& dict)
+template <class DictT, std::uint16_t rangeBits>
+ArithmeticDecoder<DictT, rangeBits>::ArithmeticDecoder(DictT&& dict)
     : _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, std::uint16_t rangeBits>
+template <class DictT, std::uint16_t rangeBits>
 auto
-ArithmeticDecoder<SymT, DictT, rangeBits>::decode(Source& source,
-                                       std::size_t wordsCount,
-                                       std::size_t bitsLimit) -> Ret {
+ArithmeticDecoder<DictT, rangeBits>::decode(Source& source,
+                                            std::size_t wordsCount,
+                                            std::size_t bitsLimit) -> Ret {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;

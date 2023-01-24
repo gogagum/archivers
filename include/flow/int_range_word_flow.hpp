@@ -13,11 +13,11 @@ namespace ga::fl {
 ///
 template <class I, I low, std::uint16_t numBits>
 class IntegerWordFlow {
+private:
+    using _Word = w::IntegerWord<I, low, numBits>;
+    using _Ord = typename _Word::Ord;
 public:
     using Tail = boost::container::static_vector<bool, numBits>;
-    using Word = w::IntegerWord<I, low, numBits>;
-    using Ord = typename Word::Ord;
-    static constexpr std::uint8_t numBytes = (numBits - 1) / 8 + 1;
 public:
 
     ////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ public:
         Iterator operator++(int);
         bool operator==(const Iterator& other) const = default;
         bool operator!=(const Iterator& other) const = default;
-        w::IntegerWord<I,  low, numBits> operator*() const;
+        _Word operator*() const;
     private:
         typename std::vector<I>::const_iterator _iter;
     private:

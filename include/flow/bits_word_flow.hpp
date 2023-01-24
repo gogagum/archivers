@@ -11,17 +11,17 @@
 
 namespace ga::fl {
 
-template <class WordT>
-class BitsWordFlow;
+namespace bi = boost::iterators;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWordFlow class
 ///
 template <std::uint16_t _numBits>
-class BitsWordFlow<w::BitsWord<_numBits>> {
+class BitsWordFlow {
+private:
+    using _Word = ga::w::BitsWord<_numBits>;
 public:
-    using Word = w::BitsWord<_numBits>;
-    constexpr static std::uint16_t numBits = Word::numBits;
+    constexpr static std::uint16_t numBits = w::BitsWord<_numBits>::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
 private:
     class Iterator;
@@ -37,13 +37,13 @@ public:
      * @brief begin - get iterator to begin.
      * @return iterator to first word for output.
      */
-    Iterator begin();
+    Iterator begin() const;
 
     /**
      * @brief end - get iterator to end.
      * @return itearator word after last word for output.
      */
-    Iterator end();
+    Iterator end() const;
 
     /**
      * @brief getNumberOfWords - get number of words in data.
@@ -64,32 +64,32 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-BitsWordFlow<w::BitsWord<_numBits>>::BitsWordFlow(std::span<const std::byte> data)
+BitsWordFlow<_numBits>::BitsWordFlow(std::span<const std::byte> data)
     : _data(data) {}
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-auto BitsWordFlow<w::BitsWord<_numBits>>::begin() -> Iterator {
+auto BitsWordFlow<_numBits>::begin() const -> Iterator {
     _data.seek(0);
     return Iterator(_data.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-auto BitsWordFlow<w::BitsWord<_numBits>>::end() -> Iterator {
+auto BitsWordFlow<_numBits>::end() const -> Iterator {
     _data.seek(size() * _numBits);
     return Iterator(_data.getCurrPosBitsIter());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-std::size_t BitsWordFlow<w::BitsWord<_numBits>>::size() const {
+std::size_t BitsWordFlow<_numBits>::size() const {
     return _data.getNumBytes() * 8 / numBits;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-auto BitsWordFlow<w::BitsWord<_numBits>>::getTail() const -> Tail {
+auto BitsWordFlow<_numBits>::getTail() const -> Tail {
      _data.seek(size() * _numBits);
      return Tail(_data.getCurrPosBitsIter(), _data.getEndBitsIter());
 }
@@ -97,13 +97,12 @@ auto BitsWordFlow<w::BitsWord<_numBits>>::getTail() const -> Tail {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-class BitsWordFlow<w::BitsWord<_numBits>>::Iterator
-        : public boost::iterators::iterator_facade<
-            Iterator,
-            Word,
-            boost::single_pass_traversal_tag,
-            Word
-        > {
+class BitsWordFlow<_numBits>::Iterator : public bi::iterator_facade<
+    Iterator,
+    _Word,
+    boost::single_pass_traversal_tag,
+    _Word
+> {
 public:
     using type = Iterator;
 public:
@@ -112,7 +111,7 @@ public:
         : _bitsIterator(bitsIteratar) {}
 protected:
     //------------------------------------------------------------------------//
-    Word dereference() const;
+    _Word dereference() const;
     //------------------------------------------------------------------------//
     bool equal(const type& other) const;
     //------------------------------------------------------------------------//
@@ -127,14 +126,15 @@ private:
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto
-BitsWordFlow<w::BitsWord<_numBits>>::Iterator::dereference() const -> Word {
-    return Word(const_cast<DataParser::BitsIterator&>(_bitsIterator));
+BitsWordFlow<_numBits>::Iterator::dereference() const -> _Word {
+    return w::BitsWord<_numBits>(
+                const_cast<DataParser::BitsIterator&>(_bitsIterator));
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 bool
-BitsWordFlow<w::BitsWord<_numBits>>::Iterator::equal(
+BitsWordFlow<_numBits>::Iterator::equal(
         const Iterator& other) const {
     return _bitsIterator == other._bitsIterator;
 }

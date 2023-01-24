@@ -19,7 +19,7 @@ constexpr static const std::uint16_t rangeNumBits = 60;
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
-using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
+using BytesFlow = ga::fl::BytesWordFlow<numBytes>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
@@ -31,11 +31,11 @@ using BytesCoder = ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, ran
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint8_t numBytes>
-using BytesDecoder = ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, rangeNumBits>;
+using BytesDecoder = ArithmeticDecoder<BytesDict<numBytes>, rangeNumBits>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsFlow = ga::fl::BitsWordFlow<BitsWord<numBits>>;
+using BitsFlow = ga::fl::BitsWordFlow<numBits>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
@@ -47,6 +47,6 @@ using BitsCoder = ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, rangeNum
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsDecoder = ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, rangeNumBits>;
+using BitsDecoder = ArithmeticDecoder<BitsDict<numBits>, rangeNumBits>;
 
 #endif // ARITHMETIC_D_ARCHIEVER_INCLUDE_HPP

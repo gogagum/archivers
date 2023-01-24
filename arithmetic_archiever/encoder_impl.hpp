@@ -17,8 +17,8 @@ struct FileBytesAdaptiveEncodeImpl {
         encoded.putT<std::uint16_t>(bytesNum * 8);
         encoded.putT<std::uint16_t>(tail.size());
         encoded.putT<std::uint64_t>(ratio);
-        const auto wordsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
-        const auto bitsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
+        const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         auto [wordsCount, bitsCount] = coder.encode(encoded);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
@@ -40,8 +40,8 @@ struct FileBitsAdaptiveEncodeImpl {
         encoded.putT<std::uint16_t>(bitsNum);
         encoded.putT<std::uint16_t>(tail.size());
         encoded.putT<std::uint64_t>(ratio);
-        const auto wordsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
-        const auto bitsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
+        const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         auto [wordsCount, bitsCount] = coder.encode(encoded);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
