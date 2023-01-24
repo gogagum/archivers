@@ -7,8 +7,7 @@ namespace ga {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-ByteDataConstructor::ByteDataConstructor()
-    : _currBitFlag{0b10000000} {}
+ByteDataConstructor::ByteDataConstructor() : _currBitFlag{0b10000000} {}
 
 //----------------------------------------------------------------------------//
 void ByteDataConstructor::putBit(bool bit) {
@@ -25,9 +24,7 @@ void ByteDataConstructor::putBit(bool bit) {
 
 //----------------------------------------------------------------------------//
 void ByteDataConstructor::putBitsRepeat(bool bit, std::size_t num) {
-    for ([[maybe_unused]] auto _ : boost::irange<std::size_t>(0, num)) {
-        putBit(bit);
-    }
+    std::fill_n(getBitBackInserter(), num, bit);
 }
 
 //----------------------------------------------------------------------------//
@@ -42,9 +39,7 @@ void ByteDataConstructor::putByte(std::byte b) {
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(b);
     } else {
-        for (auto bit: impl::make_bits_iterator_range(b)) {
-            putBit(bit);
-        }
+        std::copy_n(impl::bits_begin(b), 8, getBitBackInserter());
     }
 }
 

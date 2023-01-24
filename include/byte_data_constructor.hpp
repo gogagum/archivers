@@ -136,9 +136,9 @@ public:
 public:
     ByteBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
     ByteBackInserter operator++(int) { return* this; }
-    ByteBackInserter& operator++() { return *this; }
-    void operator=(std::byte byte) { _owner->putByte(byte); }
-    ByteBackInserter& operator*() { return* this; }
+    ByteBackInserter& operator++()   { return *this; }
+    void operator=(std::byte byte)   { _owner->putByte(byte); }
+    ByteBackInserter& operator*()    { return* this; }
 private:
     ByteDataConstructor* _owner;
 };
@@ -152,9 +152,9 @@ public:
 public:
     BitBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
     BitBackInserter operator++(int) { return* this; }
-    BitBackInserter& operator++() { return *this; }
-    void operator=(bool bit) { _owner->putBit(bit); }
-    BitBackInserter& operator*() { return *this; }
+    BitBackInserter& operator++()   { return *this; }
+    void operator=(bool bit)        { _owner->putBit(bit); }
+    BitBackInserter& operator*()    { return *this; }
     ByteBackInserter getBytesIter() { return _owner->getByteBackInserter(); }
 private:
     ByteDataConstructor* _owner;

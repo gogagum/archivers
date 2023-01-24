@@ -135,8 +135,15 @@ public:
     //------------------------------------------------------------------------//
     void increment()                    { ++_bitsPosition; }
     //------------------------------------------------------------------------//
-    BitsIterator operator+(std::size_t offset) {
+    BitsIterator
+    operator+(std::size_t offset) {
         return BitsIterator(*_owner, _bitsPosition + offset);
+    }
+    //------------------------------------------------------------------------//
+    BitsIterator&
+    operator+=(std::size_t offset) {
+        _bitsPosition += offset;
+        return *this;
     }
 private:
     DataParser* _owner;

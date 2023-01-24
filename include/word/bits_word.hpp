@@ -3,11 +3,14 @@
 
 #include <array>
 #include <algorithm>
+#include <numeric>
 #include <boost/range/irange.hpp>
 #include <cstddef>
 #include <ostream>
 #include <concepts>
 #include <cstdint>
+
+#include "bits_iterator.hpp"
 
 namespace ga::w{
 
@@ -109,22 +112,15 @@ std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw);
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 auto BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) -> Ord {
-    auto ret = std::uint64_t{0};
-    for (auto bit : bw._bits) {
-        ret <<= 1;
-        ret |= bit ? std::uint64_t{1} : std::uint64_t{0};
-    }
-    return ret;
+    return std::accumulate(
+        bw._bits.begin(), bw._bits.end(), std::uint64_t{0},
+        [](auto curr, bool bit) { return (curr << 1) | std::uint64_t(bit); });
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
 BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
-    BitsWord<_numBits> ret;
-    for (auto i : boost::irange<std::uint16_t>(0, _numBits)) {
-        ret._bits[i] = (ord >> (numBits - i - 1)) & 1;
-    }
-    return ret;
+    return BitsWord<_numBits>(ga::impl::bits_end(ord) - _numBits);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

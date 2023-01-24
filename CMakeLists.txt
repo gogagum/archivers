@@ -39,7 +39,6 @@ add_library(encoding_lib STATIC
     include/word/bytes_word.hpp
     include/word/bits_word.hpp
     include/word/integer_word.hpp
-    include/word/word_ord_comp.hpp
     include/word/uint_word.hpp
 )
 

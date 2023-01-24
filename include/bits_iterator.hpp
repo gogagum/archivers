@@ -50,6 +50,9 @@ private:
     friend class boost::iterators::iterator_core_access;
 };
 
+template <class T>
+using ReverseBitsIterator = std::reverse_iterator<BitsIterator<T>>;
+
 //----------------------------------------------------------------------------//
 template <class T>
 BitsIterator<T> bits_begin(const T& t) {
@@ -60,6 +63,18 @@ BitsIterator<T> bits_begin(const T& t) {
 template <class T>
 BitsIterator<T> bits_end(const T& t) {
     return BitsIterator(t);
+}
+
+//----------------------------------------------------------------------------//
+template <class T>
+ReverseBitsIterator<T> bits_rbegin(const T& t) {
+    return std::make_reverse_iterator(bits_begin(t));
+}
+
+//----------------------------------------------------------------------------//
+template <class T>
+BitsIterator<T> bits_rend(const T& t) {
+    return std::make_reverse_iterator(bits_end(t));
 }
 
 //----------------------------------------------------------------------------//

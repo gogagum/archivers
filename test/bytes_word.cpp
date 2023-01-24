@@ -5,11 +5,10 @@
 #include <boost/range/combine.hpp>
 
 #include "word/bytes_word.hpp"
-#include "word/word_ord_comp.hpp"
 #include "byte_data_constructor.hpp"
 
 using ga::w::BytesWord;
-using ga::w::WordOrdComp;
+//using ga::w::WordOrdComp;
 
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -42,9 +41,7 @@ TEST(BytesSymbol, BytesSymbolsOrder1) {
     auto sym1 = BytesWord<2>(testData1.data());
     auto sym2 = BytesWord<2>(testData2.data());
 
-    auto comp = ga::w::WordOrdComp<BytesWord<2>>();
-
-    ASSERT_TRUE(comp(sym1, sym2));
+    ASSERT_TRUE(BytesWord<2>::ord(sym1) < BytesWord<2>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
@@ -55,9 +52,7 @@ TEST(BytesSymbol, BytesSymbolsOrder2) {
     auto sym1 = BytesWord<1>(testData1.data());
     auto sym2 = BytesWord<1>(testData2.data());
 
-    auto comp = ga::w::WordOrdComp<BytesWord<1>>();
-
-    ASSERT_TRUE(comp(sym1, sym2));
+    ASSERT_TRUE(BytesWord<1>::ord(sym1) < BytesWord<1>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
@@ -68,9 +63,7 @@ TEST(BytesSymbol, BytesSymbolsOrder3) {
     auto sym1 = BytesWord<1>(testData1);
     auto sym2 = BytesWord<1>(testData2);
 
-    auto comp = ga::w::WordOrdComp<BytesWord<1>>();
-
-    ASSERT_FALSE(comp(sym1, sym2));
+    ASSERT_FALSE(BytesWord<1>::ord(sym1) < BytesWord<1>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
@@ -81,54 +74,7 @@ TEST(BytesSymbol, BytesSymbolsOrder4) {
     auto sym1 = BytesWord<2>(testData1);
     auto sym2 = BytesWord<2>(testData2);
 
-    auto comp = WordOrdComp<BytesWord<2>>();
-
-    ASSERT_FALSE(comp(sym1, sym2));
-}
-
-//----------------------------------------------------------------------------//
-TEST(BytesSymbol, BytesSymbolsInMap) {
-    using MapToInt64 = std::map<BytesWord<1>, std::int64_t, WordOrdComp<BytesWord<1>>>;
-
-    auto testData1 = std::array{ std::byte{0b00000000} };
-    auto testData2 = std::array{ std::byte{0b11111111} };
-
-    auto sym1 = BytesWord<1>(testData1);
-    auto sym2 = BytesWord<1>(testData2);
-
-    auto m = MapToInt64();
-
-    m[sym1] = 37;
-    m[sym2] = 42;
-
-    EXPECT_EQ(m.size(), 2);
-    EXPECT_EQ(m[sym1], 37);
-    EXPECT_EQ(m.lower_bound(sym1)->second, 37);
-    EXPECT_EQ(m.upper_bound(sym1)->second, 42);
-}
-
-//----------------------------------------------------------------------------//
-TEST(BytesSymbol, BytesSymbolsInMapUpperBoundOfSymNotInMap) {
-    using MapToInt64 =
-        std::map<BytesWord<1>, std::int64_t, WordOrdComp<BytesWord<1>>>;
-
-    auto testData1 = std::array{ std::byte{0b00000000} };
-    auto testData2 = std::array{ std::byte{0b00001111} };
-    auto testData3 = std::array{ std::byte{0b11111111} };
-
-    auto sym1 = BytesWord<1>(testData1);
-    auto sym2 = BytesWord<1>(testData2);
-    auto sym3 = BytesWord<1>(testData3);
-
-    auto m = MapToInt64();
-
-    m[sym1] = 37;
-    m[sym3] = 42;
-
-    EXPECT_EQ(m.size(), 2);
-
-    EXPECT_EQ(m.lower_bound(sym2)->second, 42);
-    EXPECT_EQ(m.upper_bound(sym2)->second, 42);
+    ASSERT_FALSE(BytesWord<2>::ord(sym1) < BytesWord<2>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//

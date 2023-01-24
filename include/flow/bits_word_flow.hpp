@@ -102,13 +102,11 @@ public:
     Iterator(BitsIterator bitsIteratar) : _bitsIter(bitsIteratar) {}
 protected:
     //------------------------------------------------------------------------//
-    _Word dereference() const
-    { return { const_cast<BitsIterator&>(_bitsIter) }; }
+    _Word dereference() const           { return _Word(_bitsIter); }
     //------------------------------------------------------------------------//
-    bool equal(const type& other) const
-    { return _bitsIter == other._bitsIter; }
+    bool equal(const type& other) const { return _bitsIter == other._bitsIter; }
     //------------------------------------------------------------------------//
-    void increment()               { }
+    void increment()                    { _bitsIter += _numBits; }
 private:
     BitsIterator _bitsIter;
 private:

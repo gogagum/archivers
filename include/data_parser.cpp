@@ -76,8 +76,7 @@ bool DataParser::BitsIterator::dereference() const {
 
 //----------------------------------------------------------------------------//
 bool DataParser::BitsIterator::equal(const type& other) const {
-    return _owner == other._owner
-        && _bitsPosition == other._bitsPosition;
+    return _owner == other._owner && _bitsPosition == other._bitsPosition;
 }
 
 }  // namespace ga
