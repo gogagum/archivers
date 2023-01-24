@@ -33,7 +33,6 @@ add_library(encoding_lib STATIC
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
-    include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
     include/flow/traits.hpp
@@ -91,7 +90,6 @@ add_executable(archiever_tests
     test/data_parser.cpp
     test/adaptive_dictionary.cpp
     test/integer_word.cpp
-    test/integer_word_flow.cpp
     test/static_dictionary.cpp
     test/uniform_dictionary.cpp
     test/adaptive_dictionary.cpp

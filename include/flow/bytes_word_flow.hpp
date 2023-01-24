@@ -36,19 +36,20 @@ public:
      * @brief begin - beginning iterator getter.
      * @return beginning iterator.
      */
-    Iterator begin() const;
+    [[nodiscard]] Iterator begin() const { return Iterator(_bytes.data()); }
 
     /**
      * @brief end - ending iterator getter.
      * @return ending iterator.
      */
-    Iterator end() const;
+    [[nodiscard]] Iterator
+    end() const { return Iterator(_bytes.data() + size() * numBytes); }
 
     /**
      * @brief countNumberOfWords.
      * @return number of words.
      */
-    std::size_t size() const;
+    [[nodiscard]] std::size_t size() const { return _bytes.size() / numBytes; }
 
     /**
      * @brief getTail
@@ -72,24 +73,6 @@ BytesWordFlow<numBytes>::BytesWordFlow(
         std::span<const std::byte> bytes) : _bytes(bytes) {}
 
 //----------------------------------------------------------------------------//
-template<std::uint8_t numBytes>
-auto BytesWordFlow<numBytes>::begin() const -> Iterator {
-    return Iterator(_bytes.data());
-}
-
-//----------------------------------------------------------------------------//
-template<std::uint8_t numBytes>
-auto BytesWordFlow<numBytes>::end() const -> Iterator {
-    return Iterator(_bytes.data() + size() * numBytes);
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-std::size_t BytesWordFlow<numBytes>::size() const {
-    return _bytes.size() / numBytes;
-}
-
-//----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 std::uint8_t BytesWordFlow<numBytes>::_getTailBytesSize() const {
     return _bytes.size() % numBytes;
@@ -99,8 +82,7 @@ std::uint8_t BytesWordFlow<numBytes>::_getTailBytesSize() const {
 template <std::uint8_t numBytes>
 auto BytesWordFlow<numBytes>::getTail() const -> Tail {
     Tail ret;
-    auto bytesRng = std::span<const std::byte>(_bytes.end() - _getTailBytesSize(),
-                                               _bytes.end());
+    auto bytesRng = std::span(_bytes.end() - _getTailBytesSize(), _bytes.end());
 
     for (auto tailByte: bytesRng) {
         ret.insert(ret.end(),

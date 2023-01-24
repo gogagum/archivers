@@ -49,7 +49,7 @@ public:
      * @brief getTotalWordsCount - current number of words.
      * @return number of words. In fact, it is last decoded/encoded word.
      */
-    [[nodiscard]] Count getTotalWordsCount() const;
+    [[nodiscard]] Count getTotalWordsCount() const { return _currentCount; };
 
 private:
     Count _currentCount;
@@ -82,12 +82,6 @@ auto DecreasingCountDictionary<CountT>::getProbabilityStats(
     auto ret = ProbabilityStats{ ord - 1, ord, _currentCount };
     _currentCount = ord;
     return ret;
-}
-
-//----------------------------------------------------------------------------//
-template <typename CountT>
-auto DecreasingCountDictionary<CountT>::getTotalWordsCount() const -> Count {
-    return _currentCount;
 }
 
 }

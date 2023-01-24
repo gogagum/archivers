@@ -60,13 +60,13 @@ public:
      * @brief getNumBytes - get number of bytes parsed.
      * @return number of bytes.
      */
-    std::size_t getNumBytes() const;
+    std::size_t getNumBytes() const { return _data.size(); }
 
     /**
      * @brief getNumBits - get number of bits.
      * @return number of bits.
      */
-    std::size_t getNumBits() const;
+    std::size_t getNumBits() const { return _data.size() * 8; }
 
     /**
      * @brief seek move to bitsOffset position.
@@ -84,7 +84,8 @@ private:
 
     void _moveInByteOffset();
 
-    std::byte _getByteFlag() const;
+    std::byte
+    _getByteFlag() const { return std::byte{0b10000000} >> _inByteOffset; }
 
 private:
 

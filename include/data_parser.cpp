@@ -44,21 +44,6 @@ void DataParser::_moveInByteOffset() {
 }
 
 //----------------------------------------------------------------------------//
-std::byte DataParser::_getByteFlag() const {
-    return std::byte{0b10000000} >> _inByteOffset;
-}
-
-//----------------------------------------------------------------------------//
-std::size_t DataParser::getNumBytes() const {
-    return _data.size();
-}
-
-//----------------------------------------------------------------------------//
-std::size_t DataParser::getNumBits() const {
-    return _data.size() * 8;
-}
-
-//----------------------------------------------------------------------------//
 void DataParser::seek(std::size_t bitsOffset) {
     _dataIter = _data.begin() + bitsOffset / 8;
     _inByteOffset = bitsOffset % 8;
@@ -83,6 +68,7 @@ auto DataParser::getCurrTailRange() -> boost::iterator_range<BitsIterator> {
 //----------------------------------------------------------------------------//
 bool operator==(const DataParser& dp1, const DataParser& dp2) {
     return dp1._data.data() == dp2._data.data()
+            && dp1._data.size() == dp2._data.size()
             && dp1._dataIter == dp2._dataIter;
 }
 

@@ -133,9 +133,7 @@ BitsWordFlow<_numBits>::Iterator::dereference() const -> _Word {
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-bool
-BitsWordFlow<_numBits>::Iterator::equal(
-        const Iterator& other) const {
+bool BitsWordFlow<_numBits>::Iterator::equal(const Iterator& other) const {
     return _bitsIterator == other._bitsIterator;
 }
 
