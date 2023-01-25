@@ -3,8 +3,11 @@
 
 #include <cstdint>
 #include <iostream>
+#include <boost/multiprecision/cpp_int.hpp>
 
 namespace ga {
+
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
@@ -26,6 +29,9 @@ public:
 public:
 
     static Range recalcRange(Range r);
+
+    static Range rangeFromStatsAndPrev(
+            Range r, Count low, Count high, Count total);
 
 };
 
@@ -49,6 +55,24 @@ auto RangesCalc::recalcRange(Range r) -> Range {
     }
     return r;
 }
+
+//----------------------------------------------------------------------------//
+auto RangesCalc::rangeFromStatsAndPrev(
+        Range r, Count low, Count high, Count total) -> Range {
+    const auto range128 = bm::uint128_t(r.high - r.low);
+    const auto low128 = bm::uint128_t(low);
+    const auto high128 = bm::uint128_t(high);
+    const auto total128 = bm::uint128_t(total);
+
+    const auto lowScaled128 = (range128 * low128) / total128;
+    const auto highScaled128 = ((range128 * high128) / total128);
+
+    return {
+        r.low + lowScaled128.convert_to<std::uint64_t>(),
+        r.low + highScaled128.convert_to<std::uint64_t>()
+    };
+}
+
 
 }
 

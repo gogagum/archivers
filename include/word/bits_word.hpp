@@ -65,7 +65,7 @@ public:
      * @param outIter - outPut bits iterator to erite bits.
      */
     template <std::output_iterator<bool> IterT>
-    void bitsOut(IterT outIter) const;
+    void bitsOut(IterT outIter) const { std::ranges::copy(_bits, outIter); }
 
 public:
 
@@ -122,14 +122,6 @@ auto BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) -> Ord {
 template <std::uint16_t _numBits>
 BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
     return BitsWord<_numBits>(ga::impl::bits_end(ord) - _numBits);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-template <std::output_iterator<bool> IterT>
-void BitsWord<_numBits>::bitsOut(IterT outIter) const {
-    std::ranges::copy(_bits, outIter);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

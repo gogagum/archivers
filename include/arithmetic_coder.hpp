@@ -3,22 +3,14 @@
 #ifndef ARITHMETIC_CODER_HPP
 #define ARITHMETIC_CODER_HPP
 
-#include <map>
 #include <iostream>
-#include <vector>
-#include <cassert>
 #include <cstdint>
-#include <bitset>
-#include <boost/range/combine.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 
 #include "flow/traits.hpp"
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
-
-namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
@@ -85,17 +77,8 @@ auto ArithmeticCoder<FlowT, DictT>::encode(
             lastPercent = currPercent;
         }
 
-        const auto range = bm::uint128_t(currRange.high - currRange.low);
         const auto [low, high, total] = _dict.getProbabilityStats(sym);
-
-        const auto low128 = bm::uint128_t(low);
-        const auto high128 = bm::uint128_t(high);
-        const auto total128 = bm::uint128_t(total);
-
-        currRange = OrdRange {
-            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
-        };
+        currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {
             if (currRange.high <= RC::half) {

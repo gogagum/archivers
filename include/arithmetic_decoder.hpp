@@ -4,23 +4,16 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 
 #include <iostream>
-#include <map>
 #include <cstdint>
-#include <cstddef>
-#include <cstring>
-#include <algorithm>
 #include <limits>
+#include <vector>
 
 #include "data_parser.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
-
-namespace bc = boost::container;
-namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
@@ -94,27 +87,17 @@ ArithmeticDecoder<DictT>::decode(Source& source,
             lastPercent = currPercent;
         }
 
-        const auto range = currRange.high - currRange.low;
-        const auto range128 = bm::uint128_t(range);
+        const auto range128 = bm::uint128_t(currRange.high - currRange.low);
         const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCnt());
         const auto offset128 = bm::uint128_t(value - currRange.low + 1);
 
-        const auto aux =
-                ((offset128 * dictTotalWords128 - 1) / range128).template convert_to<std::uint64_t>();
-
+        const auto aux128 = (offset128 * dictTotalWords128 - 1) / range128;
+        const auto aux = aux128.convert_to<std::uint64_t>();
         const auto sym = _dict.getWord(aux);
         ret.push_back(sym);
 
         auto [low, high, total] = _dict.getProbabilityStats(sym);
-
-        const auto low128 = bm::uint128_t(low);
-        const auto high128 = bm::uint128_t(high);
-        const auto total128 = bm::uint128_t(total);
-
-        currRange = OrdRange {
-            currRange.low + ((range128 * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range128 * high128) / total128).template convert_to<std::uint64_t>()
-        };
+        currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {
             if (currRange.high <= RC::half) {
