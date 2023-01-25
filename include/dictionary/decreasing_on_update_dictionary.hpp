@@ -75,7 +75,7 @@ public:
      * @brief getTotalWordsCount - get total words count.
      * @return total words count in a dictionary.
      */
-    Count getTotalWordsCount() const { return _totalWordsCount; };
+    Count getTotalWordsCnt() const { return _totalWordsCount; };
 
 private:
 
@@ -144,7 +144,7 @@ DecreasingOnUpdateDictionary<WordT, CountT>::getProbabilityStats(
     }
     auto low = _getLowerCumulativeNumFound(ord);
     auto high = low + _wordsCounts[ord];
-    auto total = getTotalWordsCount();
+    auto total = getTotalWordsCnt();
     _updateWordCount(ord);
     return { low, high, total };
 }

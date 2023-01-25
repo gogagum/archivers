@@ -108,8 +108,7 @@ StaticDictionary<WordT, CountT>::getProbabilityStats(
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto
-StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
     if (ord == 0) {
         return 0;
@@ -120,8 +119,7 @@ StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto
-StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(
+auto StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(
         Ord ord) const -> Count {
     return _cumulativeNumFound[ord];
 }

@@ -96,7 +96,7 @@ ArithmeticDecoder<DictT, rangeBits>::decode(Source& source,
 
         const auto range = currRange.high - currRange.low;
         const auto range128 = bm::uint128_t(range);
-        const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCount());
+        const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCnt());
         const auto offset128 = bm::uint128_t(value - currRange.low + 1);
 
         const auto aux =

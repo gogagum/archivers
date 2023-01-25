@@ -49,7 +49,7 @@ public:
      * @brief getTotalWordsCount - current number of words.
      * @return number of words. In fact, it is last decoded/encoded word.
      */
-    [[nodiscard]] Count getTotalWordsCount() const { return _currentCount; };
+    [[nodiscard]] Count getTotalWordsCnt() const { return _currentCount; };
 
 private:
     Count _currentCount;

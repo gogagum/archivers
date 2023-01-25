@@ -55,7 +55,7 @@ public:
      * @brief getTotalWordsCount get total number of words according to model.
      * @return
      */
-    Count getTotalWordsCount() const;
+    Count getTotalWordsCnt() const;
 
 private:
 
@@ -69,7 +69,7 @@ private:
 
 private:
     bicl::interval_map<Ord, Count> _cumulativeWordCounts;
-    mutable std::unordered_map<Ord, Count> _wordCounts;
+    std::unordered_map<Ord, Count> _wordCounts;
     Count _totalWordsCount;
     Count _ratio;
 };
@@ -98,7 +98,7 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
+auto AdaptiveDictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
     return _totalWordsCount;
 }
 
@@ -109,7 +109,7 @@ auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(
     auto ord = WordT::ord(word);
     auto low = _getLowerCumulativeNumFound(ord);
     auto high = low + _wordCounts[ord] * _ratio + 1;
-    auto total = getTotalWordsCount();
+    auto total = getTotalWordsCnt();
     _updateCumulativeNumWords(ord);
     return { low, high, total };
 }

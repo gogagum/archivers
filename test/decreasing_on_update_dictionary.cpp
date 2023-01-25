@@ -25,14 +25,14 @@ TEST(DecreasingOnUpdateDictionary, TotalCount) {
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    EXPECT_EQ(dict.getTotalWordsCount(), 32);
+    EXPECT_EQ(dict.getTotalWordsCnt(), 32);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountEmpty) {
     auto freqMapping = std::array<std::pair<BytesWord<2>, std::uint64_t>, 0>{};
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    EXPECT_EQ(dict.getTotalWordsCount(), 0);
+    EXPECT_EQ(dict.getTotalWordsCnt(), 0);
 }
 
 //----------------------------------------------------------------------------//
@@ -44,7 +44,7 @@ TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
     dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 
-    EXPECT_EQ(dict.getTotalWordsCount(), 31);
+    EXPECT_EQ(dict.getTotalWordsCnt(), 31);
 }
 
 //----------------------------------------------------------------------------//

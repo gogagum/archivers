@@ -14,14 +14,14 @@ TEST(DecreasingCountDictionary, Construct) {
 //----------------------------------------------------------------------------//
 TEST(DecreasingCountDictionary, TotalCount) {
     auto dict = DecreasingCountDictionary(42);
-    EXPECT_EQ(dict.getTotalWordsCount(), 42);
+    EXPECT_EQ(dict.getTotalWordsCnt(), 42);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingCountDictionary, TotalAfterUpdate) {
     auto dict = DecreasingCountDictionary<std::uint32_t>(42);
     [[maybe_unused]] auto _ = dict.getProbabilityStats(UIntWord<std::uint32_t>(14));
-    EXPECT_EQ(dict.getTotalWordsCount(), 14);
+    EXPECT_EQ(dict.getTotalWordsCnt(), 14);
 }
 
 //----------------------------------------------------------------------------//
