@@ -18,7 +18,7 @@ namespace ga::dict {
 ///
 template <class WordT, typename CountT = std::uint64_t>
 class AdaptiveADictionary
-        : impl::BaseADDictionary<typename WordT::Ord, CountT, WordT::wordsCount> {
+        : impl::ADDictionaryBase<typename WordT::Ord, CountT, WordT::wordsCount> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;

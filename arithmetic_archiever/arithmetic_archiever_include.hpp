@@ -14,7 +14,7 @@ using ga::w::BitsWord;
 using ga::ArithmeticCoder;
 using ga::ArithmeticDecoder;
 
-constexpr static const std::uint16_t rangeNumBits = 36;
+constexpr static const std::uint16_t rangeNumBits = 56;
 
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//

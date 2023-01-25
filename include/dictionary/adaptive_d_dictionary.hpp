@@ -17,7 +17,7 @@ namespace bicl = boost::icl;
 ///
 template <class WordT, typename CountT = std::uint64_t>
 class AdaptiveDDictionary :
-        impl::BaseADDictionary<typename WordT::Ord, CountT, WordT::wordsCount> {
+        impl::ADDictionaryBase<typename WordT::Ord, CountT, WordT::wordsCount> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
