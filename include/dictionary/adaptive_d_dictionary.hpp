@@ -32,7 +32,7 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] WordT getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats
@@ -45,11 +45,11 @@ public:
      * @brief totalWordsCount
      * @return
      */
-    Count getTotalWordsCnt() const;
+    [[nodiscard]] Count getTotalWordsCnt() const;
 
 private:
 
-    Count _getLowerCumulativeNumFound(Ord ord) const;
+    Count _getLowerCumulativeCnt(Ord ord) const;
 
     Count _getWordCnt(Ord ord) const;
 };
@@ -64,7 +64,7 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
-        return this->_getLowerCumulativeNumFound(ord + 1);
+        return this->_getLowerCumulativeCnt(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
@@ -76,7 +76,7 @@ template <class WordT, typename CountT>
 auto AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     const auto ord = Word::ord(word);
-    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + _getWordCnt(ord);
     const auto total = getTotalWordsCnt();
     this->_updateWordCnt(ord, 1);
@@ -98,7 +98,7 @@ auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
     if (this->_totalFoundWordsCnt == 0) {
         return ord;

@@ -50,7 +50,7 @@ public:
 
 private:
 
-    Count _getLowerCumulativeNumFound(Ord ord) const;
+    Count _getLowerCumulativeCnt(Ord ord) const;
 
     Count _getWordCnt(Ord ord) const;
 };
@@ -66,7 +66,7 @@ AdaptiveADictionary<WordT, CountT>::getWord(
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](std::uint64_t ord) {
-        return this->_getLowerCumulativeNumFound(ord + 1);
+        return this->_getLowerCumulativeCnt(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
@@ -79,7 +79,7 @@ auto
 AdaptiveADictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     const auto ord = Word::ord(word);
-    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + _getWordCnt(ord);
     const auto total = getTotalWordsCnt();
     this->_updateWordCnt(ord, 1);
@@ -100,7 +100,7 @@ auto AdaptiveADictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto
-AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
     const auto cumulativeNumFound = this->_cumulativeFoundWordsCnt(ord - 1);
     if (WordT::wordsCount == this->_foundWordsCount.size()) {

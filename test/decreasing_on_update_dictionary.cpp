@@ -42,7 +42,8 @@ TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    [[maybe_unused]] auto stats =
+            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 
     EXPECT_EQ(dict.getTotalWordsCnt(), 31);
 }
@@ -54,7 +55,8 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    [[maybe_unused]] auto stats =
+            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 
     auto [low, high, _0] = dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 
@@ -69,7 +71,7 @@ TEST(DecreasingOnUpdateDictionary, QueryForAnEmptyWord) {
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    EXPECT_THROW(dict.getProbabilityStats(BytesWord<2>::byOrd(13)),
+    EXPECT_THROW(auto stats = dict.getProbabilityStats(BytesWord<2>::byOrd(13)),
                  DecreasingOnUpdateDictionary<BytesWord<2>>::NoSuchWord);
 }
 
@@ -80,7 +82,8 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    [[maybe_unused]] auto stats =
+            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 
     auto [low0, high0, _0] = dict.getProbabilityStats(BytesWord<2>::byOrd(42));
 

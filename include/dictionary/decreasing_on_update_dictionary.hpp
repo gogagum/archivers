@@ -33,9 +33,9 @@ public:
     class NoSuchWord : public std::runtime_error {
     public:
         NoSuchWord(const Word& word) :
-            std::runtime_error(_formMessage(word)) {}
+            std::runtime_error(_formWord(word)) {}
     private:
-        std::string _formMessage(const Word& word) {
+        std::string _formWord(const Word& word) {
             std::string ret;
             auto retStream = std::stringstream(ret);
             retStream << "No such word: " << word;
@@ -64,20 +64,21 @@ public:
      * @param cumulativeNumFound - count to search for.
      * @return found word.
      */
-    Word getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] Word getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats - get stats for a word.
      * @param word - word to get stats for.
      * @return [low, high, total]
      */
-    ProbabilityStats getProbabilityStats(const Word& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word);
 
     /**
      * @brief getTotalWordsCount - get total words count.
      * @return total words count in a dictionary.
      */
-    Count getTotalWordsCnt() const { return this->_totalWordsCnt; };
+    [[nodiscard]] Count
+    getTotalWordsCnt() const { return this->_totalWordsCnt; };
 
 private:
 

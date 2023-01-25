@@ -39,7 +39,7 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] WordT getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getProbabilityStats reads probability statistics, updates them,
@@ -53,7 +53,7 @@ public:
      * @brief getTotalWordsCount get total number of words according to model.
      * @return
      */
-    Count getTotalWordsCnt() const { return this->_totalWordsCnt; }
+    [[nodiscard]] Count getTotalWordsCnt() const { return this->_totalWordsCnt; }
 
 private:
 
@@ -62,7 +62,7 @@ private:
 
 private:
 
-    Count _getLowerCumulativeNumFound(Ord ord) const;
+    Count _getLowerCumulativeCnt(Ord ord) const;
 
     void _updateWordCnt(Ord ord);
 
@@ -87,7 +87,7 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
-        return _getLowerCumulativeNumFound(ord + 1);
+        return _getLowerCumulativeCnt(ord + 1);
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
@@ -99,7 +99,7 @@ template <class WordT, typename CountT>
 auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(
         const WordT& word) -> ProbabilityStats {
     const auto ord = WordT::ord(word);
-    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + this->_wordCnts[ord] * _ratio + 1;
     const auto total = getTotalWordsCnt();
     _updateWordCnt(ord);
@@ -117,7 +117,7 @@ void AdaptiveDictionary<WordT, CountT>::_updateWordCnt(Ord ord) {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
     return ord + this->_cumulativeWordCounts(ord - 1) * _ratio;
 }

@@ -84,6 +84,7 @@ public:
     friend bool operator!=(const BitsWord& bs1, const BitsWord& bs2) = default;
 
 private:
+
     std::array<bool, numBits> _bits;
 
 private:

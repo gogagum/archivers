@@ -42,7 +42,7 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    WordT getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] WordT getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getProbabilityStats - get lower cumulative number of words,
@@ -50,18 +50,22 @@ public:
      * @param word - word to get info for.
      * @return statistics.
      */
-    ProbabilityStats getProbabilityStats(const Word& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word);
 
     /**
      * @brief totalWordsCount
      * @return
      */
-    Ord getTotalWordsCount() const;
+    [[nodiscard]] Ord
+    getTotalWordsCount() const { return *_cumulativeNumFound.rbegin(); }
 
 private:
 
-    Count _getLowerCumulativeNumFound(Ord ord) const;
-    Count _getHigherCumulativeNumFound(Ord ord) const;
+    /**************************************************************************/
+    Count _getLowerCumulativeCnt(Ord ord) const;
+    /**************************************************************************/
+    Count
+    _getHigherCumulativeCnt(Ord ord) const { return _cumulativeNumFound[ord]; }
 
 protected:
     std::vector<Count> _cumulativeNumFound;
@@ -101,33 +105,16 @@ auto
 StaticDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
-    auto low = _getLowerCumulativeNumFound(ord);
-    auto high = _getHigherCumulativeNumFound(ord);
+    auto low = _getLowerCumulativeCnt(ord);
+    auto high = _getHigherCumulativeCnt(ord);
     return { low, high, *_cumulativeNumFound.rbegin() };
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto StaticDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto StaticDictionary<WordT, CountT>::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
-    if (ord == 0) {
-        return 0;
-    } else {
-        return _cumulativeNumFound[ord - 1];
-    }
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto StaticDictionary<WordT, CountT>::_getHigherCumulativeNumFound(
-        Ord ord) const -> Count {
-    return _cumulativeNumFound[ord];
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto StaticDictionary<WordT, CountT>::getTotalWordsCount() const -> Ord {
-    return *_cumulativeNumFound.rbegin();
+    return ord != 0 ? _cumulativeNumFound[ord - 1] : 0;
 }
 
 }  // namespace ga::dict
