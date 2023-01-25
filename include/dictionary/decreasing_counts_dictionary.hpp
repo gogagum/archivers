@@ -75,11 +75,11 @@ auto DecreasingCountDictionary<CountT>::getWord(
 template <typename CountT>
 auto DecreasingCountDictionary<CountT>::getProbabilityStats(
         Word word) -> ProbabilityStats {
-    auto ord = Word::ord(word);
+    const auto ord = Word::ord(word);
     if (ord > _currentCount) {
         throw NonDecreasingWord();
     }
-    auto ret = ProbabilityStats{ ord - 1, ord, _currentCount };
+    const auto ret = ProbabilityStats{ ord - 1, ord, _currentCount };
     _currentCount = ord;
     return ret;
 }

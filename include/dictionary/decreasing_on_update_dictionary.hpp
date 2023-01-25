@@ -3,6 +3,7 @@
 
 #include "word_probability_stats.hpp"
 #include "integer_random_access_iterator.hpp"
+#include "impl/adaptive_dictionary_base.hpp"
 
 #include <cstdint>
 
@@ -18,7 +19,8 @@ namespace br = boost::range;
 /// \brief The DecreasingOnUpdateDictionary class
 ///
 template <class WordT, typename CountT = std::uint64_t>
-class DecreasingOnUpdateDictionary {
+class DecreasingOnUpdateDictionary
+        : public impl::AdaptiveDictionaryBase<typename WordT::Ord, CountT> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
@@ -75,20 +77,19 @@ public:
      * @brief getTotalWordsCount - get total words count.
      * @return total words count in a dictionary.
      */
-    Count getTotalWordsCnt() const { return _totalWordsCount; };
+    Count getTotalWordsCnt() const { return this->_totalWordsCnt; };
+
+private:
+
+    using OrdInterval =
+        typename impl::AdaptiveDictionaryBase<Ord, Count>::OrdInterval;
 
 private:
 
     Count _getLowerCumulativeNumFound(Ord ord) const;
 
-    void _updateWordCount(Ord ord);
+    void _updateWordCnt(Ord ord);
 
-private:
-    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
-private:
-    bicl::interval_map<Ord, Count> _cumulativeWordCounts;
-    std::unordered_map<Ord, Count> _wordsCounts;
-    Count _totalWordsCount;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,24 +97,25 @@ private:
 template <class WordT, typename CountT>
 template <std::ranges::input_range RangeT>
 DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
-        const RangeT& countRng) : _totalWordsCount(0) {
+        const RangeT& countRng) : impl::AdaptiveDictionaryBase<Ord, Count>(0) {
     for (const auto& [word, count] : countRng) {
-        auto ord = Word::ord(word);
-        _wordsCounts[ord] = count;
-        auto interval = OrdInterval(ord, WordT::wordsCount);
-        _cumulativeWordCounts += std::make_pair(interval, count);
-        _totalWordsCount += count;
+        const auto ord = Word::ord(word);
+        this->_wordCnts[ord] = count;
+        const auto interval = OrdInterval(ord, WordT::wordsCount);
+        this->_cumulativeWordCounts += std::make_pair(interval, count);
+        this->_totalWordsCnt += count;
     }
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
-        Count count) : _totalWordsCount(WordT::wordsCount * count) {
+        Count count)
+    : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount * count) {
     for (auto ord : boost::irange<typename WordT::Ord>(0, WordT::wordsCount)) {
-        _wordsCounts[ord] = count;
+        this->_wordCnts[ord] = count;
         auto interval = OrdInterval(ord, WordT::wordsCount);
-        _cumulativeWordCounts += std::make_pair(interval, count);
+        this->_cumulativeWordCounts += std::make_pair(interval, count);
     }
 }
 
@@ -139,13 +141,14 @@ auto
 DecreasingOnUpdateDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
-    if (!_wordsCounts.contains(ord) || _wordsCounts.at(ord) == Count(0)) {
+    if (!this->_wordCnts.contains(ord)
+            || this->_wordCnts.at(ord) == Count(0)) {
         throw NoSuchWord(word);
     }
-    auto low = _getLowerCumulativeNumFound(ord);
-    auto high = low + _wordsCounts[ord];
-    auto total = getTotalWordsCnt();
-    _updateWordCount(ord);
+    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto high = low + this->_wordCnts[ord];
+    const auto total = getTotalWordsCnt();
+    _updateWordCnt(ord);
     return { low, high, total };
 }
 
@@ -157,16 +160,16 @@ DecreasingOnUpdateDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
     if (ord == 0) {
         return Count{0};
     }
-    return _cumulativeWordCounts(ord - 1);
+    return this->_cumulativeWordCounts(ord - 1);
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-void DecreasingOnUpdateDictionary<WordT, CountT>::_updateWordCount(Ord ord) {
-    _totalWordsCount -= 1;
-    auto interval = OrdInterval(ord, WordT::wordsCount);
-    _cumulativeWordCounts -= std::make_pair(interval, Count{1});
-    --_wordsCounts[ord];
+void DecreasingOnUpdateDictionary<WordT, CountT>::_updateWordCnt(Ord ord) {
+    this->_totalWordsCnt -= 1;
+    const auto interval = OrdInterval(ord, WordT::wordsCount);
+    this->_cumulativeWordCounts -= std::make_pair(interval, Count{1});
+    --this->_wordCnts[ord];
 }
 
 }

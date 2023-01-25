@@ -24,7 +24,7 @@ protected:
 
     Count _getRealWordCnt(Ord ord) const;
 
-    void _increaseWordCnt(Ord ord, Count cnt);
+    void _updateWordCnt(Ord ord, Count cnt);
 
 protected:
 
@@ -41,7 +41,8 @@ protected:
 //----------------------------------------------------------------------------//
 template <typename OrdT, typename CountT, OrdT ordEnd>
 auto
-ADDictionaryBase<OrdT, CountT, ordEnd>::_getTotalUniqueWordsCnt() const -> Count {
+ADDictionaryBase<OrdT, CountT, ordEnd>::_getTotalUniqueWordsCnt(
+        ) const -> Count {
     return _foundWordsCount.size();
 }
 
@@ -63,8 +64,8 @@ auto ADDictionaryBase<OrdT, CountT, ordEnd>::_getRealWordCnt(
 //----------------------------------------------------------------------------//
 template <typename OrdT, typename CountT, OrdT ordEnd>
 void
-ADDictionaryBase<OrdT, CountT, ordEnd>::_increaseWordCnt(Ord ord, Count cnt) {
-    auto interval = OrdInterval(ord, ordEnd);
+ADDictionaryBase<OrdT, CountT, ordEnd>::_updateWordCnt(Ord ord, Count cnt) {
+    const auto interval = OrdInterval(ord, ordEnd);
     _cumulativeFoundWordsCnt += std::make_pair(interval, cnt);
     if (!_foundWordsCount.contains(ord)) {
         _cumulativeFoundUniqueWords += std::make_pair(interval, Count{1});

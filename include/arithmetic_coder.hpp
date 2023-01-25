@@ -23,8 +23,8 @@ namespace bm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-class ArithmeticCoder : RangesCalc<rangeBits> {
+template <class FlowT, class DictT>
+class ArithmeticCoder : RangesCalc {
 public:
 
     using Word = ga::fl::traits::WordT<FlowT>;
@@ -35,7 +35,7 @@ public:
     };
 
 private:
-    using RC = RangesCalc<rangeBits>;
+    using RC = RangesCalc;
     using OrdRange = typename RC::Range;
 public:
 
@@ -59,15 +59,15 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-ArithmeticCoder<FlowT, DictT, rangeBits>::ArithmeticCoder(FlowT& symbolsFlow,
+template <class FlowT, class DictT>
+ArithmeticCoder<FlowT, DictT>::ArithmeticCoder(FlowT& symbolsFlow,
                                                DictT&& dict) :
     _symFlow(symbolsFlow),
     _dict(std::forward<DictT>(dict)) {}
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-auto ArithmeticCoder<FlowT, DictT, rangeBits>::encode(
+template <class FlowT, class DictT>
+auto ArithmeticCoder<FlowT, DictT>::encode(
         ByteDataConstructor& dataConstructor) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };

@@ -22,9 +22,9 @@ using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 
-using DictWordsDecoder = ga::ArithmeticDecoder<DictWordsDictionary, 40>;
-using CountsDecoder = ga::ArithmeticDecoder<CountsDictionary, 40>;
-using ContentDecoder = ga::ArithmeticDecoder<ContentDictionary, 40>;
+using DictWordsDecoder = ga::ArithmeticDecoder<DictWordsDictionary>;
+using CountsDecoder = ga::ArithmeticDecoder<CountsDictionary>;
+using ContentDecoder = ga::ArithmeticDecoder<ContentDictionary>;
 
 struct CountMappingRow {
     BytesWord<1> word;

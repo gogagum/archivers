@@ -13,7 +13,7 @@ TEST(ArithmeticCoder, LambdaConstruct0) {
     auto dataBytes = std::array<std::byte, 32>{};
     auto flow = ga::fl::BitsWordFlow<3>(dataBytes);
     auto coder =
-        ga::ArithmeticCoder<ga::fl::BitsWordFlow<3>, Dict, 40>(flow, Dict(12));
+        ga::ArithmeticCoder<ga::fl::BitsWordFlow<3>, Dict>(flow, Dict(12));
 }
 
 //----------------------------------------------------------------------------//
@@ -23,6 +23,6 @@ TEST(ArithmeticCoder, LambdaConstruct2) {
     auto dataBytes = std::array<std::byte, 32>{};
     auto flow = ga::fl::BitsWordFlow<31>(dataBytes);
     auto coder =
-        ga::ArithmeticCoder<ga::fl::BitsWordFlow<31>, Dict, 40>(flow, Dict());
+        ga::ArithmeticCoder<ga::fl::BitsWordFlow<31>, Dict>(flow, Dict());
 }
 

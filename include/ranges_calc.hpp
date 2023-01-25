@@ -9,7 +9,6 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
 ///
-template <std::uint16_t _numBits>
 class RangesCalc {
 public:
 
@@ -18,7 +17,7 @@ public:
 
 public:
 
-    constexpr static const std::uint16_t numBits = _numBits;
+    constexpr static const std::uint16_t numBits = 56;
     constexpr static const Count total = Count{1} << Count{numBits};
     constexpr static const Count half = Count{1} << Count{numBits - 1};
     constexpr static const Count quater = Count{1} << Count{numBits - 2};
@@ -33,16 +32,14 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The Range class
 ///
-template <std::uint16_t _numBits>
-struct RangesCalc<_numBits>::Range {
+struct RangesCalc::Range {
     Count low;
     Count high;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-auto RangesCalc<_numBits>::recalcRange(Range r) -> Range {
+auto RangesCalc::recalcRange(Range r) -> Range {
     if (r.high <= half) {
         return { r.low * 2, r.high * 2 };
     } else if (r.low >= half) {

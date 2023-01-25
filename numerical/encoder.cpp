@@ -25,9 +25,9 @@ using ContentDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 
-using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow, CountsDict, 40>;
-using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow, DictWordsDict, 40>;
-using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>, ContentDict, 40>;
+using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow, CountsDict>;
+using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow, DictWordsDict>;
+using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>, ContentDict>;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");

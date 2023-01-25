@@ -3,7 +3,7 @@
 
 #include "integer_random_access_iterator.hpp"
 #include "word_probability_stats.hpp"
-#include "base_a_d_dictionary.hpp"
+#include "impl/a_d_dictionary_base.hpp"
 
 #include <algorithm>
 #include <unordered_set>
@@ -62,7 +62,7 @@ auto
 AdaptiveADictionary<WordT, CountT>::getWord(
         Count cumulativeNumFound) const -> Word {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
-    auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+    const auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](std::uint64_t ord) {
@@ -78,11 +78,11 @@ template <class WordT, typename CountT>
 auto
 AdaptiveADictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
-    auto ord = Word::ord(word);
-    auto low = _getLowerCumulativeNumFound(ord);
-    auto high = low + _getWordCnt(ord);
-    auto total = getTotalWordsCnt();
-    this->_increaseWordCnt(ord, 1);
+    const auto ord = Word::ord(word);
+    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto high = low + _getWordCnt(ord);
+    const auto total = getTotalWordsCnt();
+    this->_updateWordCnt(ord, 1);
     return { low, high, total };
 }
 
@@ -116,7 +116,7 @@ AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeNumFound(
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 auto AdaptiveADictionary<WordT, CountT>::_getWordCnt(Ord ord) const -> Count {
-    auto totalUniqueWordsCnt = this->_getTotalUniqueWordsCnt();
+    const auto totalUniqueWordsCnt = this->_getTotalUniqueWordsCnt();
     if (WordT::wordsCount == totalUniqueWordsCnt) {
         return this->_foundWordsCount.at(ord);
     }

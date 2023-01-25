@@ -3,7 +3,7 @@
 
 #include "integer_random_access_iterator.hpp"
 #include "word_probability_stats.hpp"
-#include "base_a_d_dictionary.hpp"
+#include "impl/a_d_dictionary_base.hpp"
 
 #include <unordered_set>
 #include <cstdint>
@@ -75,11 +75,11 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 template <class WordT, typename CountT>
 auto AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
-    auto ord = Word::ord(word);
-    auto low = _getLowerCumulativeNumFound(ord);
-    auto high = low + _getWordCnt(ord);
-    auto total = getTotalWordsCnt();
-    this->_increaseWordCnt(ord, 1);
+    const auto ord = Word::ord(word);
+    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto high = low + _getWordCnt(ord);
+    const auto total = getTotalWordsCnt();
+    this->_updateWordCnt(ord, 1);
     return { low, high, total };
 }
 

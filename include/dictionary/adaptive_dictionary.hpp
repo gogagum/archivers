@@ -3,6 +3,7 @@
 
 #include "integer_random_access_iterator.hpp"
 #include "word_probability_stats.hpp"
+#include "impl/adaptive_dictionary_base.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -10,20 +11,17 @@
 #include <ranges>
 #include <iterator>
 
-#include <boost/icl/interval_map.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 
 namespace ga::dict {
-
-namespace bicl = boost::icl;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionary class
 ///
 template <class WordT, typename CountT = std::uint64_t>
-class AdaptiveDictionary {
+class AdaptiveDictionary
+        : public impl::AdaptiveDictionaryBase<typename WordT::Ord, CountT> {
 public:
 
     using Word = WordT;
@@ -55,22 +53,20 @@ public:
      * @brief getTotalWordsCount get total number of words according to model.
      * @return
      */
-    Count getTotalWordsCnt() const;
+    Count getTotalWordsCnt() const { return this->_totalWordsCnt; }
+
+private:
+
+    using OrdInterval =
+        typename impl::AdaptiveDictionaryBase<Ord, CountT>::OrdInterval;
 
 private:
 
     Count _getLowerCumulativeNumFound(Ord ord) const;
 
-    void _updateCumulativeNumWords(Ord ord);
+    void _updateWordCnt(Ord ord);
 
 private:
-
-    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
-
-private:
-    bicl::interval_map<Ord, Count> _cumulativeWordCounts;
-    std::unordered_map<Ord, Count> _wordCounts;
-    Count _totalWordsCount;
     Count _ratio;
 };
 
@@ -78,14 +74,16 @@ private:
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 AdaptiveDictionary<WordT, CountT>::AdaptiveDictionary(std::uint64_t ratio)
-    : _totalWordsCount(WordT::wordsCount), _ratio(ratio) {}
+    : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount)
+    , _ratio(ratio) {}
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
 WordT
 AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
-    auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+    const auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
@@ -98,38 +96,30 @@ AdaptiveDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto AdaptiveDictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
-    return _totalWordsCount;
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
 auto AdaptiveDictionary<WordT, CountT>::getProbabilityStats(
         const WordT& word) -> ProbabilityStats {
-    auto ord = WordT::ord(word);
-    auto low = _getLowerCumulativeNumFound(ord);
-    auto high = low + _wordCounts[ord] * _ratio + 1;
-    auto total = getTotalWordsCnt();
-    _updateCumulativeNumWords(ord);
+    const auto ord = WordT::ord(word);
+    const auto low = _getLowerCumulativeNumFound(ord);
+    const auto high = low + this->_wordCnts[ord] * _ratio + 1;
+    const auto total = getTotalWordsCnt();
+    _updateWordCnt(ord);
     return { low, high, total };
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-void
-AdaptiveDictionary<WordT, CountT>::_updateCumulativeNumWords(Ord ord) {
-    auto interval = OrdInterval(ord, WordT::wordsCount);
-    _cumulativeWordCounts += std::make_pair(interval, Count{1});
-    ++_wordCounts[ord];
-    _totalWordsCount += _ratio;
+void AdaptiveDictionary<WordT, CountT>::_updateWordCnt(Ord ord) {
+    const auto interval = OrdInterval(ord, WordT::wordsCount);
+    this->_cumulativeWordCounts += std::make_pair(interval, Count{1});
+    ++this->_wordCnts[ord];
+    this->_totalWordsCnt += _ratio;
 }
 
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-auto
-AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+auto AdaptiveDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
-    return ord + _cumulativeWordCounts(ord - 1) * _ratio;
+    return ord + this->_cumulativeWordCounts(ord - 1) * _ratio;
 }
 
 
