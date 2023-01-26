@@ -15,7 +15,7 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT, class DictT>
+template <class FlowT>
 class ArithmeticCoder : RangesCalc {
 public:
 
@@ -36,31 +36,30 @@ public:
      * @param byteFlow
      * @param constructor
      */
-    ArithmeticCoder(FlowT& byteFlow, DictT&& dict);
+    ArithmeticCoder(FlowT& byteFlow);
 
     /**
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
-    EncodeRet encode(ByteDataConstructor& dataConstructor);
+    template <class DictT>
+    EncodeRet encode(ByteDataConstructor& dataConstructor, DictT& dict);
 
 private:
     FlowT& _symFlow;
-    DictT _dict;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT>
-ArithmeticCoder<FlowT, DictT>::ArithmeticCoder(FlowT& symbolsFlow,
-                                               DictT&& dict) :
-    _symFlow(symbolsFlow),
-    _dict(std::forward<DictT>(dict)) {}
+template <class FlowT>
+ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT& symbolsFlow) :
+    _symFlow(symbolsFlow) {}
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT>
-auto ArithmeticCoder<FlowT, DictT>::encode(
-        ByteDataConstructor& dataConstructor) -> EncodeRet {
+template <class FlowT>
+template <class DictT>
+auto ArithmeticCoder<FlowT>::encode(
+        ByteDataConstructor& dataConstructor, DictT& dict) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 
@@ -77,7 +76,7 @@ auto ArithmeticCoder<FlowT, DictT>::encode(
             lastPercent = currPercent;
         }
 
-        const auto [low, high, total] = _dict.getProbabilityStats(sym);
+        const auto [low, high, total] = dict.getProbabilityStats(sym);
         currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {

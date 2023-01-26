@@ -25,9 +25,9 @@ using ContentDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 
-using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow, CountsDict>;
-using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow, DictWordsDict>;
-using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>, ContentDict>;
+using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow>;
+using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow>;
+using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>>;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -94,20 +94,24 @@ int main(int argc, char* argv[]) {
         dataConstructor.putT<std::uint64_t>(wordFlow.size());
 
         {
-            auto countsCoder = CountsCoder(countsWords, CountsDict(wordFlow.size()));
-            auto [_0, countsBits] = countsCoder.encode(dataConstructor);
+            auto countsDict = CountsDict(wordFlow.size());
+            auto countsCoder = CountsCoder(countsWords);
+            auto [_0, countsBits] =
+                    countsCoder.encode(dataConstructor, countsDict);
             dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
-            auto dictWordsCoder = DictWordsCoder(dictWords, DictWordsDict(1));
-            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor);
+            auto wordsDict = DictWordsDict(1);
+            auto dictWordsCoder = DictWordsCoder(dictWords);
+            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor, wordsDict);
             dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
         {
-            auto contentCoder = ContentCoder(wordFlow, ContentDict(counts));
-            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor);
+            auto contentDict = ContentDict(counts);
+            auto contentCoder = ContentCoder(wordFlow);
+            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor, contentDict);
             dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
 
