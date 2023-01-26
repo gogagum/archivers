@@ -28,10 +28,6 @@ template <std::uint8_t numBytes>
 using BytesCoder = ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesDecoder = ArithmeticDecoder<BytesDict<numBytes>>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 using BitsFlow = ga::fl::BitsWordFlow<numBits>;
 
@@ -42,9 +38,5 @@ using BitsDict = ga::dict::AdaptiveDictionary<BitsWord<numBits>>;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 using BitsCoder = ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint16_t numBits>
-using BitsDecoder = ArithmeticDecoder<BitsDict<numBits>>;
 
 #endif // ARITHMETIC_ARCHIEVER_INCLUDE_HPP

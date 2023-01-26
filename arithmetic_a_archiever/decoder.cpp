@@ -16,14 +16,24 @@
 namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
-    case (bits): \
-        packIntoByteDataConstructor(BitsDecoder<(bits)>(BitsDict<(bits)>())); \
-        break;
+    case (bits): { \
+        auto words = std::vector<BitsWord<bits>>(); \
+        packIntoByteDataConstructor(BitsDict<bits>(), std::back_inserter(words)); \
+        for (const auto& word: words) { \
+            word.bitsOut(dataConstructor.getBitBackInserter()); \
+        } \
+    } \
+    break;
 
 #define BYTES_DECODER_CASE(bytes) \
-    case (bytes * 8): \
-        packIntoByteDataConstructor(BytesDecoder<(bytes)>(BytesDict<(bytes)>())); \
-        break;
+    case (bytes * 8): { \
+        auto words = std::vector<BytesWord<bytes>>(); \
+        packIntoByteDataConstructor(BytesDict<bytes>(), std::back_inserter(words)); \
+        for (const auto& word: words) { \
+            word.bitsOut(dataConstructor.getBitBackInserter()); \
+        } \
+    } \
+    break;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
@@ -65,10 +75,10 @@ int main(int argc, char* argv[]) {
         auto dataConstructor = ga::ByteDataConstructor();
 
         const auto packIntoByteDataConstructor =
-                [&dataConstructor, &decoded, wordsCount, bitsCount] (auto&& decoder) {
-            for (auto& word: decoder.decode(decoded, wordsCount, bitsCount)) {
-                word.bitsOut(dataConstructor.getBitBackInserter());
-            }
+                [&decoded, wordsCount, bitsCount]
+                (auto&& dict, auto outIter) {
+            auto decoder = ArithmeticDecoder();
+            decoder.decode(decoded, dict, outIter, wordsCount, bitsCount);
         };
 
         switch (symBitLen) {
