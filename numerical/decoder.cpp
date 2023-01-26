@@ -18,13 +18,11 @@ using ga::w::UIntWord;
 using ga::dict::DecreasingCountDictionary;
 using ga::dict::DecreasingOnUpdateDictionary;
 
+using ga::ArithmeticDecoder;
+
 using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
 using ContentDictionary = DecreasingOnUpdateDictionary<BytesWord<1>>;
-
-using DictWordsDecoder = ga::ArithmeticDecoder<DictWordsDictionary>;
-using CountsDecoder = ga::ArithmeticDecoder<CountsDictionary>;
-using ContentDecoder = ga::ArithmeticDecoder<ContentDictionary>;
 
 struct CountMappingRow {
     BytesWord<1> word;
@@ -77,32 +75,37 @@ int main(int argc, char* argv[]) {
         ////////////////////////////////////////////////////////////////////////
 
         auto countsDictionary = CountsDictionary(contentWordsNumber);
-        auto countsDecoder = CountsDecoder(std::move(countsDictionary));
-
-        auto counts = countsDecoder.decode(decoded, dictWordsCount, wordsCountsBitsNumber);
+        auto countsWords = std::vector<UIntWord<std::uint64_t>>();
+        auto countsDecoder = ArithmeticDecoder();
+        countsDecoder.decode(decoded, countsDictionary,
+                             std::back_inserter(countsWords),
+                             dictWordsCount, wordsCountsBitsNumber);
 
         ////////////////////////////////////////////////////////////////////////
 
         auto dictWordsDictionary = DictWordsDictionary(1);
-        auto dictWordsDecoder = DictWordsDecoder(std::move(dictWordsDictionary));
-
-        auto words = dictWordsDecoder.decode(
-                    decoded, dictWordsCount, dictWordsBitsNumber);
+        auto words = std::vector<BytesWord<1>>();
+        auto wordsDecoder = ArithmeticDecoder();
+        wordsDecoder.decode(decoded, dictWordsDictionary,
+                            std::back_inserter(words),
+                            dictWordsCount, dictWordsBitsNumber);
 
         ////////////////////////////////////////////////////////////////////////
 
         auto contentDictInitialCounts = std::vector<CountMappingRow>();
-        std::transform(words.begin(), words.end(), counts.begin(),
+        std::transform(words.begin(), words.end(), countsWords.begin(),
                        std::back_inserter(contentDictInitialCounts),
                        [](const auto& word, const auto& countWord) -> CountMappingRow {
                            return { word, countWord.getValue() };
                        });
 
         auto contentDictionary = ContentDictionary(contentDictInitialCounts);
-        auto contentDecoder = ContentDecoder(std::move(contentDictionary));
 
-        auto contentWords = contentDecoder.decode(
-                    decoded, contentWordsNumber, contentBitsNumber);
+        auto contentWords = std::vector<BytesWord<1>>();
+        auto contentDecoder = ArithmeticDecoder();
+        contentDecoder.decode(decoded, contentDictionary,
+                              std::back_inserter(contentWords),
+                              contentWordsNumber, contentBitsNumber);
 
         ////////////////////////////////////////////////////////////////////////
 

@@ -58,7 +58,7 @@ public:
      * @param inputIter - input iterator to take bits form.
      */
     template <std::input_iterator IterT>
-    BitsWord(IterT inputIter) { std::copy_n(inputIter, _numBits, _bits.begin()); }
+    explicit BitsWord(IterT inputIter) { std::copy_n(inputIter, _numBits, _bits.begin()); }
 
     /**
      * @brief bitsOut - give bits of a word out.
