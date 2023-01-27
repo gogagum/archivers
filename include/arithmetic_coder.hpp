@@ -46,7 +46,7 @@ public:
     template <class DictT>
     EncodeRet encode(ByteDataConstructor& dataConstructor,
                      DictT& dict,
-                     std::ostream& os = std::cerr);
+                     std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
     FlowT& _symFlow;
@@ -64,18 +64,18 @@ template <class DictT>
 auto ArithmeticCoder<FlowT>::encode(
         ByteDataConstructor& dataConstructor,
         DictT& dict,
-        std::ostream& os) -> EncodeRet {
+        std::optional<std::reference_wrapper<std::ostream>> os) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 
     std::size_t btf = 0;
 
-    auto bar = boost::timer::progress_display(_symFlow.size(), os, "");
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(_symFlow.size(), os.value(), "");
+    }
 
     for (auto sym : _symFlow) {
-        ++ret.wordsCount;
-        ++bar;
-
         const auto [low, high, total] = dict.getProbabilityStats(sym);
         currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
@@ -97,6 +97,10 @@ auto ArithmeticCoder<FlowT>::encode(
             auto lastRange = currRange;
 
             currRange = RC::recalcRange(currRange);
+        }
+        ++ret.wordsCount;
+        if (barOpt.has_value()) {
+            ++barOpt.value();
         }
     }
 

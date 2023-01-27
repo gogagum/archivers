@@ -20,7 +20,7 @@ struct FileBytesAdaptiveEncodeImpl {
         encoded.putT<std::uint64_t>(ratio);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = coder.encode(encoded, dict);
+        auto [wordsCount, bitsCount] = coder.encode(encoded, dict, std::cerr);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
@@ -44,7 +44,7 @@ struct FileBitsAdaptiveEncodeImpl {
         encoded.putT<std::uint64_t>(ratio);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = coder.encode(encoded, dict);
+        auto [wordsCount, bitsCount] = coder.encode(encoded, dict, std::cerr);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());

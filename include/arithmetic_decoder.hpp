@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstdint>
 #include <limits>
+#include <optional>
 
 #include "ranges_calc.hpp"
 
@@ -22,23 +23,15 @@ public:
 
     ArithmeticDecoder() : _currRange{ 0, RC::total } {}
 
-    /**
-     * @brief decode
-     * @param source
-     * @param wordsCount
-     * @param bitsLimit
-     * @return
-     */
     template <class DictT,
-              class SourceT,
               std::output_iterator<typename DictT::Word> OutIterT>
     void decode(
-            SourceT& source,
+            auto& source,
             DictT& dict,
             OutIterT outIter,
             std::size_t wordsCount,
-            std::ostream& os = std::cerr,
-            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
+            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
+            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
 
@@ -53,14 +46,14 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class DictT,
-          class SourceT,
           std::output_iterator<typename DictT::Word> OutIterT>
-void ArithmeticDecoder::decode(SourceT& source,
-                               DictT& dict,
-                               OutIterT outIter,
-                               std::size_t wordsCount,
-                               std::ostream& os,
-                               std::size_t bitsLimit) {
+void ArithmeticDecoder::decode(
+        auto& source,
+        DictT& dict,
+        OutIterT outIter,
+        std::size_t wordsCount,
+        std::size_t bitsLimit,
+        std::optional<std::reference_wrapper<std::ostream>> os) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -75,7 +68,10 @@ void ArithmeticDecoder::decode(SourceT& source,
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    auto bar = boost::timer::progress_display(wordsCount, os, "");
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(wordsCount, os.value(), "");
+    }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
         const auto range128 = bm::uint128_t(_currRange.high - _currRange.low);
@@ -107,7 +103,9 @@ void ArithmeticDecoder::decode(SourceT& source,
             }
             _currRange = RC::recalcRange(_currRange);
         }
-        ++bar;
+        if (barOpt.has_value()) {
+            ++barOpt.value();
+        }
     }
 }
 
