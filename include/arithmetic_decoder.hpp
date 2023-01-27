@@ -4,6 +4,7 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <iostream>
 #include <cstdint>
@@ -36,6 +37,7 @@ public:
             DictT& dict,
             OutIterT outIter,
             std::size_t wordsCount,
+            std::ostream& os = std::cerr,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
 
 private:
@@ -57,6 +59,7 @@ void ArithmeticDecoder::decode(SourceT& source,
                                DictT& dict,
                                OutIterT outIter,
                                std::size_t wordsCount,
+                               std::ostream& os,
                                std::size_t bitsLimit) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
@@ -72,15 +75,9 @@ void ArithmeticDecoder::decode(SourceT& source,
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    int lastPercent = -1;
+    auto bar = boost::timer::progress_display(wordsCount, os, "");
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
-        if (int currPercent = (100 * i) / wordsCount;
-                currPercent != lastPercent) {
-            std::cerr << currPercent << '%' << std::endl;
-            lastPercent = currPercent;
-        }
-
         const auto range128 = bm::uint128_t(_currRange.high - _currRange.low);
         const auto dictTotalWords128 = bm::uint128_t(dict.getTotalWordsCnt());
         const auto offset128 = bm::uint128_t(value - _currRange.low + 1);
@@ -110,9 +107,8 @@ void ArithmeticDecoder::decode(SourceT& source,
             }
             _currRange = RC::recalcRange(_currRange);
         }
+        ++bar;
     }
-
-    std::cerr << "100%" << std::endl;
 }
 
 }  // namespace ga

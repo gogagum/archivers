@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
                 [&decoded, wordsCount, bitsCount]
                 (auto&& dict, auto outIter) {
             auto decoder = ArithmeticDecoder();
-            decoder.decode(decoded, dict, outIter, wordsCount, bitsCount);
+            decoder.decode(decoded, dict, outIter, wordsCount, std::cerr, bitsCount);
         };
 
         switch (symBitLen) {
