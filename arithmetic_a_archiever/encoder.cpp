@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
                 "In file name."
             ) (
                 "out-filename,o",
-                bpo::value(&outFileName)->default_value(inFileName + "-out"),
+                bpo::value(&outFileName)->default_value(""),
                 "Out file name."
             ) (
                 "bits,b",
@@ -40,6 +40,10 @@ int main(int argc, char* argv[]) {
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
+
+        if (outFileName == "") {
+            outFileName = inFileName + "-encoded";
+        }
 
         auto fileOpener = FileOpener(inFileName, outFileName);
 

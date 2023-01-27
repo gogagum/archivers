@@ -48,13 +48,17 @@ int main(int argc, char* argv[]) {
             "In file name."
         ) (
             "out-filename,o",
-            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            bpo::value(&outFileName)->default_value(""),
             "Out file name."
         );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
+
+        if (outFileName == "") {
+            outFileName = inFileName + "-decoded";
+        }
 
         auto filesOpener = FileOpener(inFileName, outFileName);
         auto decoded = ga::DataParser(filesOpener.getInData());
