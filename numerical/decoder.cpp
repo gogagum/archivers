@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
         auto countsDecoder = ArithmeticDecoder();
         countsDecoder.decode(decoded, countsDictionary,
                              std::back_inserter(countsWords),
-                             dictWordsCount, wordsCountsBitsNumber);
+                             dictWordsCount, wordsCountsBitsNumber, std::cerr);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         auto wordsDecoder = ArithmeticDecoder();
         wordsDecoder.decode(decoded, dictWordsDictionary,
                             std::back_inserter(words),
-                            dictWordsCount, dictWordsBitsNumber);
+                            dictWordsCount, dictWordsBitsNumber, std::cerr);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
         auto contentDecoder = ArithmeticDecoder();
         contentDecoder.decode(decoded, contentDictionary,
                               std::back_inserter(contentWords),
-                              contentWordsNumber, contentBitsNumber);
+                              contentWordsNumber, contentBitsNumber, std::cerr);
 
         ////////////////////////////////////////////////////////////////////////
 

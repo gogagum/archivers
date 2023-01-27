@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include <boost/timer/progress_display.hpp>
 
 #include "flow/traits.hpp"
 #include "byte_data_constructor.hpp"
@@ -43,7 +44,9 @@ public:
      * @param bitFlow - byte
      */
     template <class DictT>
-    EncodeRet encode(ByteDataConstructor& dataConstructor, DictT& dict);
+    EncodeRet encode(ByteDataConstructor& dataConstructor,
+                     DictT& dict,
+                     std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
     FlowT& _symFlow;
@@ -59,23 +62,20 @@ ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT& symbolsFlow) :
 template <class FlowT>
 template <class DictT>
 auto ArithmeticCoder<FlowT>::encode(
-        ByteDataConstructor& dataConstructor, DictT& dict) -> EncodeRet {
+        ByteDataConstructor& dataConstructor,
+        DictT& dict,
+        std::optional<std::reference_wrapper<std::ostream>> os) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 
     std::size_t btf = 0;
 
-    std::int8_t lastPercent = -1;
-    std::size_t wordsCoded = 0;
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(_symFlow.size(), os.value(), "");
+    }
 
     for (auto sym : _symFlow) {
-        ++ret.wordsCount;
-        if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.size();
-                currPercent != lastPercent) {
-            std::cerr << static_cast<int>(currPercent) << "%" << std::endl;
-            lastPercent = currPercent;
-        }
-
         const auto [low, high, total] = dict.getProbabilityStats(sym);
         currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
@@ -98,11 +98,11 @@ auto ArithmeticCoder<FlowT>::encode(
 
             currRange = RC::recalcRange(currRange);
         }
-
-        ++wordsCoded;
+        ++ret.wordsCount;
+        if (barOpt.has_value()) {
+            ++barOpt.value();
+        }
     }
-
-    std::cerr << "100%" << std::endl;
 
     ret.bitsEncoded += btf + 2;
     if (currRange.low < RC::quater) {

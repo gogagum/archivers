@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <iostream>
 
 #include "byte_data_constructor.hpp"
 
@@ -21,7 +22,7 @@ protected:
         encoded.putT<std::uint16_t>(tail.size());
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = coder.encode(encoded, dict);
+        auto [wordsCount, bitsCount] = coder.encode(encoded, dict, std::cerr);
         encoded.putTToPosition<std::uint64_t>(wordsCount, wordsCountPos);
         encoded.putTToPosition<std::uint64_t>(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());

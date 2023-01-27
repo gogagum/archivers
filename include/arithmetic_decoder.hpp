@@ -4,10 +4,12 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <iostream>
 #include <cstdint>
 #include <limits>
+#include <optional>
 
 #include "ranges_calc.hpp"
 
@@ -21,22 +23,15 @@ public:
 
     ArithmeticDecoder() : _currRange{ 0, RC::total } {}
 
-    /**
-     * @brief decode
-     * @param source
-     * @param wordsCount
-     * @param bitsLimit
-     * @return
-     */
     template <class DictT,
-              class SourceT,
               std::output_iterator<typename DictT::Word> OutIterT>
     void decode(
-            SourceT& source,
+            auto& source,
             DictT& dict,
             OutIterT outIter,
             std::size_t wordsCount,
-            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
+            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
+            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
 
@@ -51,13 +46,14 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class DictT,
-          class SourceT,
           std::output_iterator<typename DictT::Word> OutIterT>
-void ArithmeticDecoder::decode(SourceT& source,
-                               DictT& dict,
-                               OutIterT outIter,
-                               std::size_t wordsCount,
-                               std::size_t bitsLimit) {
+void ArithmeticDecoder::decode(
+        auto& source,
+        DictT& dict,
+        OutIterT outIter,
+        std::size_t wordsCount,
+        std::size_t bitsLimit,
+        std::optional<std::reference_wrapper<std::ostream>> os) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -72,15 +68,12 @@ void ArithmeticDecoder::decode(SourceT& source,
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    int lastPercent = -1;
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(wordsCount, os.value(), "");
+    }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
-        if (int currPercent = (100 * i) / wordsCount;
-                currPercent != lastPercent) {
-            std::cerr << currPercent << '%' << std::endl;
-            lastPercent = currPercent;
-        }
-
         const auto range128 = bm::uint128_t(_currRange.high - _currRange.low);
         const auto dictTotalWords128 = bm::uint128_t(dict.getTotalWordsCnt());
         const auto offset128 = bm::uint128_t(value - _currRange.low + 1);
@@ -110,9 +103,10 @@ void ArithmeticDecoder::decode(SourceT& source,
             }
             _currRange = RC::recalcRange(_currRange);
         }
+        if (barOpt.has_value()) {
+            ++barOpt.value();
+        }
     }
-
-    std::cerr << "100%" << std::endl;
 }
 
 }  // namespace ga
