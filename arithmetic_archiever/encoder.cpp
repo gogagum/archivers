@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     std::string outFileName;
     std::uint16_t numBits;
     std::uint64_t ratio;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -40,6 +41,10 @@ int main(int argc, char* argv[]) {
                 "ratio,r",
                 bpo::value(&ratio)->default_value(2),
                 "Dictionary ratio."
+            ) (
+                "log-stream,l",
+                bpo::value(&logStreamParam)->default_value("stdout"),
+                "Log stream."
             );
 
         bpo::variables_map vm;
@@ -50,7 +55,18 @@ int main(int argc, char* argv[]) {
             outFileName = inFileName + "-encoded";
         }
 
-        auto fileOpener = FileOpener(inFileName, outFileName);
+        optout::OptOstreamRef outStream;
+
+        if (logStreamParam == "stdout") {
+            outStream = std::cout;
+        } else if (logStreamParam == "stderr") {
+            outStream = std::cerr;
+        } else if (logStreamParam == "off") {
+        } else {
+            throw InvalidStreamParam(logStreamParam);
+        }
+
+        auto fileOpener = FileOpener(inFileName, outFileName, outStream);
 
         switch (numBits) {
             BYTES_CASE(1, fileOpener, ratio);
@@ -82,7 +98,7 @@ int main(int argc, char* argv[]) {
             throw UnsupportedEncodeBitsMode(numBits); break;
         }
     } catch (const std::runtime_error& error) {
-        std::cout << error.what() << std::endl;
+        std::cerr << error.what() << std::endl;
         return 2;
     }
 

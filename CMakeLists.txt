@@ -42,7 +42,7 @@ add_library(encoding_lib STATIC
     include/word/uint_word.hpp
 )
 
-add_library(common STATIC common.hpp common.cpp)
+add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 
 include_directories(${Boost_INCLUDE_DIRS} include/)
 

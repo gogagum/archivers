@@ -11,11 +11,12 @@ template <std::uint8_t bytesNum>
 struct FileBytesDAdaptiveEncodeImpl
         : public BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8> {
     using Base = BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8>;
-    static void process(FileOpener& fileOpener) {
+    static void process(FileOpener& fileOpener,
+                        std::optional<std::reference_wrapper<std::ostream>> os) {
         auto flow = BytesFlow<bytesNum>(fileOpener.getInData());
         auto dict = BytesDict<bytesNum>();
         auto coder = BytesCoder<bytesNum>(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict);
+        Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
     }
 };
 
@@ -25,11 +26,12 @@ struct FileBytesDAdaptiveEncodeImpl
 template <std::uint16_t bitsNum>
 struct FileBitsDAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
     using Base = BaseAdaptiveEncodeImpl<bitsNum>;
-    static void process(FileOpener& fileOpener) {
+    static void process(FileOpener& fileOpener,
+                        std::optional<std::reference_wrapper<std::ostream>> os) {
         auto flow = BitsFlow<bitsNum>(fileOpener.getInData());
         auto dict = BitsDict<bitsNum>();
         auto coder = BitsCoder<bitsNum>(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict);
+        Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
     }
 };
 
