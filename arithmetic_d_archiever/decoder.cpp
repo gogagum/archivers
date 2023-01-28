@@ -17,18 +17,8 @@ namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
     case (bits): { \
-        auto words = std::vector<BitsWord<bits>>(); \
-        packIntoByteDataConstructor(BitsDict<bits>(), std::back_inserter(words)); \
-        for (const auto& word: words) { \
-            word.bitsOut(dataConstructor.getBitBackInserter()); \
-        } \
-    } \
-    break;
-
-#define BYTES_DECODER_CASE(bytes) \
-    case (bytes * 8): { \
-        auto words = std::vector<BytesWord<bytes>>(); \
-        packIntoByteDataConstructor(BytesDict<bytes>(), std::back_inserter(words)); \
+        auto words = WordVec<bits>(); \
+        packIntoByteDataConstructor(Dict<bits>(), std::back_inserter(words)); \
         for (const auto& word: words) { \
             word.bitsOut(dataConstructor.getBitBackInserter()); \
         } \
@@ -103,7 +93,7 @@ int main(int argc, char* argv[]) {
 
 
         switch (symBitLen) {
-            BYTES_DECODER_CASE(1);
+            BITS_DECODER_CASE(8);
             BITS_DECODER_CASE(9);
             BITS_DECODER_CASE(10);
             BITS_DECODER_CASE(11);
@@ -111,7 +101,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(13);
             BITS_DECODER_CASE(14);
             BITS_DECODER_CASE(15);
-            BYTES_DECODER_CASE(2);
+            BITS_DECODER_CASE(16);
             BITS_DECODER_CASE(17);
             BITS_DECODER_CASE(18);
             BITS_DECODER_CASE(19);
@@ -119,7 +109,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(21);
             BITS_DECODER_CASE(22);
             BITS_DECODER_CASE(23);
-            BYTES_DECODER_CASE(3);
+            BITS_DECODER_CASE(24);
             BITS_DECODER_CASE(25);
             BITS_DECODER_CASE(26);
             BITS_DECODER_CASE(27);
@@ -127,7 +117,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(29);
             BITS_DECODER_CASE(30);
             BITS_DECODER_CASE(31);
-            BYTES_DECODER_CASE(4);
+            BITS_DECODER_CASE(32);
         default:
             throw UnsupportedDecodeBitsMode(symBitLen);
             break;

@@ -9,32 +9,21 @@
 #include "flow/bits_word_flow.hpp"
 #include "dictionary/adaptive_a_dictionary.hpp"
 
-using ga::w::BytesWord;
-using ga::w::BitsWord;
-using ga::ArithmeticCoder;
-using ga::ArithmeticDecoder;
-
 ////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveADictionary<BytesWord<numBytes>>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveADictionary<BitsWord<numBits>>;
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 struct TypeChoise {
-    using Dict = BitsDict<numBits>;
+    using Dict = ga::dict::AdaptiveADictionary<ga::w::BitsWord<numBits>>;
     using Flow = ga::fl::BitsWordFlow<numBits>;
+    using WordVec = std::vector<ga::w::BitsWord<numBits>>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits> requires (numBits % 8 == 0)
 struct TypeChoise<numBits>{
-    using Dict = BytesDict<numBits/8>;
+    using Dict = ga::dict::AdaptiveADictionary<ga::w::BytesWord<numBits/8>>;
     using Flow = ga::fl::BytesWordFlow<numBits/8>;
+    using WordVec = std::vector<ga::w::BytesWord<numBits/8>>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -44,5 +33,9 @@ using Dict = typename TypeChoise<numBits>::Dict;
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 using Flow = typename TypeChoise<numBits>::Flow;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <std::uint16_t numBits>
+using WordVec = typename TypeChoise<numBits>::WordVec;
 
 #endif // ARITHMETIC_A_ARCHIEVER_INCLUDE_HPP

@@ -13,7 +13,7 @@ struct AAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
     static void process(FileOpener& fileOpener, optout::OptOstreamRef os) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
         auto dict = Dict<bitsNum>();
-        auto coder = ArithmeticCoder(flow);
+        auto coder = ga::ArithmeticCoder(flow);
         Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
     }
 };
