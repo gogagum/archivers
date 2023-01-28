@@ -94,4 +94,7 @@ private:
     std::ofstream _fout;
 };
 
+//----------------------------------------------------------------------------//
+optout::OptOstreamRef get_out_stream(const std::string& arg);
+
 #endif // COMMON_HPP

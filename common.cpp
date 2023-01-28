@@ -68,3 +68,19 @@ FileOpener::_openInFile(const std::string& fileInName, optout::OptOstreamRef opt
     fin.read(reinterpret_cast<char*>(ret.data()), finSize);
     return ret;
 }
+
+//----------------------------------------------------------------------------//
+optout::OptOstreamRef get_out_stream(const std::string& arg) {
+    optout::OptOstreamRef outStream;
+
+    if (arg == "stdout") {
+        outStream = std::cout;
+    } else if (arg == "stderr") {
+        outStream = std::cerr;
+    } else if (arg == "off") {
+    } else {
+        throw InvalidStreamParam(arg);
+    }
+
+    return outStream;
+}

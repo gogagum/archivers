@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
                 "In file name."
             ) (
                 "out-filename,o",
-                bpo::value(&outFileName)->default_value(""),
+                bpo::value(&outFileName)->default_value({}),
                 "Out file name."
             ) (
                 "bits,b",
@@ -43,21 +43,8 @@ int main(int argc, char* argv[]) {
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        if (outFileName == "") {
-            outFileName = inFileName + "-encoded";
-        }
-
-        optout::OptOstreamRef outStream;
-
-        if (logStreamParam == "stdout") {
-            outStream = std::cout;
-        } else if (logStreamParam == "stderr") {
-            outStream = std::cerr;
-        } else if (logStreamParam == "off") {
-        } else {
-            throw InvalidStreamParam(logStreamParam);
-        }
-
+        outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
+        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
 
         switch (numBits) {

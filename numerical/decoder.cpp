@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
             "In file name."
         ) (
             "out-filename,o",
-            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            bpo::value(&outFileName)->default_value({}),
             "Out file name."
         ) (
             "log-stream,l",
@@ -55,17 +55,8 @@ int main(int argc, char* argv[]) {
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        optout::OptOstreamRef outStream;
-
-        if (logStreamParam == "stdout") {
-            outStream = std::cout;
-        } else if (logStreamParam == "stderr") {
-            outStream = std::cerr;
-        } else if (logStreamParam == "off") {
-        } else {
-            throw InvalidStreamParam(logStreamParam);
-        }
-
+        outFileName = outFileName.empty() ? inFileName + "-out" : outFileName;
+        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
         auto decoded = ga::DataParser(filesOpener.getInData());
 
