@@ -7,29 +7,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The FileBytesAAdaptiveEncodeImpl class
 ///
-template <std::uint8_t bytesNum>
-struct FileBytesAAdaptiveEncodeImpl
-        : public BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8> {
-    using Base = BaseAdaptiveEncodeImpl<std::uint16_t{bytesNum} * 8>;
-    static void process(FileOpener& fileOpener) {
-        auto flow = BytesFlow<bytesNum>(fileOpener.getInData());
-        auto dict = BytesDict<bytesNum>();
-        auto coder = BytesCoder<bytesNum>(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict);
-    }
-};
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief The FileBitsAAdaptiveEncodeImpl class
-///
 template <std::uint16_t bitsNum>
-struct FileBitsAAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
+struct AAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
     using Base = BaseAdaptiveEncodeImpl<bitsNum>;
-    static void process(FileOpener& fileOpener) {
-        auto flow = BitsFlow<bitsNum>(fileOpener.getInData());
-        auto dict = BitsDict<bitsNum>();
-        auto coder = BitsCoder<bitsNum>(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict);
+    static void process(FileOpener& fileOpener, optout::OptOstreamRef os) {
+        auto flow = Flow<bitsNum>(fileOpener.getInData());
+        auto dict = Dict<bitsNum>();
+        auto coder = ArithmeticCoder(flow);
+        Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
     }
 };
 

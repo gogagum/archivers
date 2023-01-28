@@ -7,11 +7,8 @@
 #include "../common.hpp"
 #include "encoder_impl.hpp"
 
-#define BYTES_CASE(bytes, fileOpener, outStream) \
-    case (bytes) * 8: FileBytesDAdaptiveEncodeImpl<bytes>::process(fileOpener, outStream); break;
-
 #define BITS_CASE(bits, fileOpener, outStream) \
-    case (bits): FileBitsDAdaptiveEncodeImpl<bits>::process(fileOpener, outStream); break;
+    case (bits): DAdaptiveEncodeImpl<bits>::process((fileOpener), (outStream)); break;
 
 namespace bpo = boost::program_options;
 
@@ -64,7 +61,7 @@ int main(int argc, char* argv[]) {
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
 
         switch (numBits) {
-            BYTES_CASE(1, fileOpener, outStream);
+            BITS_CASE(8, fileOpener, outStream);
             BITS_CASE(9, fileOpener, outStream);
             BITS_CASE(10, fileOpener, outStream);
             BITS_CASE(11, fileOpener, outStream);
@@ -72,7 +69,7 @@ int main(int argc, char* argv[]) {
             BITS_CASE(13, fileOpener, outStream);
             BITS_CASE(14, fileOpener, outStream);
             BITS_CASE(15, fileOpener, outStream);
-            BYTES_CASE(2, fileOpener, outStream);
+            BITS_CASE(16, fileOpener, outStream);
             BITS_CASE(17, fileOpener, outStream);
             BITS_CASE(18, fileOpener, outStream);
             BITS_CASE(19, fileOpener, outStream);
@@ -80,7 +77,7 @@ int main(int argc, char* argv[]) {
             BITS_CASE(21, fileOpener, outStream);
             BITS_CASE(22, fileOpener, outStream);
             BITS_CASE(23, fileOpener, outStream);
-            BYTES_CASE(3, fileOpener, outStream);
+            BITS_CASE(24, fileOpener, outStream);
             BITS_CASE(25, fileOpener, outStream);
             BITS_CASE(26, fileOpener, outStream);
             BITS_CASE(27, fileOpener, outStream);
@@ -88,7 +85,7 @@ int main(int argc, char* argv[]) {
             BITS_CASE(29, fileOpener, outStream);
             BITS_CASE(30, fileOpener, outStream);
             BITS_CASE(31, fileOpener, outStream);
-            BYTES_CASE(4, fileOpener, outStream);
+            BITS_CASE(32, fileOpener, outStream);
         default:
             throw UnsupportedEncodeBitsMode(numBits); break;
         }
