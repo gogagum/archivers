@@ -44,21 +44,6 @@ void DataParser::_moveInByteOffset() {
 }
 
 //----------------------------------------------------------------------------//
-std::byte DataParser::_getByteFlag() const {
-    return std::byte{0b10000000} >> _inByteOffset;
-}
-
-//----------------------------------------------------------------------------//
-std::size_t DataParser::getNumBytes() const {
-    return _data.size();
-}
-
-//----------------------------------------------------------------------------//
-std::size_t DataParser::getNumBits() const {
-    return _data.size() * 8;
-}
-
-//----------------------------------------------------------------------------//
 void DataParser::seek(std::size_t bitsOffset) {
     _dataIter = _data.begin() + bitsOffset / 8;
     _inByteOffset = bitsOffset % 8;
@@ -74,15 +59,11 @@ auto DataParser::getEndBitsIter() -> BitsIterator {
     return BitsIterator(*this, _data.size() * 8);
 }
 
-//----------------------------------------------------------------------------//
-auto DataParser::getCurrTailRange() -> boost::iterator_range<BitsIterator> {
-    return boost::make_iterator_range(getCurrPosBitsIter(), getEndBitsIter());
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 bool operator==(const DataParser& dp1, const DataParser& dp2) {
     return dp1._data.data() == dp2._data.data()
+            && dp1._data.size() == dp2._data.size()
             && dp1._dataIter == dp2._dataIter;
 }
 
@@ -90,14 +71,12 @@ bool operator==(const DataParser& dp1, const DataParser& dp2) {
 //----------------------------------------------------------------------------//
 bool DataParser::BitsIterator::dereference() const {
     _owner->seek(_bitsPosition);
-    bool retBit = _owner->takeBit();
-    return retBit;
+    return _owner->takeBit();
 }
 
 //----------------------------------------------------------------------------//
 bool DataParser::BitsIterator::equal(const type& other) const {
-    return _owner == other._owner
-        && _bitsPosition == other._bitsPosition;
+    return _owner == other._owner && _bitsPosition == other._bitsPosition;
 }
 
 }  // namespace ga

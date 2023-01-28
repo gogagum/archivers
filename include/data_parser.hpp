@@ -60,13 +60,13 @@ public:
      * @brief getNumBytes - get number of bytes parsed.
      * @return number of bytes.
      */
-    std::size_t getNumBytes() const;
+    std::size_t getNumBytes() const { return _data.size(); }
 
     /**
      * @brief getNumBits - get number of bits.
      * @return number of bits.
      */
-    std::size_t getNumBits() const;
+    std::size_t getNumBits() const { return _data.size() * 8; }
 
     /**
      * @brief seek move to bitsOffset position.
@@ -78,13 +78,12 @@ public:
 
     BitsIterator getEndBitsIter();
 
-    boost::iterator_range<BitsIterator> getCurrTailRange();
-
 private:
 
     void _moveInByteOffset();
 
-    std::byte _getByteFlag() const;
+    std::byte
+    _getByteFlag() const { return std::byte{0b10000000} >> _inByteOffset; }
 
 private:
 
@@ -136,8 +135,15 @@ public:
     //------------------------------------------------------------------------//
     void increment()                    { ++_bitsPosition; }
     //------------------------------------------------------------------------//
-    BitsIterator operator+(std::size_t offset) {
+    BitsIterator
+    operator+(std::size_t offset) {
         return BitsIterator(*_owner, _bitsPosition + offset);
+    }
+    //------------------------------------------------------------------------//
+    BitsIterator&
+    operator+=(std::size_t offset) {
+        _bitsPosition += offset;
+        return *this;
     }
 private:
     DataParser* _owner;

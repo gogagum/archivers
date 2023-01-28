@@ -3,8 +3,10 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <iostream>
 
 #include "byte_data_constructor.hpp"
+#include "opt_ostream_ref.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BaseAAdaptiveEncodeImpl class
@@ -14,13 +16,15 @@ class BaseAdaptiveEncodeImpl {
 protected:
     static void processImpl(auto& fileOpener,
                             auto&& tail,
-                            auto& coder) {
+                            auto& coder,
+                            auto& dict,
+                            optout::OptOstreamRef os = std::nullopt) {
         auto encoded = ga::ByteDataConstructor();
         encoded.putT<std::uint16_t>(bitsNum);
         encoded.putT<std::uint16_t>(tail.size());
-        const auto wordsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
-        const auto bitsCountPos = encoded.saveBytesSpace(sizeof(std::uint64_t));
-        auto [wordsCount, bitsCount] = coder.encode(encoded);
+        const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        auto [wordsCount, bitsCount] = coder.encode(encoded, dict, os);
         encoded.putTToPosition<std::uint64_t>(wordsCount, wordsCountPos);
         encoded.putTToPosition<std::uint64_t>(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
@@ -31,7 +35,7 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The UnsupportedBitsMode class
 ///
-class UnsupportedEncodeBitsMode : std::invalid_argument {
+class UnsupportedEncodeBitsMode : public std::invalid_argument {
 public:
     UnsupportedEncodeBitsMode(std::uint16_t bits);
 };
@@ -39,10 +43,19 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The UnsupportedDecodeBitsMode class
 ///
-class UnsupportedDecodeBitsMode : std::invalid_argument {
+class UnsupportedDecodeBitsMode : public std::invalid_argument {
 public:
     UnsupportedDecodeBitsMode(std::uint16_t bits);
 };
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The InvalidStreamParam class
+///
+class InvalidStreamParam : public std::invalid_argument {
+public:
+    InvalidStreamParam(const std::string& streamParam);
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The FilesOpener class
@@ -54,8 +67,11 @@ public:
      * @brief FileOpener - opener constructor from two files names.
      * @param inFileName - input file name.
      * @param outFileName - output file name.
+     * @param optOs - optional out stream.
      */
-    FileOpener(const std::string& inFileName, const std::string& outFileName);
+    FileOpener(const std::string& inFileName,
+               const std::string& outFileName,
+               optout::OptOstreamRef optOs = std::nullopt);
 
     /**
      * @brief getInData - get input file data.
@@ -70,11 +86,15 @@ public:
     std::ofstream& getOutFileStream();
 
 private:
-    std::vector<std::byte> _openInFile(const std::string& fileInName);
+    std::vector<std::byte>
+    _openInFile(const std::string& fileInName, optout::OptOstreamRef optOs);
 
 private:
     std::vector<std::byte> _finData;
     std::ofstream _fout;
 };
+
+//----------------------------------------------------------------------------//
+optout::OptOstreamRef get_out_stream(const std::string& arg);
 
 #endif // COMMON_HPP

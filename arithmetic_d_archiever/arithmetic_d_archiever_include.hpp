@@ -9,44 +9,33 @@
 #include "flow/bits_word_flow.hpp"
 #include "dictionary/adaptive_d_dictionary.hpp"
 
-using ga::w::BytesWord;
-using ga::w::BitsWord;
-using ga::ArithmeticCoder;
-using ga::ArithmeticDecoder;
-
-constexpr static const std::uint16_t rangeNumBits = 60;
-
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesFlow = ga::fl::BytesWordFlow<BytesWord<numBytes>>;
+template <std::uint16_t numBits>
+struct TypeChoise {
+    using Dict = ga::dict::AdaptiveDDictionary<ga::w::BitsWord<numBits>>;
+    using Flow = ga::fl::BitsWordFlow<numBits>;
+    using WordVec = std::vector<ga::w::BitsWord<numBits>>;
+};
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesDict = ga::dict::AdaptiveDDictionary<BytesWord<numBytes>>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesCoder = ArithmeticCoder<BytesFlow<numBytes>, BytesDict<numBytes>, rangeNumBits>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint8_t numBytes>
-using BytesDecoder = ArithmeticDecoder<BytesWord<numBytes>, BytesDict<numBytes>, rangeNumBits>;
+template <std::uint16_t numBits> requires (numBits % 8 == 0)
+struct TypeChoise<numBits>{
+    using Dict = ga::dict::AdaptiveDDictionary<ga::w::BytesWord<numBits/8>>;
+    using Flow = ga::fl::BytesWordFlow<numBits/8>;
+    using WordVec = std::vector<ga::w::BytesWord<numBits/8>>;
+};
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsFlow = ga::fl::BitsWordFlow<BitsWord<numBits>>;
+using Dict = typename TypeChoise<numBits>::Dict;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsDict = ga::dict::AdaptiveDDictionary<BitsWord<numBits>>;
+using Flow = typename TypeChoise<numBits>::Flow;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using BitsCoder = ArithmeticCoder<BitsFlow<numBits>, BitsDict<numBits>, rangeNumBits>;
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint16_t numBits>
-using BitsDecoder = ArithmeticDecoder<BitsWord<numBits>, BitsDict<numBits>, rangeNumBits>;
+using WordVec = typename TypeChoise<numBits>::WordVec;
 
 #endif // ARITHMETIC_D_ARCHIEVER_INCLUDE_HPP

@@ -4,69 +4,56 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <iostream>
-#include <map>
 #include <cstdint>
-#include <cstddef>
-#include <cstring>
-#include <algorithm>
 #include <limits>
+#include <optional>
 
-#include "data_parser.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
 
-namespace bc = boost::container;
-namespace bm = boost::multiprecision;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-template <class SymT, class DictT, std::uint16_t rangeBits>
-class ArithmeticDecoder : RangesCalc<rangeBits> {
-public:
-    using Source = DataParser;
-    using Ret = std::vector<SymT>;
-
+class ArithmeticDecoder : RangesCalc {
 public:
 
-    ArithmeticDecoder(DictT&& dict);
+    ArithmeticDecoder() : _currRange{ 0, RC::total } {}
 
-    /**
-     * @brief decode
-     * @param source
-     * @param wordsCount
-     * @param bitsLimit
-     * @return
-     */
-    Ret decode(Source& source,
-               std::size_t wordsCount,
-               std::size_t bitsLimit = std::numeric_limits<std::size_t>::max());
+    template <class DictT,
+              std::output_iterator<typename DictT::Word> OutIterT>
+    void decode(
+            auto& source,
+            DictT& dict,
+            OutIterT outIter,
+            std::size_t wordsCount,
+            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
+            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
 
-    using RC = RangesCalc<rangeBits>;
+    using RC = RangesCalc;
     using OrdRange = typename RC::Range;
 
 private:
-    DictT _dict;
+
+    OrdRange _currRange;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class SymT, class DictT, std::uint16_t rangeBits>
-ArithmeticDecoder<SymT, DictT, rangeBits>::ArithmeticDecoder(DictT&& dict)
-    : _dict(std::forward<DictT>(dict)) {}
-
-//----------------------------------------------------------------------------//
-template <class SymT, class DictT, std::uint16_t rangeBits>
-auto
-ArithmeticDecoder<SymT, DictT, rangeBits>::decode(Source& source,
-                                       std::size_t wordsCount,
-                                       std::size_t bitsLimit) -> Ret {
+template <class DictT,
+          std::output_iterator<typename DictT::Word> OutIterT>
+void ArithmeticDecoder::decode(
+        auto& source,
+        DictT& dict,
+        OutIterT outIter,
+        std::size_t wordsCount,
+        std::size_t bitsLimit,
+        std::optional<std::reference_wrapper<std::ostream>> os) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -81,61 +68,45 @@ ArithmeticDecoder<SymT, DictT, rangeBits>::decode(Source& source,
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
-    auto currRange = OrdRange { 0, RC::total };
-
-    Ret ret;
-
-    int lastPercent = -1;
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(wordsCount, os.value(), "");
+    }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
-        if (int currPercent = (100 * i) / wordsCount;
-                currPercent != lastPercent) {
-            std::cerr << currPercent << '%' << std::endl;
-            lastPercent = currPercent;
-        }
+        const auto range128 = bm::uint128_t(_currRange.high - _currRange.low);
+        const auto dictTotalWords128 = bm::uint128_t(dict.getTotalWordsCnt());
+        const auto offset128 = bm::uint128_t(value - _currRange.low + 1);
 
-        const auto range = currRange.high - currRange.low;
-        const auto range128 = bm::uint128_t(range);
-        const auto dictTotalWords128 = bm::uint128_t(_dict.getTotalWordsCount());
-        const auto offset128 = bm::uint128_t(value - currRange.low + 1);
+        const auto aux128 = (offset128 * dictTotalWords128 - 1) / range128;
+        const auto aux = aux128.convert_to<std::uint64_t>();
+        const auto word = dict.getWord(aux);
+        *outIter = word;
+        ++outIter;
 
-        const auto aux =
-                ((offset128 * dictTotalWords128 - 1) / range128).template convert_to<std::uint64_t>();
-
-        const auto sym = _dict.getWord(aux);
-        ret.push_back(sym);
-
-        auto [low, high, total] = _dict.getProbabilityStats(sym);
-
-        const auto low128 = bm::uint128_t(low);
-        const auto high128 = bm::uint128_t(high);
-        const auto total128 = bm::uint128_t(total);
-
-        currRange = OrdRange {
-            currRange.low + ((range128 * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range128 * high128) / total128).template convert_to<std::uint64_t>()
-        };
+        auto [low, high, total] = dict.getProbabilityStats(word);
+        _currRange = RC::rangeFromStatsAndPrev(_currRange, low, high, total);
 
         while (true) {
-            if (currRange.high <= RC::half) {
+            if (_currRange.high <= RC::half) {
                 bool bit = takeBitLimited();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (currRange.low >= RC::half) {
+            } else if (_currRange.low >= RC::half) {
                 bool bit = takeBitLimited();
                 value = value * 2 - RC::total + (bit ? 1 : 0);
-            } else if (currRange.low >= RC::quater
-                       && currRange.high <= RC::threeQuaters) {
+            } else if (_currRange.low >= RC::quater
+                       && _currRange.high <= RC::threeQuaters) {
                 bool bit = takeBitLimited();
                 value = value * 2 - RC::half + (bit ? 1 : 0);
             } else {
                 break;
             }
-            currRange = RC::recalcRange(currRange);
+            _currRange = RC::recalcRange(_currRange);
+        }
+        if (barOpt.has_value()) {
+            ++barOpt.value();
         }
     }
-
-    std::cerr << "100%" << std::endl;
-    return ret;
 }
 
 }  // namespace ga

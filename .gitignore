@@ -76,4 +76,7 @@ archievers.kdev4
 build/
 CMakeLists.txt.user
 .cache/
-
+testing/.ipynb_checkpoints/
+testing/out/
+testing/dataset/
+testing/exe/

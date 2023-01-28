@@ -106,11 +106,11 @@ public:
     ByteBackInserter getByteBackInserter();
 
     /**
-     * @brief saveBytesSpace
-     * @param bytesCount
-     * @return bytesPosition
+     * @brief saveSpaceForT
+     * @return
      */
-    std::size_t saveBytesSpace(std::size_t bytesCount);
+    template <class T>
+    std::size_t saveSpaceForT();
 
 private:
 
@@ -136,9 +136,9 @@ public:
 public:
     ByteBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
     ByteBackInserter operator++(int) { return* this; }
-    ByteBackInserter& operator++() { return *this; }
-    void operator=(std::byte byte) { _owner->putByte(byte); }
-    ByteBackInserter& operator*() { return* this; }
+    ByteBackInserter& operator++()   { return *this; }
+    void operator=(std::byte byte)   { _owner->putByte(byte); }
+    ByteBackInserter& operator*()    { return* this; }
 private:
     ByteDataConstructor* _owner;
 };
@@ -152,9 +152,9 @@ public:
 public:
     BitBackInserter(ByteDataConstructor& owner) : _owner(&owner) {};
     BitBackInserter operator++(int) { return* this; }
-    BitBackInserter& operator++() { return *this; }
-    void operator=(bool bit) { _owner->putBit(bit); }
-    BitBackInserter& operator*() { return *this; }
+    BitBackInserter& operator++()   { return *this; }
+    void operator=(bool bit)        { _owner->putBit(bit); }
+    BitBackInserter& operator*()    { return *this; }
     ByteBackInserter getBytesIter() { return _owner->getByteBackInserter(); }
 private:
     ByteDataConstructor* _owner;
@@ -188,6 +188,17 @@ void ByteDataConstructor::putTToPosition(auto s, std::size_t position) {
 template <class T>
 const T* ByteDataConstructor::data() const {
     return reinterpret_cast<const T*>(_data.data());
+}
+
+//----------------------------------------------------------------------------//
+template <class T>
+std::size_t ByteDataConstructor::saveSpaceForT() {
+    if (_currBitFlag != std::byte{0b10000000}) {
+        throw BytesAfterBits("Tried saving bytes with bit flag != 0b10000000.");
+    }
+    auto ret = _data.size();
+    _data.resize(_data.size() + sizeof(T));
+    return ret;
 }
 
 } // namespace ga

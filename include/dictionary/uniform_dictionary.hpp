@@ -39,7 +39,8 @@ public:
      * @brief totalWordsCount
      * @return
      */
-    [[nodiscard]] Count getTotalWordsCount() const;
+    [[nodiscard]] Count
+    getTotalWordsCount() const { return WordT::wordsCount; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,11 +58,6 @@ auto UniformDictionary<WordT, CountT>::getProbabilityStats(
     return { ord, ord + 1, WordT::wordsCount };
 }
 
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto UniformDictionary<WordT, CountT>::getTotalWordsCount() const -> Count {
-    return WordT::wordsCount;
-}
 
 }  // namespace ga::dict
 

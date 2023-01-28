@@ -70,6 +70,8 @@ public:
      */
     BytesWord(const std::array<std::byte, _numBytes>& bytes);
 
+    BytesWord(const BytesWord<_numBytes>& other) = default;
+
     /**
      * @brief toBits transform to bits
      * @return bits array

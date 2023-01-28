@@ -16,14 +16,7 @@
 namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
-    case (bits): \
-        packIntoByteDataConstructor(BitsDecoder<(bits)>(BitsDict<(bits)>())); \
-        break;
-
-#define BYTES_DECODER_CASE(bytes) \
-    case (bytes * 8): \
-        packIntoByteDataConstructor(BytesDecoder<(bytes)>(BytesDict<(bytes)>())); \
-        break;
+    case (bits): packIntoByteDataConstructor(Dict<bits>(), WordVec<bits>()); break;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
@@ -31,6 +24,7 @@ int main(int argc, char* argv[]) {
 
     std::string inFileName;
     std::string outFileName;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -39,40 +33,48 @@ int main(int argc, char* argv[]) {
             "In file name."
         ) (
             "out-filename,o",
-            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            bpo::value(&outFileName)->default_value({}),
             "Out file name."
+        ) (
+            "log-stream,l",
+            bpo::value(&logStreamParam)->default_value("stdout"),
+            "Log stream."
         );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        auto filesOpener = FileOpener(inFileName, outFileName);
+        outFileName = outFileName.empty() ? inFileName + "-decoded" : outFileName;
+        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
+        auto filesOpener = FileOpener(inFileName, outFileName, outStream);
         auto decoded = ga::DataParser(filesOpener.getInData());
 
         const auto symBitLen = decoded.takeT<std::uint16_t>();
-        std::cerr << "Word bits length: " << symBitLen << std::endl;
+        outStream << "Word bits length: " << symBitLen << std::endl;
 
         const auto tailSize = decoded.takeT<std::uint16_t>();
-        std::cerr << "Tail size: " << tailSize << std::endl;
+        outStream << "Tail size: " << tailSize << std::endl;
 
         const auto wordsCount = decoded.takeT<std::uint64_t>();
-        std::cerr << "Words count: " << wordsCount << std::endl;
+        outStream << "Words count: " << wordsCount << std::endl;
 
         const auto bitsCount = decoded.takeT<std::uint64_t>();
-        std::cerr << "Bits count: " << bitsCount << std::endl;
+        outStream << "Bits count: " << bitsCount << std::endl;
 
         auto dataConstructor = ga::ByteDataConstructor();
+        auto decoder = ga::ArithmeticDecoder();
 
-        const auto packIntoByteDataConstructor =
-                [&dataConstructor, &decoded, wordsCount, bitsCount] (auto&& decoder) {
-            for (auto& word: decoder.decode(decoded, wordsCount, bitsCount)) {
+        const auto packIntoByteDataConstructor = [&](auto&& dict, auto&& words) {
+            decoder.decode(decoded, dict, std::back_inserter(words),
+                           wordsCount, bitsCount, outStream);
+            for (const auto& word: words) { \
                 word.bitsOut(dataConstructor.getBitBackInserter());
             }
         };
 
         switch (symBitLen) {
-            BYTES_DECODER_CASE(1);
+            BITS_DECODER_CASE(8);
             BITS_DECODER_CASE(9);
             BITS_DECODER_CASE(10);
             BITS_DECODER_CASE(11);
@@ -80,7 +82,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(13);
             BITS_DECODER_CASE(14);
             BITS_DECODER_CASE(15);
-            BYTES_DECODER_CASE(2);
+            BITS_DECODER_CASE(16);
             BITS_DECODER_CASE(17);
             BITS_DECODER_CASE(18);
             BITS_DECODER_CASE(19);
@@ -88,7 +90,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(21);
             BITS_DECODER_CASE(22);
             BITS_DECODER_CASE(23);
-            BYTES_DECODER_CASE(3);
+            BITS_DECODER_CASE(24);
             BITS_DECODER_CASE(25);
             BITS_DECODER_CASE(26);
             BITS_DECODER_CASE(27);
@@ -96,7 +98,7 @@ int main(int argc, char* argv[]) {
             BITS_DECODER_CASE(29);
             BITS_DECODER_CASE(30);
             BITS_DECODER_CASE(31);
-            BYTES_DECODER_CASE(4);
+            BITS_DECODER_CASE(32);
         default:
             throw UnsupportedDecodeBitsMode(symBitLen);
             break;
@@ -109,7 +111,7 @@ int main(int argc, char* argv[]) {
         filesOpener.getOutFileStream().write(
                     dataConstructor.data<char>(), dataConstructor.size());
     } catch (const std::runtime_error&  error) {
-        std::cout << error.what();
+        std::cerr << error.what();
         return 1;
     }
 

@@ -3,30 +3,24 @@
 #ifndef ARITHMETIC_CODER_HPP
 #define ARITHMETIC_CODER_HPP
 
-#include <map>
 #include <iostream>
-#include <vector>
-#include <cassert>
 #include <cstdint>
-#include <bitset>
-#include <boost/range/combine.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/timer/progress_display.hpp>
 
+#include "flow/traits.hpp"
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
 namespace ga {
 
-namespace bm = boost::multiprecision;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-class ArithmeticCoder : RangesCalc<rangeBits> {
+template <class FlowT>
+class ArithmeticCoder : RangesCalc {
 public:
 
-    using Word = typename FlowT::Word;
+    using Word = ga::fl::traits::WordT<FlowT>;
 
     struct EncodeRet {
         std::size_t wordsCount;
@@ -34,7 +28,7 @@ public:
     };
 
 private:
-    using RC = RangesCalc<rangeBits>;
+    using RC = RangesCalc;
     using OrdRange = typename RC::Range;
 public:
 
@@ -43,58 +37,47 @@ public:
      * @param byteFlow
      * @param constructor
      */
-    ArithmeticCoder(FlowT& byteFlow, DictT&& dict);
+    ArithmeticCoder(FlowT& byteFlow);
 
     /**
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
-    EncodeRet encode(ByteDataConstructor& dataConstructor);
+    template <class DictT>
+    EncodeRet encode(ByteDataConstructor& dataConstructor,
+                     DictT& dict,
+                     std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
 
 private:
     FlowT& _symFlow;
-    DictT _dict;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-ArithmeticCoder<FlowT, DictT, rangeBits>::ArithmeticCoder(FlowT& symbolsFlow,
-                                               DictT&& dict) :
-    _symFlow(symbolsFlow),
-    _dict(std::forward<DictT>(dict)) {}
+template <class FlowT>
+ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT& symbolsFlow) :
+    _symFlow(symbolsFlow) {}
 
 //----------------------------------------------------------------------------//
-template <class FlowT, class DictT, std::uint16_t rangeBits>
-auto ArithmeticCoder<FlowT, DictT, rangeBits>::encode(
-        ByteDataConstructor& dataConstructor) -> EncodeRet {
+template <class FlowT>
+template <class DictT>
+auto ArithmeticCoder<FlowT>::encode(
+        ByteDataConstructor& dataConstructor,
+        DictT& dict,
+        std::optional<std::reference_wrapper<std::ostream>> os) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 
     std::size_t btf = 0;
 
-    std::int8_t lastPercent = -1;
-    std::size_t wordsCoded = 0;
+    auto barOpt = std::optional<boost::timer::progress_display>();
+    if (os.has_value()) {
+        barOpt.emplace(_symFlow.size(), os.value(), "");
+    }
 
     for (auto sym : _symFlow) {
-        ++ret.wordsCount;
-        if (std::uint8_t currPercent = wordsCoded * 100 / _symFlow.size();
-                currPercent != lastPercent) {
-            std::cerr << static_cast<int>(currPercent) << "%" << std::endl;
-            lastPercent = currPercent;
-        }
-
-        const auto range = bm::uint128_t(currRange.high - currRange.low);
-        const auto [low, high, total] = _dict.getProbabilityStats(sym);
-
-        const auto low128 = bm::uint128_t(low);
-        const auto high128 = bm::uint128_t(high);
-        const auto total128 = bm::uint128_t(total);
-
-        currRange = OrdRange {
-            currRange.low + ((range * low128) / total128).template convert_to<std::uint64_t>(),
-            currRange.low + ((range * high128) / total128).template convert_to<std::uint64_t>()
-        };
+        const auto [low, high, total] = dict.getProbabilityStats(sym);
+        currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {
             if (currRange.high <= RC::half) {
@@ -115,11 +98,11 @@ auto ArithmeticCoder<FlowT, DictT, rangeBits>::encode(
 
             currRange = RC::recalcRange(currRange);
         }
-
-        ++wordsCoded;
+        ++ret.wordsCount;
+        if (barOpt.has_value()) {
+            ++barOpt.value();
+        }
     }
-
-    std::cerr << "100%" << std::endl;
 
     ret.bitsEncoded += btf + 2;
     if (currRange.low < RC::quater) {

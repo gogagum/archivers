@@ -33,17 +33,16 @@ add_library(encoding_lib STATIC
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
-    include/flow/int_range_word_flow.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
+    include/flow/traits.hpp
     include/word/bytes_word.hpp
     include/word/bits_word.hpp
     include/word/integer_word.hpp
-    include/word/word_ord_comp.hpp
     include/word/uint_word.hpp
 )
 
-add_library(common STATIC common.hpp common.cpp)
+add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 
 include_directories(${Boost_INCLUDE_DIRS} include/)
 
@@ -65,6 +64,12 @@ target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES}
 add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
 target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
 
+add_executable(numerical_encoder numerical/encoder.cpp)
+target_link_libraries(numerical_encoder encoding_lib common ${Boost_LIBRARIES})
+
+add_executable(numerical_decoder numerical/decoder.cpp)
+target_link_libraries(numerical_decoder encoding_lib common ${Boost_LIBRARIES})
+
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -84,7 +89,6 @@ add_executable(archiever_tests
     test/data_parser.cpp
     test/adaptive_dictionary.cpp
     test/integer_word.cpp
-    test/integer_word_flow.cpp
     test/static_dictionary.cpp
     test/uniform_dictionary.cpp
     test/adaptive_dictionary.cpp
@@ -93,6 +97,7 @@ add_executable(archiever_tests
     test/arithmetic_coder.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
+    test/traits.cpp
 )
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)

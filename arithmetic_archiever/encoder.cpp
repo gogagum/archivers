@@ -7,11 +7,8 @@
 #include "../common.hpp"
 #include "encoder_impl.hpp"
 
-#define BYTES_CASE(bytes, fileOpener, ratio) \
-    case (bytes) * 8: FileBytesAdaptiveEncodeImpl<bytes>::process((fileOpener), (ratio)); break;
-
-#define BITS_CASE(bits, fileOpener, ratio) \
-    case (bits): FileBitsAdaptiveEncodeImpl<bits>::process((fileOpener), (ratio)); break;
+#define BITS_CASE(bits, fileOpener, ratio, outStream) \
+    case (bits): AdaptiveEncodeImpl<bits>::process((fileOpener), (ratio), (outStream)); break;
 
 namespace bpo = boost::program_options;
 
@@ -22,6 +19,7 @@ int main(int argc, char* argv[]) {
     std::string outFileName;
     std::uint16_t numBits;
     std::uint64_t ratio;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -30,7 +28,7 @@ int main(int argc, char* argv[]) {
                 "In file name."
             ) (
                 "out-filename,o",
-                bpo::value(&outFileName)->default_value(inFileName + "-out"),
+                bpo::value(&outFileName)->default_value({}),
                 "Out file name."
             ) (
                 "bits,b",
@@ -40,45 +38,51 @@ int main(int argc, char* argv[]) {
                 "ratio,r",
                 bpo::value(&ratio)->default_value(2),
                 "Dictionary ratio."
+            ) (
+                "log-stream,l",
+                bpo::value(&logStreamParam)->default_value("stdout"),
+                "Log stream."
             );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        auto fileOpener = FileOpener(inFileName, outFileName);
+        outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
+        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
+        auto fileOpener = FileOpener(inFileName, outFileName, outStream);
 
         switch (numBits) {
-            BYTES_CASE(1, fileOpener, ratio);
-            BITS_CASE(9, fileOpener, ratio);
-            BITS_CASE(10, fileOpener, ratio);
-            BITS_CASE(11, fileOpener, ratio);
-            BITS_CASE(12, fileOpener, ratio);
-            BITS_CASE(13, fileOpener, ratio);
-            BITS_CASE(14, fileOpener, ratio);
-            BITS_CASE(15, fileOpener, ratio);
-            BYTES_CASE(2, fileOpener, ratio);
-            BITS_CASE(17, fileOpener, ratio);
-            BITS_CASE(18, fileOpener, ratio);
-            BITS_CASE(19, fileOpener, ratio);
-            BITS_CASE(20, fileOpener, ratio);
-            BITS_CASE(21, fileOpener, ratio);
-            BITS_CASE(22, fileOpener, ratio);
-            BITS_CASE(23, fileOpener, ratio);
-            BYTES_CASE(3, fileOpener, ratio);
-            BITS_CASE(25, fileOpener, ratio);
-            BITS_CASE(26, fileOpener, ratio);
-            BITS_CASE(27, fileOpener, ratio);
-            BITS_CASE(28, fileOpener, ratio);
-            BITS_CASE(29, fileOpener, ratio);
-            BITS_CASE(30, fileOpener, ratio);
-            BITS_CASE(31, fileOpener, ratio);
-            BYTES_CASE(4, fileOpener, ratio);
+            BITS_CASE(8, fileOpener, ratio, outStream);
+            BITS_CASE(9, fileOpener, ratio, outStream);
+            BITS_CASE(10, fileOpener, ratio, outStream);
+            BITS_CASE(11, fileOpener, ratio, outStream);
+            BITS_CASE(12, fileOpener, ratio, outStream);
+            BITS_CASE(13, fileOpener, ratio, outStream);
+            BITS_CASE(14, fileOpener, ratio, outStream);
+            BITS_CASE(15, fileOpener, ratio, outStream);
+            BITS_CASE(16, fileOpener, ratio, outStream);
+            BITS_CASE(17, fileOpener, ratio, outStream);
+            BITS_CASE(18, fileOpener, ratio, outStream);
+            BITS_CASE(19, fileOpener, ratio, outStream);
+            BITS_CASE(20, fileOpener, ratio, outStream);
+            BITS_CASE(21, fileOpener, ratio, outStream);
+            BITS_CASE(22, fileOpener, ratio, outStream);
+            BITS_CASE(23, fileOpener, ratio, outStream);
+            BITS_CASE(24, fileOpener, ratio, outStream);
+            BITS_CASE(25, fileOpener, ratio, outStream);
+            BITS_CASE(26, fileOpener, ratio, outStream);
+            BITS_CASE(27, fileOpener, ratio, outStream);
+            BITS_CASE(28, fileOpener, ratio, outStream);
+            BITS_CASE(29, fileOpener, ratio, outStream);
+            BITS_CASE(30, fileOpener, ratio, outStream);
+            BITS_CASE(31, fileOpener, ratio, outStream);
+            BITS_CASE(32, fileOpener, ratio, outStream);
         default:
             throw UnsupportedEncodeBitsMode(numBits); break;
         }
     } catch (const std::runtime_error& error) {
-        std::cout << error.what() << std::endl;
+        std::cerr << error.what() << std::endl;
         return 2;
     }
 
