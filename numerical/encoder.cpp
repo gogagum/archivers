@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
 
     std::string inFileName;
     std::string outFileName;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -44,13 +45,28 @@ int main(int argc, char* argv[]) {
             "out-filename,o",
             bpo::value(&outFileName)->default_value(inFileName + "-out"),
             "Out file name."
+        ) (
+            "log-stream,l",
+            bpo::value(&logStreamParam)->default_value("stdout"),
+            "Log stream."
         );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        auto fileOpener = FileOpener(inFileName, outFileName);
+        optout::OptOstreamRef outStream;
+
+        if (logStreamParam == "stdout") {
+            outStream = std::cout;
+        } else if (logStreamParam == "stderr") {
+            outStream = std::cerr;
+        } else if (logStreamParam == "off") {
+        } else {
+            throw InvalidStreamParam(logStreamParam);
+        }
+
+        auto fileOpener = FileOpener(inFileName, outFileName, outStream);
         auto inFileBytes = fileOpener.getInData();
         auto wordFlow = BytesWordFlow<1>(inFileBytes);
 
@@ -97,28 +113,28 @@ int main(int argc, char* argv[]) {
             auto countsDict = CountsDict(wordFlow.size());
             auto countsCoder = CountsCoder(countsWords);
             auto [_0, countsBits] =
-                    countsCoder.encode(dataConstructor, countsDict);
+                    countsCoder.encode(dataConstructor, countsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
             auto wordsDict = DictWordsDict(1);
             auto dictWordsCoder = DictWordsCoder(dictWords);
-            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor, wordsDict);
+            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor, wordsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
         {
             auto contentDict = ContentDict(counts);
             auto contentCoder = ContentCoder(wordFlow);
-            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor, contentDict);
+            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor, contentDict, outStream);
             dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
 
         fileOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
 
     } catch (const std::runtime_error& error) {
-        std::cout << error.what() << std::endl;
+        std::cerr << error.what() << std::endl;
         return 2;
     }
 

@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     std::string inFileName;
     std::string outFileName;
     std::uint16_t numBits;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -29,19 +30,38 @@ int main(int argc, char* argv[]) {
                 "In file name."
             ) (
                 "out-filename,o",
-                bpo::value(&outFileName)->default_value(inFileName + "-out"),
+                bpo::value(&outFileName)->default_value(""),
                 "Out file name."
             ) (
                 "bits,b",
                 bpo::value(&numBits)->default_value(16),
                 "Word bits count."
+            ) (
+                "log-stream,l",
+                bpo::value(&logStreamParam)->default_value("stdout"),
+                "Log stream."
             );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        auto fileOpener = FileOpener(inFileName, outFileName);
+        if (outFileName == "") {
+            outFileName = inFileName + "-encoded";
+        }
+
+        optout::OptOstreamRef outStream;
+
+        if (logStreamParam == "stdout") {
+            outStream = std::cout;
+        } else if (logStreamParam == "stderr") {
+            outStream = std::cerr;
+        } else if (logStreamParam == "off") {
+        } else {
+            throw InvalidStreamParam(logStreamParam);
+        }
+
+        auto fileOpener = FileOpener(inFileName, outFileName, outStream);
 
         switch (numBits) {
             BYTES_CASE(1, fileOpener);
@@ -73,7 +93,7 @@ int main(int argc, char* argv[]) {
             throw UnsupportedEncodeBitsMode(numBits); break;
         }
     } catch (const std::exception& error) {
-        std::cout << error.what() << std::endl;
+        std::cerr << error.what() << std::endl;
         return 1;
     }
 

@@ -10,6 +10,7 @@
 #include <boost/format.hpp>
 
 #include "../common.hpp"
+#include "../opt_ostream_ref.hpp"
 #include "arithmetic_d_archiever_include.hpp"
 
 namespace bpo = boost::program_options;
@@ -40,6 +41,7 @@ int main(int argc, char* argv[]) {
 
     std::string inFileName;
     std::string outFileName;
+    std::string logStreamParam;
 
     try {
         appOptionsDescr.add_options() (
@@ -48,36 +50,55 @@ int main(int argc, char* argv[]) {
             "In file name."
         ) (
             "out-filename,o",
-            bpo::value(&outFileName)->default_value(inFileName + "-out"),
+            bpo::value(&outFileName)->default_value(""),
             "Out file name."
+        ) (
+            "log-stream,l",
+            bpo::value(&logStreamParam)->default_value("stdout"),
+            "Log stream."
         );
 
         bpo::variables_map vm;
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        auto filesOpener = FileOpener(inFileName, outFileName);
+        if (outFileName == "") {
+            outFileName = inFileName + "-decoded";
+        }
+
+        optout::OptOstreamRef outStream;
+
+        if (logStreamParam == "stdout") {
+            outStream = std::cout;
+        } else if (logStreamParam == "stderr") {
+            outStream = std::cerr;
+        } else if (logStreamParam == "off") {
+        } else {
+            throw InvalidStreamParam(logStreamParam);
+        }
+
+        auto filesOpener = FileOpener(inFileName, outFileName, outStream);
         auto decoded = ga::DataParser(filesOpener.getInData());
 
         const auto symBitLen = decoded.takeT<std::uint16_t>();
-        std::cerr << "Word bits length: " << symBitLen << std::endl;
+        outStream << "Word bits length: " << symBitLen << std::endl;
 
         const auto tailSize = decoded.takeT<std::uint16_t>();
-        std::cerr << "Tail size: " << tailSize << std::endl;
+        outStream << "Tail size: " << tailSize << std::endl;
 
         const auto wordsCount = decoded.takeT<std::uint64_t>();
-        std::cerr << "Words count: " << wordsCount << std::endl;
+        outStream << "Words count: " << wordsCount << std::endl;
 
         const auto bitsCount = decoded.takeT<std::uint64_t>();
-        std::cerr << "Bits count: " << bitsCount << std::endl;
+        outStream << "Bits count: " << bitsCount << std::endl;
 
         auto dataConstructor = ga::ByteDataConstructor();
 
         const auto packIntoByteDataConstructor =
-                [&decoded, wordsCount, bitsCount]
+                [&decoded, wordsCount, bitsCount, outStream]
                 (auto&& dict, auto outIter) {
             auto decoder = ArithmeticDecoder();
-            decoder.decode(decoded, dict, outIter, wordsCount, bitsCount, std::cerr);
+            decoder.decode(decoded, dict, outIter, wordsCount, bitsCount, outStream);
         };
 
 
@@ -119,7 +140,7 @@ int main(int argc, char* argv[]) {
         filesOpener.getOutFileStream().write(
                     dataConstructor.data<char>(), dataConstructor.size());
     } catch (const std::exception&  error) {
-        std::cout << error.what();
+        std::cerr << error.what();
         return 1;
     }
 
