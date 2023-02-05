@@ -102,13 +102,13 @@ template <class WordT, typename CountT>
 auto
 AdaptiveADictionary<WordT, CountT>::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
-    const auto cumulativeNumFound = this->_cumulativeFoundWordsCnt(ord - 1);
+    const auto cumulativeNumFound = this->_cumulativeFoundWordsCnt.get(ord - 1);
     if (WordT::wordsCount == this->_foundWordsCount.size()) {
         return cumulativeNumFound;
     }
     const auto numUniqueWordsTotal = this->_getTotalUniqueWordsCnt();
     const auto cumulativeUniqueWordsNumFound =
-            this->_cumulativeFoundUniqueWords(ord - 1);
+            this->_cumulativeFoundUniqueWords.get(ord - 1);
     return (WordT::wordsCount - numUniqueWordsTotal) * cumulativeNumFound
             + (ord - cumulativeUniqueWordsNumFound);
 }

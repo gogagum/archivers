@@ -1,11 +1,9 @@
 #ifndef BASE_A_D_DICTIONARY_HPP
 #define BASE_A_D_DICTIONARY_HPP
 
-#include <boost/icl/interval_map.hpp>
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace ga::dict::impl {
-
-namespace bicl = boost::icl;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BaseADDictionary class
@@ -16,7 +14,10 @@ protected:
     using Ord = OrdT;
     using Count = CountT;
 protected:
-    ADDictionaryBase() : _totalFoundWordsCnt(0) {}
+    ADDictionaryBase()
+        : _cumulativeFoundUniqueWords(0, ordEnd, 0),
+          _totalFoundWordsCnt(0),
+          _cumulativeFoundWordsCnt(0, ordEnd, 0) {}
 
     Count _getTotalUniqueWordsCnt() const;
 
@@ -28,12 +29,15 @@ protected:
 
 protected:
 
-    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
+    using DST =
+        dst::DynamicSegmentTree<
+            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
+            std::plus<void>, std::int64_t>;
 
 protected:
-    bicl::interval_map<Ord, Count> _cumulativeFoundWordsCnt;
+    DST _cumulativeFoundWordsCnt;
     Count _totalFoundWordsCnt;
-    bicl::interval_map<Ord, Count> _cumulativeFoundUniqueWords;
+    DST _cumulativeFoundUniqueWords;
     std::unordered_map<Ord, Count> _foundWordsCount;
 };
 
@@ -65,10 +69,9 @@ auto ADDictionaryBase<OrdT, CountT, ordEnd>::_getRealWordCnt(
 template <typename OrdT, typename CountT, OrdT ordEnd>
 void
 ADDictionaryBase<OrdT, CountT, ordEnd>::_updateWordCnt(Ord ord, Count cnt) {
-    const auto interval = OrdInterval(ord, ordEnd);
-    _cumulativeFoundWordsCnt += std::make_pair(interval, cnt);
+    _cumulativeFoundWordsCnt.update(ord, ordEnd, 1);
     if (!_foundWordsCount.contains(ord)) {
-        _cumulativeFoundUniqueWords += std::make_pair(interval, Count{1});
+        _cumulativeFoundUniqueWords.update(ord, ordEnd, 1);
     }
     ++_totalFoundWordsCnt;
     ++_foundWordsCount[ord];
