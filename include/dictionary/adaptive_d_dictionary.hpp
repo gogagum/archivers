@@ -7,10 +7,9 @@
 
 #include <unordered_set>
 #include <cstdint>
+#include <boost/range/irange.hpp>
 
 namespace ga::dict {
-
-namespace bicl = boost::icl;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDDictionary class
@@ -104,11 +103,11 @@ auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeCnt(
         return ord;
     }
     const auto totalUniqueWordsCnt = this->_getTotalUniqueWordsCnt();
-    const auto cumulativeWordsCnt = this->_cumulativeFoundWordsCnt(ord - 1);
+    const auto cumulativeWordsCnt = this->_cumulativeFoundWordsCnt.get(ord - 1);
     if (totalUniqueWordsCnt == WordT::wordsCount) {
         return cumulativeWordsCnt;
     }
-    const auto cumulativeUniqueWordsCnt = this->_cumulativeFoundUniqueWords(ord - 1);
+    const auto cumulativeUniqueWordsCnt = this->_cumulativeFoundUniqueWords.get(ord - 1);
     return (WordT::wordsCount - totalUniqueWordsCnt) * 2 * cumulativeWordsCnt
             + ord * totalUniqueWordsCnt
             - WordT::wordsCount * cumulativeUniqueWordsCnt;

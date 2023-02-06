@@ -2,11 +2,9 @@
 #define ADAPTIVE_DICTIONARY_BASE_HPP
 
 #include <unordered_map>
-#include <boost/icl/interval_map.hpp>
+#include <dst/dynamic_segment_tree.hpp>
 
 namespace ga::dict::impl {
-
-namespace bicl = boost::icl;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionaryBase class
@@ -19,14 +17,19 @@ protected:
 
 protected:
 
-    AdaptiveDictionaryBase(Count initialTotalWordsCount)
-        : _totalWordsCnt(initialTotalWordsCount) {}
+    AdaptiveDictionaryBase(OrdT wordsCount, Count initialTotalWordsCount)
+        : _cumulativeWordCounts(OrdT{0}, wordsCount, 0),
+          _totalWordsCnt(initialTotalWordsCount) {}
 
 protected:
-    using OrdInterval = typename bicl::interval_map<Ord, Count>::interval_type;
+    using DST =
+        dst::DynamicSegmentTree<
+            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
+            std::plus<void>, std::int64_t>;
+
 
 protected:
-    bicl::interval_map<Ord, Count> _cumulativeWordCounts;
+    DST _cumulativeWordCounts;
     std::unordered_map<Ord, Count> _wordCnts;
     Count _totalWordsCnt;
 };
