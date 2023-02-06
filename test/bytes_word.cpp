@@ -5,19 +5,8 @@
 #include <boost/range/combine.hpp>
 
 #include "word/bytes_word.hpp"
-#include "byte_data_constructor.hpp"
 
 using ga::w::BytesWord;
-
-////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(!ga::w::BytesOutputTransformable<std::vector<bool>::iterator>);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::BitBackInserter>);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(!ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::ByteBackInserter>);
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -71,23 +60,53 @@ TEST(BytesWord, BytesSymbolsOrder4) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(BytesWord, BitsOut) {
+TEST(BytesWord, BytesOut) {
     const auto testData = std::array{ std::byte{0b00001111} };
     auto word = BytesWord<1>(testData);
 
-    std::vector<bool> bits;
-    auto bitsInserter = std::back_inserter(bits);
+    std::vector<std::byte> bytes;
+    auto bytesInserter = std::back_inserter(bytes);
 
-    word.bitsOut(bitsInserter);
-    EXPECT_EQ(bits.size(), 8);
+    word.bytesOut(bytesInserter);
+    EXPECT_EQ(bytes.size(), 1);
 
-    auto combinedTestAndTested =
-            boost::range::combine(bits,
-                                  ga::impl::make_bits_iterator_range(testData));
+    EXPECT_EQ(bytes[0], testData[0]);
+}
 
-    for (const auto& [dataI, bitI] : combinedTestAndTested) {
-        EXPECT_EQ(dataI, bitI);
+//----------------------------------------------------------------------------//
+TEST(BytesWord, BytesOutThreeBytes) {
+    const auto testData = std::array{ std::byte{0b00001111},
+                                      std::byte{0b11000101},
+                                      std::byte{0b11011001} };
+    auto word = BytesWord<3>(testData);
+
+    std::vector<std::byte> bytes;
+    auto bytesInserter = std::back_inserter(bytes);
+
+    word.bytesOut(bytesInserter);
+    EXPECT_EQ(bytes.size(), 3);
+
+    for (const auto& [byteI, testByteI] : boost::range::combine(bytes,
+                                                                testData)) {
+        EXPECT_EQ(byteI, testByteI);
     }
+}
+
+//----------------------------------------------------------------------------//
+TEST(BytesWord, FromBytesOut) {
+    const auto testData = std::array{ std::byte{0b00001111},
+                                      std::byte{0b11000101},
+                                      std::byte{0b11011001} };
+    auto word = BytesWord<3>(testData);
+
+    std::vector<std::byte> bytes;
+    auto bytesInserter = std::back_inserter(bytes);
+
+    word.bytesOut(bytesInserter);
+
+    auto otherWord = BytesWord<3>(bytes.data());
+
+    EXPECT_EQ(word, otherWord);
 }
 
 //----------------------------------------------------------------------------//

@@ -9,20 +9,14 @@
 #include <cassert>
 #include <cstring>
 #include <ostream>
+#include <boost/range/irange.hpp>
 #include <boost/range/combine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "bits_iterator.hpp"
+#include "tags.hpp"
 
 namespace ga::w {
-
-template <class IterT>
-concept BytesOutputTransformable =
-    std::output_iterator<IterT, bool>
-    && requires(IterT iter) {
-        { iter.getBytesIter() } -> std::output_iterator<std::byte>;
-    };
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
@@ -31,6 +25,7 @@ template <std::uint8_t _numBytes>
 class BytesWord {
 public:
 
+    using OutType = tags::BytesOut;
     constexpr static std::uint16_t numBits = _numBytes * 8;
     using Ord = std::uint64_t;
     constexpr static Ord wordsCount = Ord{1} << numBits;
@@ -72,19 +67,12 @@ public:
 
     BytesWord(const BytesWord<_numBytes>& other) = default;
 
-    /**
-     * @brief toBits transform to bits
-     * @return bits array
-     */
-    template <std::output_iterator<bool> IterT>
-    void bitsOut(IterT outIter) const;
-
-
-    template <BytesOutputTransformable IterT>
-    void bitsOut(IterT outIter) const;
+    template <std::output_iterator<std::byte> IterT>
+    void bytesOut(IterT outIter) const;
 
 private:
-    std::array<std::byte, _numBytes> _data;  // data of the word
+
+    std::uint64_t _data;  // data of the word
 
 private:
 
@@ -147,27 +135,27 @@ std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> sym);
 template <std::uint8_t _numBytes>
 std::uint64_t
 BytesWord<_numBytes>::ord(const BytesWord<_numBytes>& word) {
-    std::uint64_t ret = 0;
-    auto& asBytesArr = reinterpret_cast<std::array<std::byte, 8>&>(ret);
-    std::copy(word._data.begin(), word._data.end(), asBytesArr.rend() - _numBytes);
-    return ret;
+    return word._data;
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
 auto BytesWord<_numBytes>::byOrd(std::uint64_t ord) -> BytesWord<_numBytes> {
-    static_assert(_numBytes < 8, "Big numbers of bytes are not supported.");
-    const auto& asBytesOrdArr = reinterpret_cast<std::array<std::byte, 8>&>(ord);
-    std::array<std::byte, _numBytes> retBytes;
-    std::copy(asBytesOrdArr.rend() - _numBytes, asBytesOrdArr.rend(), retBytes.begin());
-    return BytesWord<_numBytes>(retBytes.data());
+    assert(ord < wordsCount && "Too big ord.");
+    auto ret = BytesWord<_numBytes>();
+    ret._data = ord;
+    return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 BytesWord<numBytes>::BytesWord(const std::byte* ptr) {
-    std::memcpy(_data.data(), ptr, numBytes);
+    _data = 0;
+    for (auto i : boost::irange<std::uint8_t>(0, numBytes)) {
+        _data <<= 8;
+        _data |= std::to_integer<std::uint64_t>(ptr[i]);
+    }
 }
 
 //----------------------------------------------------------------------------//
@@ -177,30 +165,17 @@ BytesWord<_numBytes>::BytesWord(const std::array<std::byte, _numBytes>& arr)
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-template <std::output_iterator<bool> IterT>
-void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
-    for (auto byte: _data) {
-        auto rng = ga::impl::make_bits_iterator_range(byte);
-        std::copy(rng.begin(), rng.end(), outIter);
-    }
+template <std::output_iterator<std::byte> IterT>
+void BytesWord<_numBytes>::bytesOut(IterT outIter) const {
+    auto& bytes = reinterpret_cast<const std::array<std::byte, 8>&>(_data);
+    std::copy(bytes.rend() - _numBytes, bytes.rend(), outIter);
 }
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes>
-template <BytesOutputTransformable IterT>
-void BytesWord<_numBytes>::bitsOut(IterT outIter) const {
-    auto bytesIter = outIter.getBytesIter();
-    std::copy(_data.begin(), _data.end(), bytesIter);
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, w::BytesWord<numBytes> sym) {
-    for (auto iter = sym._data.begin(); iter < sym._data.end() - 1; ++iter) {
-        os << std::bitset<8>(std::to_integer<std::uint8_t>(*iter)) << ' ';
-    }
-    return os << std::bitset<8>(std::to_integer<std::uint8_t>(*sym._data.rbegin()));
+std::ostream& operator<<(std::ostream& os, w::BytesWord<numBytes> word) {
+    return os << word._data;  // TODO: in a binary form.
 }
 
 }  // namespace ga::w

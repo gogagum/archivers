@@ -11,6 +11,7 @@
 #include <cstdint>
 
 #include "bits_iterator.hpp"
+#include "tags.hpp"
 
 namespace ga::w{
 
@@ -23,6 +24,7 @@ template <std::uint16_t _numBits>
 class BitsWord {
 public:
 
+    using OutType = tags::BitsOut;
     using Ord = std::uint64_t;
 
 public:
