@@ -65,8 +65,6 @@ public:
      */
     BytesWord(const std::array<std::byte, _numBytes>& bytes);
 
-    BytesWord(const BytesWord<_numBytes>& other) = default;
-
     template <std::output_iterator<std::byte> IterT>
     void bytesOut(IterT outIter) const;
 
@@ -102,26 +100,6 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief operator ==
-/// \param bs1 - first compared byte symbol.
-/// \param bs2 - second compared byte symbol.
-/// \return `true if symbols are equal, else `false.
-///
-template <std::uint8_t numBytes>
-bool operator==(const BytesWord<numBytes>& bs1,
-                const BytesWord<numBytes>& bs2);
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief operator !=
-/// \param bs1 - first compared byte symbol.
-/// \param bs2 - second compared byte symbol.
-/// \return `true if symbols are not equal, else `false.
-///
-template <std::uint8_t numBytes>
-bool operator!=(const BytesWord<numBytes>& bs1,
-                const BytesWord<numBytes>& bs2);
-
-////////////////////////////////////////////////////////////////////////////////
 /// \brief operator <<
 /// \param os - stream to write to.
 /// \param sym - ounput symbol.
@@ -150,13 +128,12 @@ auto BytesWord<_numBytes>::byOrd(std::uint64_t ord) -> BytesWord<_numBytes> {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesWord<numBytes>::BytesWord(const std::byte* ptr) {
-    _data = 0;
-    for (auto i : boost::irange<std::uint8_t>(0, numBytes)) {
-        _data <<= 8;
-        _data |= std::to_integer<std::uint64_t>(ptr[i]);
-    }
-}
+BytesWord<numBytes>::BytesWord(const std::byte* ptr)
+    : _data{std::accumulate(
+                ptr, ptr + numBytes, 0ull,
+                [](auto curr, std::byte b) {
+                    return (curr << 8) | std::to_integer<std::uint64_t>(b);
+                })} {}
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
@@ -174,7 +151,7 @@ void BytesWord<_numBytes>::bytesOut(IterT outIter) const {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, w::BytesWord<numBytes> word) {
+std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> word) {
     return os << word._data;  // TODO: in a binary form.
 }
 

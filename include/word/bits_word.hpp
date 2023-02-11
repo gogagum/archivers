@@ -39,14 +39,19 @@ public:
      * @param word - to get order of.
      * @return word order index.
      */
-    static Ord ord(const BitsWord<_numBits>& word);
+    static Ord ord(const BitsWord<_numBits>& word) { return word._data; }
 
     /**
      * @brief byOrd
      * @param ord
      * @return
      */
-    static BitsWord<_numBits> byOrd(std::uint64_t ord);
+    static BitsWord<_numBits>
+    byOrd(std::uint64_t ord) { return BitsWord<_numBits>(ord); }
+
+public:
+
+    BitsWord(std::uint64_t ord) : _data(ord) {}
 
 public:
 
@@ -60,14 +65,14 @@ public:
      * @param inputIter - input iterator to take bits form.
      */
     template <std::input_iterator IterT>
-    explicit BitsWord(IterT inputIter) { std::copy_n(inputIter, _numBits, _bits.begin()); }
+    explicit BitsWord(IterT inputIter);
 
     /**
      * @brief bitsOut - give bits of a word out.
      * @param outIter - outPut bits iterator to erite bits.
      */
     template <std::output_iterator<bool> IterT>
-    void bitsOut(IterT outIter) const { std::ranges::copy(_bits, outIter); }
+    void bitsOut(IterT outIter) const;
 
 public:
 
@@ -87,12 +92,12 @@ public:
 
 private:
 
-    std::array<bool, numBits> _bits;
+    std::uint64_t _data;
 
 private:
 
     /**
-     * @brief operator <<  for debug output.
+     * @brief operator << for debug output.
      * @param os - output stream.
      * @param word - printed word.
      * @return output stream reference.
@@ -103,35 +108,28 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief operator <<
-/// \param os - stream to write to.
-/// \param bw - ounput word.
-/// \return reference to os.
-///
-template <std::uint16_t numBits>
-std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw);
+template <std::uint16_t _numBits>
+template <std::input_iterator IterT>
+BitsWord<_numBits>::BitsWord(IterT inputIter)
+    : _data{std::accumulate(
+                inputIter, inputIter + _numBits, 0ull,
+                [](auto curr, bool bit) { return (curr << 1) | bit; })} {}
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-auto BitsWord<_numBits>::ord(const BitsWord<_numBits>& bw) -> Ord {
-    return std::accumulate(
-        bw._bits.begin(), bw._bits.end(), std::uint64_t{0},
-        [](auto curr, bool bit) { return (curr << 1) | std::uint64_t(bit); });
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-BitsWord<_numBits> BitsWord<_numBits>::byOrd(std::uint64_t ord) {
-    return BitsWord<_numBits>(ga::impl::bits_end(ord) - _numBits);
+template <std::output_iterator<bool> IterT>
+void BitsWord<_numBits>::bitsOut(IterT outIter) const {
+    std::copy(ga::impl::bits_end(_data) - _numBits,
+              ga::impl::bits_end(_data),
+              outIter);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::uint16_t numBits>
 std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw) {
-    std::ranges::for_each(bw._bits, [&](auto bit) { os << (bit ? 1 : 0); });
-    return os;
+    return *std::accumulate(
+        ga::impl::bits_begin(bw._data), ga::impl::bits_end(bw._data), &os,
+        [](auto* os, const bool bit) { return &(*os << bit); });
 }
 
 }

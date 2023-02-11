@@ -73,7 +73,7 @@ ReverseBitsIterator<T> bits_rbegin(const T& t) {
 
 //----------------------------------------------------------------------------//
 template <class T>
-BitsIterator<T> bits_rend(const T& t) {
+ReverseBitsIterator<T> bits_rend(const T& t) {
     return std::make_reverse_iterator(bits_end(t));
 }
 
