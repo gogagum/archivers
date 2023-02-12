@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <word/bytes_word.hpp>
+#include <word/bits_word.hpp>
 #include "byte_data_constructor.hpp"
 #include "opt_ostream_ref.hpp"
 
@@ -96,5 +98,18 @@ private:
 
 //----------------------------------------------------------------------------//
 optout::OptOstreamRef get_out_stream(const std::string& arg);
+
+//----------------------------------------------------------------------------//
+template <std::uint8_t _numBytes>
+void packWordIntoData(const ga::w::BytesWord<_numBytes> word, auto& cntr) {
+    word.bytesOut(cntr.getByteBackInserter());
+}
+
+//----------------------------------------------------------------------------//
+template <std::uint16_t _numBits>
+void packWordIntoData(const ga::w::BitsWord<_numBits> word, auto& cntr) {
+    word.bitsOut(cntr.getBitBackInserter());
+}
+
 
 #endif // COMMON_HPP

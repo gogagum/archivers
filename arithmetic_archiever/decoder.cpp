@@ -73,17 +73,8 @@ int main(int argc, char* argv[]) {
                     DictT&& dict, auto&& words) {
             decoder.decode(decoded, dict, std::back_inserter(words),
                            wordsCount, bitsCount, outStream);
-            if constexpr (std::is_same_v<typename DictT::Word::OutType,
-                                         ga::w::tags::BitsOut>) {
-                for (const auto& word: words) { \
-                    word.bitsOut(dataConstructor.getBitBackInserter());
-                }
-            } else if constexpr (std::is_same_v<typename DictT::Word::OutType,
-                                                ga::w::tags::BytesOut>) {
-                for (const auto& word: words) { \
-                    word.bytesOut(dataConstructor.getByteBackInserter());
-                }
-            }
+            std::ranges::for_each(
+                words, [&](auto& w){ packWordIntoData(w, dataConstructor); });
         };
 
         switch (symBitLen) {

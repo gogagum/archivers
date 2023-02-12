@@ -14,7 +14,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "bits_iterator.hpp"
-#include "tags.hpp"
 
 namespace ga::w {
 
@@ -25,7 +24,6 @@ template <std::uint8_t _numBytes>
 class BytesWord {
 public:
 
-    using OutType = tags::BytesOut;
     constexpr static std::uint16_t numBits = _numBytes * 8;
     using Ord = std::uint64_t;
     constexpr static Ord wordsCount = Ord{1} << numBits;
