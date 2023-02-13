@@ -28,7 +28,7 @@ TEST(UniformDictionary, Ord3Bytes) {
 TEST(UniformDictionary, OrdLongOrd) {
     auto dict = UniformDictionary<BytesWord<2>>();
     auto symBytes = std::array{ std::byte{8}, std::byte{42} };
-    EXPECT_EQ(dict.getWord(256 * 8 + 42), BytesWord<2>(symBytes));
+    EXPECT_EQ(dict.getWord(256 * 8 + 42), BytesWord<2>(symBytes.begin()));
 }
 
 //----------------------------------------------------------------------------//

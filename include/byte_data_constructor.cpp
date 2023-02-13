@@ -39,7 +39,7 @@ void ByteDataConstructor::putByte(std::byte b) {
     if (_currBitFlag == std::byte{0b10000000}) {
         _data.push_back(b);
     } else {
-        std::copy_n(impl::bits_begin(b), 8, getBitBackInserter());
+        std::copy_n(impl::BitsIterator(b, 0), 8, getBitBackInserter());
     }
 }
 

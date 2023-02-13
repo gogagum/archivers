@@ -36,6 +36,16 @@ TEST(BytesWordFlow, TailSize2) {
 }
 
 //----------------------------------------------------------------------------//
+TEST(BytesWordFlow, Tail) {
+    auto data = std::array{ std::byte{0b00011101} };
+    auto wf = BytesWordFlow<4>(data);
+    const auto expectedTail = std::array<bool, 8>{0, 0, 0, 1, 1, 1, 0, 1};
+    for (const auto& [expected, found] : boost::range::combine(wf.getTail(), expectedTail)) {
+        EXPECT_EQ(expected, found);
+    }
+}
+
+//----------------------------------------------------------------------------//
 TEST(BytesWordFlow, Iterate) {
     auto data = std::array<std::byte, 3>{};
     auto wf = BytesWordFlow<4>(data);
@@ -52,3 +62,4 @@ TEST(BytesWordFlow, IterateCheckNomberOfWords) {
     }
     EXPECT_EQ(n, 3);
 }
+

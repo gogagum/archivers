@@ -16,13 +16,13 @@ TEST(BitsWord, Construct) {
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ConstructFromInt) {
     auto num = std::uint8_t{42};
-    [[maybe_unused]] auto bw = BitsWord<8>(ga::impl::bits_begin(num));
+    [[maybe_unused]] auto bw = BitsWord<8>(ga::impl::BitsIterator(num, 0));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ConstructFromIntNotFromStart) {
     auto num = std::uint8_t{42};
-    [[maybe_unused]] auto bw = BitsWord<5>(ga::impl::bits_begin(num) + 4);
+    [[maybe_unused]] auto bw = BitsWord<5>(ga::impl::BitsIterator(num, 4));
 }
 
 //----------------------------------------------------------------------------//
@@ -82,7 +82,7 @@ TEST(BitsWord, BitsOutLongerWord) {
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ByOrdOrd) {
-    auto arr = std::array<bool, 5>{true, false, false, true, true};
+    const auto arr = std::array<bool, 5>{1, 0, 0, 1, 1};
     const auto word = BitsWord<5>(arr.begin());
     const auto ord = BitsWord<5>::ord(word);
 
@@ -95,6 +95,28 @@ TEST(BitsWord, OrdByOrd) {
     const auto word = BitsWord<7>::byOrd(ord);
 
     EXPECT_EQ(BitsWord<7>::ord(word), ord);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsWord, Output) {
+    const auto arr = std::array<bool, 5>{1, 1, 0, 0, 1};
+    const auto word = BitsWord<5>(arr.begin());
+
+    auto testOutStream = std::ostringstream();
+    testOutStream << word;
+
+    EXPECT_EQ(testOutStream.str(), "11001");
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsWord, LongerWord) {
+    const auto arr = std::array<bool, 11>{1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0};
+    const auto word = BitsWord<11>(arr.begin());
+
+    auto testOutStream = std::ostringstream();
+    testOutStream << word;
+
+    EXPECT_EQ(testOutStream.str(), "11001110100");
 }
 
 

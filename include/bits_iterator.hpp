@@ -20,96 +20,55 @@ class BitsIterator : public boost::iterators::iterator_facade<
 private:
     using type = BitsIterator<T>;
 public:
-    //------------------------------------------------------------------------//
-    BitsIterator(const T& iterated)
-        : _iterated(iterated), _offset(sizeof(T) * 8) {}
-    //------------------------------------------------------------------------//
-    BitsIterator(const T& iterated, std::ptrdiff_t offset)
-        : _iterated(iterated), _offset(offset) {}
-    //------------------------------------------------------------------------//
-    BitsIterator& operator=(const BitsIterator& other);
-protected:
-    //------------------------------------------------------------------------//
-    std::ptrdiff_t
-    distance_to(const type& rhs) const  { return rhs._offset - _offset; }
-    //------------------------------------------------------------------------//
-    void advance(std::ptrdiff_t n)      { _offset += n; }
-    //------------------------------------------------------------------------//
-    bool dereference() const;
-    //------------------------------------------------------------------------//
-    bool equal(const type& other) const;
-    //------------------------------------------------------------------------//
-    void increment()                    { ++_offset; }
-    //------------------------------------------------------------------------//
-    void decrement()                    { --_offset; }
+
+    ////////////////////////////////////////////////////////////////////////////
+    BitsIterator(const T& iterated, std::ptrdiff_t offset = sizeof(T) * 8)
+        : _iterated(&iterated), _offset(offset) {}
+    ////////////////////////////////////////////////////////////////////////////
+    BitsIterator& operator=(const BitsIterator& other) = default;
 
 private:
-    const T& _iterated;
+    ////////////////////////////////////////////////////////////////////////////
+    std::byte _getByte() const
+    { return reinterpret_cast<const std::byte*>(_iterated)[_getByteIdx()]; }
+    ////////////////////////////////////////////////////////////////////////////
+    std::size_t _getByteIdx() const      { return sizeof(T) - _offset / 8 - 1; }
+    ////////////////////////////////////////////////////////////////////////////
+    std::uint8_t _getInByteIdx() const   { return 8 - (_offset % 8) - 1; }
+protected:
+    ////////////////////////////////////////////////////////////////////////////
+    std::ptrdiff_t
+    distance_to(const type& rhs) const   { return rhs._offset - _offset; }
+    ////////////////////////////////////////////////////////////////////////////
+    void advance(std::ptrdiff_t n)       { _offset += n; }
+    ////////////////////////////////////////////////////////////////////////////
+    bool dereference() const
+    { return ((_getByte() >> _getInByteIdx()) & std::byte{1}) != std::byte{}; }
+    ////////////////////////////////////////////////////////////////////////////
+    bool equal(const type& other) const  { return _offset == other._offset; }
+    ////////////////////////////////////////////////////////////////////////////
+    void increment()                     { ++_offset; }
+    ////////////////////////////////////////////////////////////////////////////
+    void decrement()                     { --_offset; }
+
+private:
+    const T* _iterated;
     std::ptrdiff_t _offset;
 private:
     friend class boost::iterators::iterator_core_access;
 };
 
-template <class T>
-using ReverseBitsIterator = std::reverse_iterator<BitsIterator<T>>;
-
-//----------------------------------------------------------------------------//
-template <class T>
-BitsIterator<T> bits_begin(const T& t) {
-    return BitsIterator(t, 0);
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-BitsIterator<T> bits_end(const T& t) {
-    return BitsIterator(t);
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-ReverseBitsIterator<T> bits_rbegin(const T& t) {
-    return std::make_reverse_iterator(bits_begin(t));
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-ReverseBitsIterator<T> bits_rend(const T& t) {
-    return std::make_reverse_iterator(bits_end(t));
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-auto make_bits_iterator_range(const T& t) {
-    return boost::make_iterator_range(bits_begin(t), bits_end(t));
-}
-
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
+/// \brief The ReverseBitsIterator class
+///
 template <class T>
-BitsIterator<T>& BitsIterator<T>::operator=(const BitsIterator& other) {
-    const_cast<T&>(_iterated) = other._iterated;
-    _offset = other._offset;
-    return *this;
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-bool BitsIterator<T>::dereference() const {
-    using ConstBytesArray = const std::array<std::byte, sizeof(T)>;
-    const auto& iteratedBytes =
-            reinterpret_cast<ConstBytesArray&>(_iterated);
-    const auto bytesOffset = sizeof(T) - _offset / 8 - 1;
-    const std::byte b = iteratedBytes[bytesOffset];
-    const auto inByteOffset = 8 - (_offset % 8) - 1;
-    return (((b >> inByteOffset)) & std::byte{1}) == std::byte{1};
-}
-
-//----------------------------------------------------------------------------//
-template <class T>
-bool BitsIterator<T>::equal(const type& other) const {
-    return &_iterated == &other._iterated && _offset == other._offset;
-}
-
+class ReverseBitsIterator : public std::reverse_iterator<BitsIterator<T>> {
+public:
+    ReverseBitsIterator(const T& iterated,
+                        std::ptrdiff_t offset = sizeof(T) * 8)
+        : std::reverse_iterator<BitsIterator<T>>(
+              BitsIterator<T>(iterated, sizeof(T) * 8 - offset)) {}
+};
 
 }  // namespace ga::impl
 

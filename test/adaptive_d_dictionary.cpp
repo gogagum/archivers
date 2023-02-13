@@ -19,14 +19,14 @@ TEST(AdaptiveDDictionary, GetStats) {
     auto dict = AdaptiveDDictionary<BytesWord<2>>();
     auto wordData = std::array{ std::byte{0b00000000}, std::byte{0b00000001} };
     [[maybe_unused]] auto [low, high, total] =
-            dict.getProbabilityStats(BytesWord<2>(wordData));
+            dict.getProbabilityStats(BytesWord<2>(wordData.data()));
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdapriveDDictionary, GetStatsOnStartCenter) {
     auto dict = AdaptiveDDictionary<BitsWord<3>>();
     auto testWordData = std::byte{ 0b110 };  // 6
-    auto word = BitsWord<3>(ga::impl::bits_end(testWordData) - 3);
+    auto word = BitsWord<3>(ga::impl::BitsIterator(testWordData) - 3);
     auto [low, high, total] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 6);
     EXPECT_EQ(high, 7);
@@ -38,7 +38,7 @@ TEST(AdapriveDDictionary, GetStatsOnStartCenter) {
 TEST(AdaptiveDDictionary, GetStatsOnStartEnd) {
     auto dict = AdaptiveDDictionary<BitsWord<3>>();
     auto testWordData = std::byte{ 0b111 };  // 7
-    auto word = BitsWord<3>(ga::impl::bits_end(testWordData) - 3);
+    auto word = BitsWord<3>(ga::impl::BitsIterator(testWordData) - 3);
     auto [low, high, total] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 7);
     EXPECT_EQ(high, 8);
@@ -50,7 +50,7 @@ TEST(AdaptiveDDictionary, GetStatsOnStartEnd) {
 TEST(AdaptiveDDictionary, GetStatsOnStartBegin) {
     auto dict = AdaptiveDDictionary<BitsWord<3>>();
     auto testWordData = std::byte{ 0b000 };  // 0
-    auto word = BitsWord<3>(ga::impl::bits_end(testWordData) - 3);
+    auto word = BitsWord<3>(ga::impl::BitsIterator(testWordData) - 3);
     auto [low, high, total] = dict.getProbabilityStats(word);
     EXPECT_EQ(low, 0);
     EXPECT_EQ(high, 1);

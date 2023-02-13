@@ -11,9 +11,12 @@
 #include <ostream>
 #include <boost/range/irange.hpp>
 #include <boost/range/combine.hpp>
+#include <boost/range/numeric.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "bits_iterator.hpp"
+#include <bits_iterator.hpp>
+#include <bytes_iterator.hpp>
 
 namespace ga::w {
 
@@ -35,7 +38,8 @@ public:
      * @param word
      * @return
      */
-    static std::uint64_t ord(const BytesWord<_numBytes>& word);
+    static std::uint64_t
+    ord(const BytesWord<_numBytes>& word) { return word._data; }
 
     /**
      * @brief byOrd
@@ -43,6 +47,10 @@ public:
      * @return
      */
     static BytesWord<_numBytes> byOrd(std::uint64_t ord);
+
+private:
+
+    BytesWord(std::uint64_t ord) : _data(ord) {}
 
 public:
 
@@ -55,22 +63,36 @@ public:
      * @brief BytesSymbol bytes symbol constructor from pointer to data.
      * @param ptr - pointer to data.
      */
-    BytesWord(const std::byte* ptr);
+    template <std::input_iterator IterT>
+    explicit BytesWord(IterT iter);
 
     /**
-     * @brief BytesSymbol constructor from array.
-     * @param bytes
+     * @brief bytesOut - put out word bytes.
+     * @param outIter iterator to put to.
      */
-    BytesWord(const std::array<std::byte, _numBytes>& bytes);
-
     template <std::output_iterator<std::byte> IterT>
-    void bytesOut(IterT outIter) const;
+    void
+    bytesOut(IterT outIter) const { boost::range::copy(_getBytes(), outIter); }
 
 private:
 
     std::uint64_t _data;  // data of the word
 
 private:
+
+    using BitsIter = impl::BitsIterator<std::uint64_t>;
+    using BytesIter = impl::BytesIterator<std::uint64_t>;
+
+private:
+
+    boost::iterator_range<BitsIter> _getBits() const
+    { return { BitsIter(_data) - 8 * _numBytes, BitsIter(_data) }; }
+
+    boost::iterator_range<BytesIter> _getBytes() const
+    { return { BytesIter(_data) - _numBytes, BytesIter(_data) }; }
+
+private:
+
 
     /**
      * @brief operator == check if two symbols are equal.
@@ -98,59 +120,27 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief operator <<
-/// \param os - stream to write to.
-/// \param sym - ounput symbol.
-/// \return reference to os.
-///
-template <std::uint8_t numBytes>
-std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> sym);
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-std::uint64_t
-BytesWord<_numBytes>::ord(const BytesWord<_numBytes>& word) {
-    return word._data;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes>
-auto BytesWord<_numBytes>::byOrd(std::uint64_t ord) -> BytesWord<_numBytes> {
+BytesWord<_numBytes> BytesWord<_numBytes>::byOrd(std::uint64_t ord) {
     assert(ord < wordsCount && "Too big ord.");
-    auto ret = BytesWord<_numBytes>();
-    ret._data = ord;
-    return ret;
+    return BytesWord<_numBytes>(ord);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesWord<numBytes>::BytesWord(const std::byte* ptr)
+template <std::input_iterator IterT>
+BytesWord<numBytes>::BytesWord(IterT iter)
     : _data{std::accumulate(
-                ptr, ptr + numBytes, 0ull,
+                iter, iter + numBytes, 0ull,
                 [](auto curr, std::byte b) {
                     return (curr << 8) | std::to_integer<std::uint64_t>(b);
                 })} {}
 
-//----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes>
-BytesWord<_numBytes>::BytesWord(const std::array<std::byte, _numBytes>& arr)
-    : BytesWord(arr.data()) {};
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t _numBytes>
-template <std::output_iterator<std::byte> IterT>
-void BytesWord<_numBytes>::bytesOut(IterT outIter) const {
-    auto& bytes = reinterpret_cast<const std::array<std::byte, 8>&>(_data);
-    std::copy(bytes.rend() - _numBytes, bytes.rend(), outIter);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
 std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> word) {
-    return os << word._data;  // TODO: in a binary form.
+    return *boost::accumulate(word._getBits(), &os,
+        [](auto* os, const bool bit) { return &(*os << bit); });
 }
 
 }  // namespace ga::w
