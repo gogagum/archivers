@@ -23,7 +23,37 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////
     /// \brief The BitIterator class
-    class BitsIterator;
+    class BitsIterator: public boost::iterators::iterator_facade<
+            BitsIterator,
+            bool,
+            boost::random_access_traversal_tag,
+            bool
+        > {
+    public:
+        using type = BitsIterator;
+    public:
+        BitsIterator(DataParser& owner, std::size_t bitsPosition)
+            : _owner(&owner), _bitsPosition(bitsPosition) {}
+    protected:
+        ////////////////////////////////////////////////////////////////////////
+        bool dereference() const
+        { return _owner->seek(_bitsPosition).takeBit(); }
+        ////////////////////////////////////////////////////////////////////////
+        bool equal(const type& other) const
+        { return _bitsPosition == other._bitsPosition; }
+        ////////////////////////////////////////////////////////////////////////
+        std::ptrdiff_t distance_to(const type& other) const
+        { return static_cast<ptrdiff_t>(other._bitsPosition) - _bitsPosition; }
+        ////////////////////////////////////////////////////////////////////////
+        void increment()                     { ++_bitsPosition; }
+        ////////////////////////////////////////////////////////////////////////
+        void advance(std::ptrdiff_t offset)  { _bitsPosition += offset; }
+    private:
+        DataParser* _owner;
+        std::size_t _bitsPosition;
+    private:
+        friend class boost::iterators::iterator_core_access;
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     /// \brief The OutOfRange class
@@ -71,12 +101,21 @@ public:
     /**
      * @brief seek move to bitsOffset position.
      * @param bitsOffset - position to move to.
+     * @return reference to self.
      */
-    void seek(std::size_t bitsOffset);
+    DataParser& seek(std::size_t bitsOffset);
 
-    BitsIterator getCurrPosBitsIter();
+    /**
+     * @brief getBeginBitsIter
+     * @return bits begin iterator.
+     */
+    auto getBeginBitsIter() { return BitsIterator(*this, 0); }
 
-    BitsIterator getEndBitsIter();
+    /**
+     * @brief getEndBitsIter
+     * @return bitsEndIterator
+     */
+    auto getEndBitsIter() { return BitsIterator(*this, _data.size() * 8); }
 
 private:
 
@@ -114,43 +153,6 @@ T DataParser::takeT() {
     return ret;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-class DataParser::BitsIterator : public boost::iterators::iterator_facade<
-            BitsIterator,
-            bool,
-            boost::single_pass_traversal_tag,
-            bool
-        > {
-public:
-    using type = BitsIterator;
-public:
-    //------------------------------------------------------------------------//
-    BitsIterator(DataParser& owner, std::size_t bitsPosition)
-        : _owner(&owner), _bitsPosition(bitsPosition) {}
-    //------------------------------------------------------------------------//
-    bool dereference() const;
-    //------------------------------------------------------------------------//
-    bool equal(const type& other) const;
-    //------------------------------------------------------------------------//
-    void increment()                    { ++_bitsPosition; }
-    //------------------------------------------------------------------------//
-    BitsIterator
-    operator+(std::size_t offset) {
-        return BitsIterator(*_owner, _bitsPosition + offset);
-    }
-    //------------------------------------------------------------------------//
-    BitsIterator&
-    operator+=(std::size_t offset) {
-        _bitsPosition += offset;
-        return *this;
-    }
-private:
-    DataParser* _owner;
-    std::size_t _bitsPosition;
-private:
-    friend class boost::iterators::iterator_core_access;
-};
 
 }  // namespace ga
 

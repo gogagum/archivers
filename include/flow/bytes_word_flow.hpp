@@ -9,6 +9,7 @@
 #include <boost/iterator/iterator_categories.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/container/static_vector.hpp>
+#include <boost/range/algorithm_ext.hpp>
 
 namespace ga::fl {
 
@@ -22,28 +23,27 @@ private:
 public:
     constexpr static std::uint16_t numBits = _Word::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
-public:
-    class Iterator;
+private:
+    class _Iterator;
 public:
 
     /**
      * @brief ByteFlow
      * @param bytes
      */
-    BytesWordFlow(std::span<const std::byte> bytes);
+    BytesWordFlow(std::span<const std::byte> bytes) : _bytes(bytes) {}
 
     /**
      * @brief begin - beginning iterator getter.
      * @return beginning iterator.
      */
-    [[nodiscard]] Iterator begin() const { return Iterator(_bytes.data()); }
+    [[nodiscard]] auto begin() const { return _Iterator(_bytes.data()); }
 
     /**
      * @brief end - ending iterator getter.
      * @return ending iterator.
      */
-    [[nodiscard]] Iterator
-    end() const { return Iterator(_bytes.data() + size() * numBytes); }
+    [[nodiscard]] auto end() const { return _Iterator(_bytes.data()) + size(); }
 
     /**
      * @brief countNumberOfWords.
@@ -55,11 +55,28 @@ public:
      * @brief getTail
      * @return
      */
-    Tail getTail() const;
+    [[nodiscard]] Tail getTail() const
+    { return boost::accumulate(_getTailBytes(), Tail{}, tailAccOp); }
 
 private:
 
-    std::uint8_t _getTailBytesSize() const;
+    using _DataIterator = std::span<const std::byte>::iterator;
+
+private:
+
+    std::uint8_t _getTailBytesSize() const { return _bytes.size() % numBytes; }
+
+    boost::iterator_range<_DataIterator> _getTailBytes() const
+    { return {_bytes.end() - _getTailBytesSize(), _bytes.end()}; }
+
+private:
+
+    constexpr static Tail (*tailAccOp)(Tail&&, std::byte) =
+        +[](Tail&& currTail, std::byte b) {
+            auto bitRng = boost::make_iterator_range(impl::BitsIterator(b, 0),
+                                                     impl::BitsIterator(b));
+            return boost::range::push_back(currTail, bitRng);
+        };
 
 private:
 
@@ -69,54 +86,30 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <std::uint8_t numBytes>
-BytesWordFlow<numBytes>::BytesWordFlow(
-        std::span<const std::byte> bytes) : _bytes(bytes) {}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-std::uint8_t BytesWordFlow<numBytes>::_getTailBytesSize() const {
-    return _bytes.size() % numBytes;
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-auto BytesWordFlow<numBytes>::getTail() const -> Tail {
-    Tail ret;
-    auto bytesRng = std::span(_bytes.end() - _getTailBytesSize(), _bytes.end());
-
-    for (auto tailByte: bytesRng) {
-        ret.insert(ret.end(),
-                   ga::impl::bits_begin(tailByte),
-                   ga::impl::bits_end(tailByte));
-    }
-
-    return ret;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint8_t numBytes>
-class BytesWordFlow<numBytes>::Iterator : public boost::iterator_facade<
-    Iterator,
+class BytesWordFlow<numBytes>::_Iterator : public boost::iterator_facade<
+    _Iterator,
     _Word,
-    boost::incrementable_traversal_tag,
+    boost::random_access_traversal_tag,
     _Word> {
 public:
-    using type = Iterator;
-public:
+    using type = _Iterator;
+private:
     //------------------------------------------------------------------------//
-    Iterator(const std::byte* ptr) : _ptr(ptr) {};
+    explicit _Iterator(const std::byte* ptr) : _ptr(ptr) {};
 protected:
     //------------------------------------------------------------------------//
-    _Word dereference() const           { return {_ptr}; };
+    _Word dereference() const           { return _Word(_ptr); };
     //------------------------------------------------------------------------//
     bool equal(const type& other) const { return _ptr == other._ptr; };
     //------------------------------------------------------------------------//
     void increment()                    { _ptr += numBytes; };
+    //------------------------------------------------------------------------//
+    void advance(std::ptrdiff_t offset) { _ptr += numBytes * offset; }
 private:
     const std::byte* _ptr;
 private:
     friend class boost::iterators::iterator_core_access;
+    friend class BytesWordFlow<numBytes>;
 };
 
 }  // namespace ga

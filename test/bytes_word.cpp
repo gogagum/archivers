@@ -1,60 +1,52 @@
 #include <gtest/gtest.h>
+
 #include <array>
 #include <cstddef>
 #include <vector>
 #include <boost/range/combine.hpp>
 
 #include "word/bytes_word.hpp"
-#include "byte_data_constructor.hpp"
 
 using ga::w::BytesWord;
 
 ////////////////////////////////////////////////////////////////////////////////
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(!ga::w::BytesOutputTransformable<std::vector<bool>::iterator>);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::BitBackInserter>);
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-static_assert(!ga::w::BytesOutputTransformable<typename ga::ByteDataConstructor::ByteBackInserter>);
-
-////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(BytesWord, Construct) {
-    std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = BytesWord<5>(testData.data());
+    const auto testData = std::array<std::byte, 5>{};
+    [[maybe_unused]] const auto sym = BytesWord<5>(testData.data());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWord, ConstructFromArray) {
-    std::array<std::byte, 5> testData;
-    [[maybe_unused]] auto sym = BytesWord<5>(testData);
+    const auto testData = std::array<std::byte, 5>{};
+    [[maybe_unused]] const auto sym = BytesWord<5>(testData.begin());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWord, BytesSymbolsOrder1) {
-    auto testData1 = std::array{ std::byte{0b00000000}, std::byte{0b11111111} };
-    auto testData2 = std::array{ std::byte{0b11111111}, std::byte{0b11111111} };
+    const auto testData1 =
+            std::array{ std::byte{0b00000000}, std::byte{0b11111111} };
+    const auto testData2 =
+            std::array{ std::byte{0b11111111}, std::byte{0b11111111} };
 
-    auto sym1 = BytesWord<2>(testData1.data());
-    auto sym2 = BytesWord<2>(testData2.data());
+    const auto sym1 = BytesWord<2>(testData1.data());
+    const auto sym2 = BytesWord<2>(testData2.data());
 
     ASSERT_TRUE(BytesWord<2>::ord(sym1) < BytesWord<2>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWord, BytesSymbolsOrder2) {
-    const auto sym1 = BytesWord<1>(std::array{ std::byte{0b00000111} });
-    const auto sym2 = BytesWord<1>(std::array{ std::byte{0b00001111} });
+    const auto sym1 = BytesWord<1>(std::array{ std::byte{0b00000111} }.begin());
+    const auto sym2 = BytesWord<1>(std::array{ std::byte{0b00001111} }.begin());
 
     ASSERT_TRUE(BytesWord<1>::ord(sym1) < BytesWord<1>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWord, BytesSymbolsOrder3) {
-    const auto sym1 = BytesWord<1>(std::array{ std::byte{0b00001111} });
-    const auto sym2 = BytesWord<1>(std::array{ std::byte{0b00000111} });
+    const auto sym1 = BytesWord<1>(std::array{ std::byte{0b00001111} }.begin());
+    const auto sym2 = BytesWord<1>(std::array{ std::byte{0b00000111} }.begin());
 
     ASSERT_FALSE(BytesWord<1>::ord(sym1) < BytesWord<1>::ord(sym2));
 }
@@ -64,36 +56,62 @@ TEST(BytesWord, BytesSymbolsOrder4) {
     const auto testData1 = std::array{ std::byte{0b10000000}, std::byte{0b00000000} };
     const auto testData2 = std::array{ std::byte{0b00001111}, std::byte{0b11111111} };
 
-    const auto sym1 = BytesWord<2>(testData1);
-    const auto sym2 = BytesWord<2>(testData2);
+    const auto sym1 = BytesWord<2>(testData1.begin());
+    const auto sym2 = BytesWord<2>(testData2.begin());
 
     ASSERT_FALSE(BytesWord<2>::ord(sym1) < BytesWord<2>::ord(sym2));
 }
 
 //----------------------------------------------------------------------------//
-TEST(BytesWord, BitsOut) {
+TEST(BytesWord, BytesOut) {
     const auto testData = std::array{ std::byte{0b00001111} };
-    auto word = BytesWord<1>(testData);
+    const auto word = BytesWord<1>(testData.begin());
 
-    std::vector<bool> bits;
-    auto bitsInserter = std::back_inserter(bits);
+    std::vector<std::byte> bytes;
+    auto bytesInserter = std::back_inserter(bytes);
 
-    word.bitsOut(bitsInserter);
-    EXPECT_EQ(bits.size(), 8);
+    word.bytesOut(bytesInserter);
+    EXPECT_EQ(bytes.size(), 1);
 
-    auto combinedTestAndTested =
-            boost::range::combine(bits,
-                                  ga::impl::make_bits_iterator_range(testData));
+    EXPECT_EQ(bytes[0], testData[0]);
+}
 
-    for (const auto& [dataI, bitI] : combinedTestAndTested) {
-        EXPECT_EQ(dataI, bitI);
+//----------------------------------------------------------------------------//
+TEST(BytesWord, BytesOutThreeBytes) {
+    const auto testData = std::array{ std::byte{0b00001111},
+                                      std::byte{0b11000101},
+                                      std::byte{0b11011001} };
+    const auto word = BytesWord<3>(testData.begin());
+
+    std::vector<std::byte> bytes;
+    word.bytesOut(std::back_inserter(bytes));
+    EXPECT_EQ(bytes.size(), 3);
+
+    for (const auto& [byteI, testByteI] : boost::range::combine(bytes,
+                                                                testData)) {
+        EXPECT_EQ(byteI, testByteI);
     }
+}
+
+//----------------------------------------------------------------------------//
+TEST(BytesWord, FromBytesOut) {
+    const auto testData = std::array{ std::byte{0b00001111},
+                                      std::byte{0b11000101},
+                                      std::byte{0b11011001} };
+    const auto word = BytesWord<3>(testData.begin());
+
+    std::vector<std::byte> bytes;
+    word.bytesOut(std::back_inserter(bytes));
+
+    const auto otherWord = BytesWord<3>(bytes.data());
+
+    EXPECT_EQ(word, otherWord);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWord, ByOrdOrd) {
     const auto word = BytesWord<2>(
-                std::array{std::byte{0b10001110}, std::byte{0b10101010}});
+        std::array{std::byte{0b10001110}, std::byte{0b10101010}}.begin());
 
     const auto ord = BytesWord<2>::ord(word);
 
@@ -106,4 +124,15 @@ TEST(BytesWord, OrdByOrd) {
     const auto word = BytesWord<2>::byOrd(ord);
 
     EXPECT_EQ(BytesWord<2>::ord(word), ord);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BytesWord, Output) {
+    const auto testData = std::array{ std::byte{0b00101101} };
+    const auto word = BytesWord<1>(testData.begin());
+
+    auto testOutStream = std::ostringstream();
+    testOutStream << word;
+
+    EXPECT_EQ(testOutStream.str(), "00101101");
 }

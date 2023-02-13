@@ -1,70 +1,89 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <cstdint>
+
 #include "bits_iterator.hpp"
 
 using ga::impl::BitsIterator;
-using ga::impl::make_bits_iterator_range;
+using ga::impl::ReverseBitsIterator;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Construct) {
-    std::uint64_t num;
-    auto iter = BitsIterator(num, 3);
+    const auto num = std::uint64_t{};
+    [[maybe_unused]] const auto iter = BitsIterator(num, 3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref) {
-    std::uint64_t num = 0;
+    const auto num = std::uint64_t{0};
     auto iter = BitsIterator(num, 3);
     EXPECT_FALSE(*iter);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref2) {
-    auto num = std::byte{0b11110000};
-    auto iter = BitsIterator(num, 2);
+    const auto b = std::byte{0b11110000};
+    auto iter = BitsIterator(b, 2);
     EXPECT_TRUE(*iter);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref3) {
-    auto num = std::byte{0b11110000};
-    auto iter = BitsIterator(num, 7);
+    const auto b = std::byte{0b11110000};
+    auto iter = BitsIterator(b, 7);
     EXPECT_FALSE(*iter);
+}
+
+//----------------------------------------------------------------------------//
+TEST(BitsIterator, DerefLongerT) {
+    const auto num = std::uint16_t{0b1100110011110000};
+    const auto iter1 = BitsIterator(num, 6);
+    const auto iter2 = BitsIterator(num, 8);
+    const auto iter3 = BitsIterator(num, 11);
+
+    EXPECT_FALSE(*iter1);
+    EXPECT_TRUE(*iter2);
+    EXPECT_TRUE(*iter3);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-TEST(BitsIteratorRange, Construct) {
-    auto num = 42;
-    make_bits_iterator_range(num);
+TEST(ReverseBitsIterator, Construct) {
+    const auto num = std::uint32_t{};
+    [[maybe_unused]] const auto iter = ReverseBitsIterator(num, 3);
 }
 
 //----------------------------------------------------------------------------//
-TEST(BitsIteratorRange, Size) {
-    std::uint32_t num = 42;
-    auto rng = make_bits_iterator_range(num);
-    EXPECT_EQ(std::size(rng), 32);
+TEST(ReverseBitsIterator, Deref) {
+    const auto num = std::byte{0b11110000};
+    const auto iter = ReverseBitsIterator(num, 2);
+    EXPECT_FALSE(*iter);
 }
 
 //----------------------------------------------------------------------------//
-TEST(BitsIteratorRange, Iterate) {
-    std::uint32_t num = 42;
-    std::size_t cnt = 0;
-    for ([[maybe_unused]] bool bit : make_bits_iterator_range(num)) {
-        ++cnt;
-    }
-    EXPECT_EQ(cnt, 32);
+TEST(ReverseBitsIterator, Deref2) {
+    const auto num = std::byte{0b11110000};
+    const auto iter = ReverseBitsIterator(num, 3);
+    EXPECT_FALSE(*iter);
 }
 
 //----------------------------------------------------------------------------//
-TEST(BitsIteratorRange, BoolVec) {
-    std::uint32_t num = 0xFF00A5C3;  // 1111 1111 0000 0000 1100 0101 1010 0011
-    auto bitsRng = make_bits_iterator_range(num);
-    auto vec = std::vector(bitsRng.begin(), bitsRng.end());
-    EXPECT_EQ(vec[4], true);
-    EXPECT_EQ(vec[7], true);
-    EXPECT_EQ(vec[9], false);
-    EXPECT_EQ(vec[12], false);
-    EXPECT_EQ(vec[16], true);
+TEST(ReverseBitsIterator, Deref3) {
+    const auto num = std::byte{0b11110000};
+    const auto iter = ReverseBitsIterator(num, 7);
+    EXPECT_TRUE(*iter);
+}
+
+//----------------------------------------------------------------------------//
+TEST(ReverseBitsIterator, DerefLongerT) {
+    const auto num = std::uint16_t{0b1100110011110000};
+    const auto iter1 = ReverseBitsIterator(num, 6);
+    const auto iter2 = ReverseBitsIterator(num, 8);
+    const auto iter3 = ReverseBitsIterator(num, 11);
+
+    EXPECT_TRUE(*iter1);
+    EXPECT_FALSE(*iter2);
+    EXPECT_TRUE(*iter3);
 }

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include <array>
 
+#include <array>
+#include <cstdint>
 
 #include "dictionary/decreasing_on_update_dictionary.hpp"
 #include "word/bytes_word.hpp"
@@ -11,7 +12,7 @@ using ga::w::BytesWord;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, Construct) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
@@ -20,7 +21,7 @@ TEST(DecreasingOnUpdateDictionary, Construct) {
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCount) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
@@ -30,14 +31,14 @@ TEST(DecreasingOnUpdateDictionary, TotalCount) {
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountEmpty) {
-    auto freqMapping = std::array<std::pair<BytesWord<2>, std::uint64_t>, 0>{};
+    const auto freqMapping = std::array<std::pair<BytesWord<2>, std::uint64_t>, 0>{};
     auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
     EXPECT_EQ(dict.getTotalWordsCnt(), 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
@@ -50,7 +51,7 @@ TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
@@ -77,7 +78,7 @@ TEST(DecreasingOnUpdateDictionary, QueryForAnEmptyWord) {
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };
@@ -98,7 +99,7 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, GetWord) {
-    auto freqMapping = std::array{
+    const auto freqMapping = std::array{
         std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
         std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
     };

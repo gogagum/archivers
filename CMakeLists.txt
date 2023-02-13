@@ -16,6 +16,11 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(Boost COMPONENTS system program_options REQUIRED)
 
+add_subdirectory(thirdparty/dynamic-segment-tree)
+include_directories(${Boost_INCLUDE_DIRS}
+    include/
+    thirdparty/dynamic-segment-tree/include/)
+
 add_library(encoding_lib STATIC
     include/arithmetic_coder.hpp
     include/arithmetic_decoder.hpp
@@ -42,9 +47,9 @@ add_library(encoding_lib STATIC
     include/word/uint_word.hpp
 )
 
-add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
+target_link_libraries(encoding_lib dynamic-segment-tree)
 
-include_directories(${Boost_INCLUDE_DIRS} include/)
+add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 
 add_executable(archiever_encoder arithmetic_archiever/encoder.cpp)
 target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
@@ -81,6 +86,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 add_executable(archiever_tests
     test/bits_iterator.cpp
+    test/bytes_iterator.cpp
     test/bits_word.cpp
     test/bits_word_flow.cpp
     test/byte_data_constructor.cpp
@@ -94,7 +100,6 @@ add_executable(archiever_tests
     test/adaptive_dictionary.cpp
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
-    test/arithmetic_coder.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
     test/traits.cpp

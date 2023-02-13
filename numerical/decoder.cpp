@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
         auto dataConstructor = ga::ByteDataConstructor();
 
         for (auto& word: contentWords) {
-            word.bitsOut(dataConstructor.getBitBackInserter());
+            word.bytesOut(dataConstructor.getByteBackInserter());
         }
 
         filesOpener.getOutFileStream().write(

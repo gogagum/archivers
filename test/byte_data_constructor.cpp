@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <cstdint>
+
 #include "byte_data_constructor.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////

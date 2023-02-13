@@ -78,7 +78,7 @@ public:
      */
     void putTToPosition(auto s, std::size_t position);
 
-    /**auto& bytes = reinterpret_cast<TBytes<decltype(s)>&>(s);
+    /**
      * @brief data - get data pointer
      * @return data pointer
      */

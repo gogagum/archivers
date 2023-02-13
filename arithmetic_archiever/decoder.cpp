@@ -17,6 +17,8 @@ namespace bpo = boost::program_options;
 #define BITS_DECODER_CASE(bits) \
     case (bits): packIntoByteDataConstructor(Dict<bits>(ratio), WordVec<bits>()); break;
 
+
+
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -67,12 +69,12 @@ int main(int argc, char* argv[]) {
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
 
-        const auto packIntoByteDataConstructor = [&](auto&& dict, auto&& words) {
+        const auto packIntoByteDataConstructor = [&]<class DictT>(
+                    DictT&& dict, auto&& words) {
             decoder.decode(decoded, dict, std::back_inserter(words),
                            wordsCount, bitsCount, outStream);
-            for (const auto& word: words) { \
-                word.bitsOut(dataConstructor.getBitBackInserter());
-            }
+            std::ranges::for_each(
+                words, [&](auto& w){ packWordIntoData(w, dataConstructor); });
         };
 
         switch (symBitLen) {
@@ -106,7 +108,7 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        std::copy(decoded.getCurrPosBitsIter(), decoded.getCurrPosBitsIter() + tailSize,
+        std::copy(decoded.getEndBitsIter() - tailSize, decoded.getEndBitsIter(),
                   dataConstructor.getBitBackInserter());
 
         filesOpener.getOutFileStream().write(

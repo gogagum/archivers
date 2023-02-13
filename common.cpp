@@ -34,7 +34,7 @@ FileOpener::FileOpener(const std::string& inFileName,
         : _finData(_openInFile(inFileName, optOs)), _fout(outFileName) {
     if (!_fout.is_open()) {
         throw std::runtime_error(
-            (boost::format("Could not open filr: \"%1%\"") % outFileName).str());
+            (boost::format("Could not open file: \"%1%\"") % outFileName).str());
     }
 }
 
@@ -61,7 +61,7 @@ FileOpener::_openInFile(const std::string& fileInName, optout::OptOstreamRef opt
     std::streampos finSize;
     fin.seekg(0, std::ios::end);
     finSize = fin.tellg();
-    optOs << "File size: " << static_cast<std::size_t>(finSize) << ".";
+    optOs << "File size: " << static_cast<std::size_t>(finSize) << "." << std::endl;
     fin.seekg(0, std::ios::beg);
 
     auto ret = std::vector<std::byte>(finSize);
