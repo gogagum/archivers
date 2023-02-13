@@ -30,11 +30,13 @@ add_library(encoding_lib STATIC
     include/data_parser.hpp
     include/data_parser.cpp
     include/ranges_calc.hpp
+    include/dictionary/impl/a_d_dictionary_base.hpp
     include/dictionary/uniform_dictionary.hpp
     include/dictionary/static_dictionary.hpp
     include/dictionary/adaptive_dictionary.hpp
     include/dictionary/adaptive_a_dictionary.hpp
     include/dictionary/adaptive_d_dictionary.hpp
+    include/dictionary/ppmd_dictionary.hpp
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
     include/dictionary/integer_random_access_iterator.hpp
@@ -100,6 +102,7 @@ add_executable(archiever_tests
     test/adaptive_dictionary.cpp
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
+    test/ppmd_dictionary.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
     test/traits.cpp

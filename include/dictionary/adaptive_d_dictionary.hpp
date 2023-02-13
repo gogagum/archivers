@@ -16,7 +16,7 @@ namespace ga::dict {
 ///
 template <class WordT, typename CountT = std::uint64_t>
 class AdaptiveDDictionary :
-        impl::ADDictionaryBase<typename WordT::Ord, CountT, WordT::wordsCount> {
+        protected impl::ADDictionaryBase<typename WordT::Ord, CountT, WordT::wordsCount> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
@@ -51,6 +51,12 @@ private:
     Count _getLowerCumulativeCnt(Ord ord) const;
 
     Count _getWordCnt(Ord ord) const;
+
+    ProbabilityStats _getProbabilityStats(Ord ord) const;
+
+private:
+    template <class _WordT, std::uint8_t _numBits, class _CountT>
+    friend class PPMDDictionary;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,11 +81,9 @@ template <class WordT, typename CountT>
 auto AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     const auto ord = Word::ord(word);
-    const auto low = _getLowerCumulativeCnt(ord);
-    const auto high = low + _getWordCnt(ord);
-    const auto total = getTotalWordsCnt();
+    auto ret = _getProbabilityStats(ord);
     this->_updateWordCnt(ord, 1);
-    return { low, high, total };
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
@@ -127,6 +131,16 @@ auto AdaptiveDDictionary<WordT, CountT>::_getWordCnt(Ord ord) const -> Count {
     return (Word::wordsCount - totalUniqueWordsCount) * 2 * realWordCount
         + totalUniqueWordsCount
         - Word::wordsCount * ((realWordCount > 0) ? 1 : 0);
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT, typename CountT>
+auto AdaptiveDDictionary<WordT, CountT>::_getProbabilityStats(
+        Ord ord) const -> ProbabilityStats {
+    const auto low = _getLowerCumulativeCnt(ord);
+    const auto high = low + _getWordCnt(ord);
+    const auto total = getTotalWordsCnt();
+    return { low, high, total };
 }
 
 }
