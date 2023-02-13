@@ -1,7 +1,12 @@
-#include <boost/range/combine.hpp>
 #include <gtest/gtest.h>
-#include <boost/range/irange.hpp>
+
+#include <array>
+#include <cstddef>
+#include <vector>
+
 #include <boost/range/algorithm.hpp>
+#include <boost/range/combine.hpp>
+#include <boost/range/irange.hpp>
 
 #include "data_parser.hpp"
 

@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <cstdint>
+
 #include "bits_iterator.hpp"
 
 using ga::impl::BitsIterator;
@@ -8,28 +11,28 @@ using ga::impl::ReverseBitsIterator;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Construct) {
-    std::uint64_t num;
+    const auto num = std::uint64_t{};
     [[maybe_unused]] const auto iter = BitsIterator(num, 3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref) {
-    std::uint64_t num = 0;
+    const auto num = std::uint64_t{0};
     auto iter = BitsIterator(num, 3);
     EXPECT_FALSE(*iter);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref2) {
-    auto num = std::byte{0b11110000};
-    auto iter = BitsIterator(num, 2);
+    const auto b = std::byte{0b11110000};
+    auto iter = BitsIterator(b, 2);
     EXPECT_TRUE(*iter);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsIterator, Deref3) {
-    auto num = std::byte{0b11110000};
-    auto iter = BitsIterator(num, 7);
+    const auto b = std::byte{0b11110000};
+    auto iter = BitsIterator(b, 7);
     EXPECT_FALSE(*iter);
 }
 
@@ -48,7 +51,7 @@ TEST(BitsIterator, DerefLongerT) {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(ReverseBitsIterator, Construct) {
-    std::uint32_t num;
+    const auto num = std::uint32_t{};
     [[maybe_unused]] const auto iter = ReverseBitsIterator(num, 3);
 }
 

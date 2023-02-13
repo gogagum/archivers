@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
+
 #include <array>
 #include <cstddef>
+#include <boost/range/combine.hpp>
 
 #include "flow/bytes_word_flow.hpp"
 
@@ -10,35 +12,35 @@ using ga::w::BytesWord;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, Construct) {
-    auto data = std::array<std::byte, 15>{};
-    [[maybe_unused]] auto wf = BytesWordFlow<2>(data);
+    const auto data = std::array<std::byte, 15>{};
+    [[maybe_unused]] const auto wf = BytesWordFlow<2>(data);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, TailSize0) {
-    auto data = std::array<std::byte, 15>{};
-    auto wf = BytesWordFlow<2>(data);
+    const auto data = std::array<std::byte, 15>{};
+    const auto wf = BytesWordFlow<2>(data);
     EXPECT_EQ(wf.getTail().size(), 8);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, TailSize1) {
-    auto data = std::array<std::byte, 15>{};
-    auto wf = BytesWordFlow<3>(data);
+    const auto data = std::array<std::byte, 15>{};
+    const auto wf = BytesWordFlow<3>(data);
     EXPECT_EQ(wf.getTail().size(), 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, TailSize2) {
-    auto data = std::array<std::byte, 3>{};
-    auto wf = BytesWordFlow<4>(data);
+    const auto data = std::array<std::byte, 3>{};
+    const auto wf = BytesWordFlow<4>(data);
     EXPECT_EQ(wf.getTail().size(), 3 * 8);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, Tail) {
-    auto data = std::array{ std::byte{0b00011101} };
-    auto wf = BytesWordFlow<4>(data);
+    const auto data = std::array{ std::byte{0b00011101} };
+    const auto wf = BytesWordFlow<4>(data);
     const auto expectedTail = std::array<bool, 8>{0, 0, 0, 1, 1, 1, 0, 1};
     for (const auto& [expected, found] : boost::range::combine(wf.getTail(), expectedTail)) {
         EXPECT_EQ(expected, found);
@@ -47,15 +49,15 @@ TEST(BytesWordFlow, Tail) {
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, Iterate) {
-    auto data = std::array<std::byte, 3>{};
-    auto wf = BytesWordFlow<4>(data);
+    const auto data = std::array<std::byte, 3>{};
+    const auto wf = BytesWordFlow<4>(data);
     for (const auto& w: wf) {}
 }
 
 //----------------------------------------------------------------------------//
 TEST(BytesWordFlow, IterateCheckNomberOfWords) {
-    auto data = std::array<std::byte, 14>{};
-    auto wf = BytesWordFlow<4>(data);
+    const auto data = std::array<std::byte, 14>{};
+    const auto wf = BytesWordFlow<4>(data);
     std::size_t n = 0;
     for (const auto& w: wf) {
         ++n;

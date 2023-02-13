@@ -26,7 +26,7 @@ public:
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    [[nodiscard]] Word getWord(Count cumulativeNumFound);
+    [[nodiscard]] Word getWord(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats
@@ -46,7 +46,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 template <class WordT, typename CountT>
-WordT UniformDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) {
+WordT UniformDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
     return WordT::byOrd(cumulativeNumFound);
 }
 

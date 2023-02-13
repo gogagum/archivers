@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
-#include <bytes_iterator.hpp>
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
+#include "bytes_iterator.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

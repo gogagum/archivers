@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include <cstdint>
 #include <boost/range/combine.hpp>
 
@@ -27,20 +28,20 @@ TEST(BitsWord, ConstructFromIntNotFromStart) {
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ConstructFromArray) {
-    const auto arr = std::array<bool, 5>{true, false, true, true, false};
+    const auto arr = std::array<bool, 5>{1, 0, 1, 1, 0};
     [[maybe_unused]] auto bw = BitsWord<5>(arr.begin());
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, OrdWithArray) {
-    const auto arr = std::array<bool, 5>{true, false, true, true, false};
+    const auto arr = std::array<bool, 5>{1, 0, 1, 1, 0};
     const auto bw = BitsWord<5>(arr.begin());
     EXPECT_EQ(BitsWord<5>::ord(bw), 22);
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ByOrd) {
-    const auto arr = std::array<bool, 3>{true, false, true};
+    const auto arr = std::array<bool, 3>{1, 0, 1};
     const auto bwByOrd = BitsWord<3>::byOrd(5);
     auto bwFromArr = BitsWord<3>(arr.begin());
     EXPECT_EQ(bwByOrd, bwFromArr);
@@ -48,7 +49,7 @@ TEST(BitsWord, ByOrd) {
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ByOrd2) {
-    auto arr = std::array<bool, 3>{true, false, false};
+    auto arr = std::array<bool, 3>{1, 0, 0};
     auto bwByOrd = BitsWord<3>::byOrd(5);
     auto bwFromArr = BitsWord<3>(arr.begin());
     EXPECT_NE(bwByOrd, bwFromArr);

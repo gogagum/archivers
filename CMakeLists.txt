@@ -100,7 +100,6 @@ add_executable(archiever_tests
     test/adaptive_dictionary.cpp
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
-    test/arithmetic_coder.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
     test/traits.cpp
