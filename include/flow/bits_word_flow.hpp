@@ -37,60 +37,39 @@ public:
      * @brief begin - get iterator to begin.
      * @return iterator to first word for output.
      */
-    Iterator begin() const;
+    Iterator begin() const { return Iterator(_data.getBeginBitsIter()); }
 
     /**
      * @brief end - get iterator to end.
      * @return itearator word after last word for output.
      */
-    Iterator end() const;
+    Iterator end() const { return Iterator(_data.getBeginBitsIter()) + size(); }
 
     /**
      * @brief getNumberOfWords - get number of words in data.
      * @return number of words.
      */
-    std::size_t
-    size() const { return _data.getNumBytes() * 8 / numBits; }
+    std::size_t size() const { return _data.getNumBytes() * 8 / numBits; }
 
     /**
      * @brief getTail get tail bits.
      * @return tail bits array.
      */
-    Tail getTail() const;
+    Tail getTail() const
+    { return Tail(_data.getBeginBitsIter() + size() * _numBits, _data.getEndBitsIter()); }
 
 private:
     mutable DataParser _data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-auto BitsWordFlow<_numBits>::begin() const -> Iterator {
-    _data.seek(0);
-    return Iterator(_data.getCurrPosBitsIter());
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-auto BitsWordFlow<_numBits>::end() const -> Iterator {
-    _data.seek(size() * _numBits);
-    return Iterator(_data.getCurrPosBitsIter());
-}
-
-//----------------------------------------------------------------------------//
-template <std::uint16_t _numBits>
-auto BitsWordFlow<_numBits>::getTail() const -> Tail {
-     _data.seek(size() * _numBits);
-     return Tail(_data.getCurrPosBitsIter(), _data.getEndBitsIter());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
+/// \brief The BitsWordFlow::Iterator class
+///
 template <std::uint16_t _numBits>
 class BitsWordFlow<_numBits>::Iterator : public bi::iterator_facade<
     Iterator,
     _Word,
-    boost::single_pass_traversal_tag,
+    boost::random_access_traversal_tag,
     _Word
 > {
 public:
@@ -98,15 +77,19 @@ public:
 private:
     using BitsIterator = DataParser::BitsIterator;
 public:
-    //------------------------------------------------------------------------//
     Iterator(BitsIterator bitsIteratar) : _bitsIter(bitsIteratar) {}
 protected:
-    //------------------------------------------------------------------------//
+    ////////////////////////////////////////////////////////////////////////////
     _Word dereference() const           { return _Word(_bitsIter); }
-    //------------------------------------------------------------------------//
+    ////////////////////////////////////////////////////////////////////////////
+    std::ptrdiff_t
+    distance_to (const type& other)     { return other._bitsIter - _bitsIter; }
+    ////////////////////////////////////////////////////////////////////////////
     bool equal(const type& other) const { return _bitsIter == other._bitsIter; }
-    //------------------------------------------------------------------------//
+    ////////////////////////////////////////////////////////////////////////////
     void increment()                    { _bitsIter += _numBits; }
+    ////////////////////////////////////////////////////////////////////////////
+    void advance(std::ptrdiff_t offset) { _bitsIter += offset * _numBits; }
 private:
     BitsIterator _bitsIter;
 private:

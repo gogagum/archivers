@@ -44,19 +44,10 @@ void DataParser::_moveInByteOffset() {
 }
 
 //----------------------------------------------------------------------------//
-void DataParser::seek(std::size_t bitsOffset) {
+DataParser& DataParser::seek(std::size_t bitsOffset) {
     _dataIter = _data.begin() + bitsOffset / 8;
     _inByteOffset = bitsOffset % 8;
-}
-
-//----------------------------------------------------------------------------//
-auto DataParser::getCurrPosBitsIter() -> BitsIterator {
-    return BitsIterator(*this, (_dataIter - _data.begin()) * 8 + _inByteOffset);
-}
-
-//----------------------------------------------------------------------------//
-auto DataParser::getEndBitsIter() -> BitsIterator {
-    return BitsIterator(*this, _data.size() * 8);
+    return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,18 +56,6 @@ bool operator==(const DataParser& dp1, const DataParser& dp2) {
     return dp1._data.data() == dp2._data.data()
             && dp1._data.size() == dp2._data.size()
             && dp1._dataIter == dp2._dataIter;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-bool DataParser::BitsIterator::dereference() const {
-    _owner->seek(_bitsPosition);
-    return _owner->takeBit();
-}
-
-//----------------------------------------------------------------------------//
-bool DataParser::BitsIterator::equal(const type& other) const {
-    return _owner == other._owner && _bitsPosition == other._bitsPosition;
 }
 
 }  // namespace ga

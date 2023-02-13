@@ -1,3 +1,4 @@
+#include <boost/range/combine.hpp>
 #include <gtest/gtest.h>
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm.hpp>
@@ -7,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(DataParser, Construct) {
-    auto testData = std::array{
+    const auto testData = std::array{
         std::byte{2}, std::byte{25}, std::byte{17}, std::byte{11}
     };
     [[maybe_unused]] auto decoded = ga::DataParser(testData);
@@ -15,7 +16,7 @@ TEST(DataParser, Construct) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, NumBytes) {
-    auto testData = std::array{
+    const auto testData = std::array{
         static_cast<std::byte>(std::uint8_t{2}), std::byte{25},
         std::byte{17}, std::byte{11}
     };
@@ -29,8 +30,8 @@ TEST(DataParser, NumBytes) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, TakeBit) {
-    auto testData = std::array{ std::byte{0b10100110} };
-                                          //|------|
+    const auto testData = std::array{ std::byte{0b10100110} };
+                                                //|------|
 
     auto decoded = ga::DataParser(testData);
 
@@ -39,8 +40,9 @@ TEST(DataParser, TakeBit) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, TakeBits) {
-    auto testData = std::array{ std::byte{0b10100110}, std::byte{0b00110110} };
-                                          //|------|             //|------|
+    const auto testData =
+        std::array{ std::byte{0b10100110}, std::byte{0b00110110} };
+                              //|------|             //|------|
 
     auto decoded = ga::DataParser(testData);
 
@@ -59,7 +61,7 @@ TEST(DataParser, TakeBits) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, BitAfterByte1) {
-    auto testData = std::array{ std::byte{2}, std::byte{0b10100110} };
+    const auto testData = std::array{ std::byte{2}, std::byte{0b10100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
@@ -68,7 +70,7 @@ TEST(DataParser, BitAfterByte1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, BitAfterByte2) {
-    auto testData = std::array { std::byte{2}, std::byte{0b00100110} };
+    const auto testData = std::array { std::byte{2}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeByte(), std::byte(2));
@@ -77,7 +79,8 @@ TEST(DataParser, BitAfterByte2) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, ByteAfterBit0) {
-    auto testData = std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
+    const auto testData =
+        std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     decoded.takeBit();
@@ -86,7 +89,8 @@ TEST(DataParser, ByteAfterBit0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, ByteAfterBit1) {
-    auto testData = std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
+    const auto testData =
+        std::array{ std::byte{0b00000010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     for ([[maybe_unused]] auto _: boost::irange(0, 8)) {
@@ -98,7 +102,8 @@ TEST(DataParser, ByteAfterBit1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, UInt16T) {
-    auto testData = std::array{ std::byte{0b01100010}, std::byte{0b00100110} };
+    const auto testData =
+            std::array{ std::byte{0b01100010}, std::byte{0b00100110} };
     auto decoded = ga::DataParser(testData);
 
     EXPECT_EQ(decoded.takeT<std::uint16_t>(),
@@ -107,7 +112,8 @@ TEST(DataParser, UInt16T) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek0) {
-    auto testData = std::array{std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData =
+            std::array{std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.takeBit();
@@ -121,7 +127,8 @@ TEST(DataParser, Seek0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek1) {
-    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.seek(4);
@@ -133,7 +140,8 @@ TEST(DataParser, Seek1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, Seek2) {
-    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto parser = ga::DataParser(testData);
 
     parser.seek(10);
@@ -147,7 +155,8 @@ TEST(DataParser, Seek2) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare0) {
-    auto testData = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
     auto p0 = ga::DataParser(testData);
     auto p1 = ga::DataParser(testData);
 
@@ -156,8 +165,10 @@ TEST(DataParser, EqCompare0) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare1) {
-    auto testData0 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
-    auto testData1 = std::array{ std::byte{0b01001100}, std::byte{0b00100100} };
+    const auto testData0 =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData1 =
+            std::array{ std::byte{0b01001100}, std::byte{0b00100100} };
     auto p0 = ga::DataParser(testData0);
     auto p1 = ga::DataParser(testData1);
 
@@ -166,8 +177,10 @@ TEST(DataParser, EqCompare1) {
 
 //----------------------------------------------------------------------------//
 TEST(DataParser, EqCompare2) {
-    auto testData0 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
-    auto testData1 = std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData0 =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    const auto testData1 =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
 
     EXPECT_EQ(testData0, testData1);
 
@@ -175,4 +188,46 @@ TEST(DataParser, EqCompare2) {
     auto p1 = ga::DataParser(testData1);
 
     EXPECT_NE(p0, p1);
+}
+
+//----------------------------------------------------------------------------//
+TEST(DataParser, IterateBits) {
+    const auto testData =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    auto p = ga::DataParser(testData);
+
+    auto bitsReceived = std::vector<bool>();
+    std::copy(p.getBeginBitsIter(), p.getEndBitsIter(),
+              std::back_inserter(bitsReceived));
+
+    const auto bitsExpected =
+        std::array<bool, 16>{0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0};
+
+    for (const auto& [received, expected] : boost::range::combine(bitsReceived,
+                                                                  bitsExpected)) {
+        EXPECT_EQ(received, expected);
+    }
+}
+
+//----------------------------------------------------------------------------//
+TEST(DataParser, IterateBitsTwice) {
+    const auto testData =
+            std::array{ std::byte{0b01001100}, std::byte{0b00111100} };
+    auto p = ga::DataParser(testData);
+
+    auto bitsReceived = std::vector<bool>();
+    std::copy(p.getBeginBitsIter(), p.getEndBitsIter(),
+              std::back_inserter(bitsReceived));
+    std::copy(p.getBeginBitsIter(), p.getEndBitsIter(),
+              std::back_inserter(bitsReceived));
+
+    const auto bitsExpected = std::array<bool, 32>{
+        0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0,
+        0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0
+    };
+
+    for (const auto& [received, expected] : boost::range::combine(bitsReceived,
+                                                                  bitsExpected)) {
+        EXPECT_EQ(received, expected);
+    }
 }

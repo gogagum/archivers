@@ -106,8 +106,7 @@ int main(int argc, char* argv[]) {
             break;
         }
 
-        std::copy(decoded.getCurrPosBitsIter(),
-                  decoded.getCurrPosBitsIter() + tailSize,
+        std::copy(decoded.getEndBitsIter() - tailSize, decoded.getEndBitsIter(),
                   dataConstructor.getBitBackInserter());
 
         filesOpener.getOutFileStream().write(
