@@ -80,3 +80,4 @@ testing/.ipynb_checkpoints/
 testing/out/
 testing/dataset/
 testing/exe/
+compile_commands.json
