@@ -3,6 +3,7 @@
 
 #include <unordered_set>
 #include <deque>
+#include <cassert>
 #include <cstdint>
 #include <boost/container/static_vector.hpp>
 #include <boost/container_hash/hash.hpp>
@@ -13,7 +14,7 @@
 
 namespace ga::dict {
 
-template <class WordT, std::uint8_t contextLen = 5>
+template <class WordT>
 class PPMDDictionary : protected AdaptiveDDictionary<WordT> {
 public:
     using Word = WordT;
@@ -27,14 +28,18 @@ private:
             Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
             std::plus<void>, std::int64_t>;
 
-
     using _DDict = AdaptiveDDictionary<Word>;
 
+    constexpr static std::uint8_t maxContextLength = 8;
     using _Ctx = std::deque<Ord>;
-    using _SearchCtx = boost::container::static_vector<Ord, contextLen>;
+    using _SearchCtx = boost::container::static_vector<Ord, maxContextLength>;
     using _SearchCtxHash = boost::hash<_SearchCtx>;
 
 public:
+
+    PPMDDictionary(std::uint8_t contextLen = 5) : _contextLen(contextLen) {
+        assert(contextLen < maxContextLength && "Unsupported context length.");
+    }
 
     /**
      * @brief getWord
@@ -89,7 +94,7 @@ private:
     _SearchCtx _getInitSearchCtx() const { return {_ctx.rbegin(), _ctx.rend()}; }
 
     void _updateCtx(typename Word::Ord ord) {
-        if (_ctx.size() == contextLen) {
+        if (_ctx.size() == _contextLen) {
             _ctx.pop_front();
         }
         _ctx.push_back(ord);
@@ -98,6 +103,7 @@ private:
 private:
     std::unordered_map<_SearchCtx, _DDict, _SearchCtxHash> _contextProbs;
     _Ctx _ctx;
+    const std::uint8_t _contextLen;
 };
 
 }

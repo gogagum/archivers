@@ -16,7 +16,7 @@
 namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
-    case (bits): packIntoByteDataConstructor(Dict<bits>(), WordVec<bits>()); break;
+    case (bits): packIntoByteDataConstructor(Dict<bits>(contextLength), WordVec<bits>()); break;
 
 
 //----------------------------------------------------------------------------//
@@ -57,6 +57,10 @@ int main(int argc, char* argv[]) {
 
         const auto tailSize = decoded.takeT<std::uint16_t>();
         outStream << "Tail size: " << tailSize << std::endl;
+
+        const auto contextLength = decoded.takeT<std::uint8_t>();
+        outStream << "Context length: "
+                  << static_cast<std::uint32_t>(contextLength) << std::endl;
 
         const auto wordsCount = decoded.takeT<std::uint64_t>();
         outStream << "Words count: " << wordsCount << std::endl;

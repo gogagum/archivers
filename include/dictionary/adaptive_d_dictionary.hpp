@@ -55,7 +55,7 @@ private:
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
 private:
-    template <class _WordT, std::uint8_t _numBits>
+    template <class _WordT>
     friend class PPMDDictionary;
 };
 

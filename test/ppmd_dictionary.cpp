@@ -9,18 +9,18 @@ using ga::w::BytesWord;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, Construct) {
-    const auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    const auto dict = PPMDDictionary<BytesWord<1>>(3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, WordsCountAfterInit) {
-    const auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    const auto dict = PPMDDictionary<BytesWord<1>>(3);
     EXPECT_EQ(dict.getTotalWordsCnt(), 256);
 }
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, GetInitProbabilityStatsOrd0) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     const auto [low, high, totalWordsCount] =
         dict.getProbabilityStats(BytesWord<1>::byOrd(0));
     EXPECT_EQ(low, 0);
@@ -30,7 +30,7 @@ TEST(PPMDDictionary, GetInitProbabilityStatsOrd0) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, GetInitProbabilityStatsOrdEnd) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     const auto [low, high, totalWordsCount] =
         dict.getProbabilityStats(BytesWord<1>::byOrd(255));
     EXPECT_EQ(low, 255);
@@ -40,7 +40,7 @@ TEST(PPMDDictionary, GetInitProbabilityStatsOrdEnd) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, GetInitProbabilityStatsOrdCenter) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     const auto [low, high, totalWordsCount] = 
         dict.getProbabilityStats(BytesWord<1>::byOrd(42));
     EXPECT_EQ(low, 42);
@@ -50,7 +50,7 @@ TEST(PPMDDictionary, GetInitProbabilityStatsOrdCenter) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, DoubleGetStatsSame) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     [[maybe_unused]] const auto _stats =
         dict.getProbabilityStats(BytesWord<1>::byOrd(42));
     const auto [low1, high1, totalWordsCount] =
@@ -62,7 +62,7 @@ TEST(PPMDDictionary, DoubleGetStatsSame) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, DoubleGetStatsDifferent) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     [[maybe_unused]] const auto _stats =
         dict.getProbabilityStats(BytesWord<1>::byOrd(42));
     const auto [low1, high1, totalWordsCount] =
@@ -74,7 +74,7 @@ TEST(PPMDDictionary, DoubleGetStatsDifferent) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, DoubleGetStatsDifferent2) {
-    auto dict = PPMDDictionary<BytesWord<1>, 3>();
+    auto dict = PPMDDictionary<BytesWord<1>>(3);
     [[maybe_unused]] const auto _stats =
         dict.getProbabilityStats(BytesWord<1>::byOrd(42));
     const auto [low1, high1, totalWordsCount] =
@@ -86,7 +86,7 @@ TEST(PPMDDictionary, DoubleGetStatsDifferent2) {
 
 //----------------------------------------------------------------------------//
 TEST(PPMDDictionary, Example) {
-    auto dict = PPMDDictionary<BytesWord<1>, 5>();
+    auto dict = PPMDDictionary<BytesWord<1>>(5);
     const auto getLetterStats = [&dict](char letter) {
         return dict.getProbabilityStats(BytesWord<1>::byOrd(letter));
     };

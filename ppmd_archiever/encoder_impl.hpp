@@ -9,12 +9,24 @@
 ///
 template <std::uint16_t bitsNum>
 struct PPMDEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
-    using Base = BaseAdaptiveEncodeImpl<bitsNum>;
-    static void process(FileOpener& fileOpener, optout::OptOstreamRef os) {
+    static void process(FileOpener& fileOpener,
+                        std::uint16_t contextLength,
+                        optout::OptOstreamRef os) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
         auto dict = Dict<bitsNum>();
         auto coder = ga::ArithmeticCoder(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
+        auto tail = flow.getTail();
+        auto encoded = ga::ByteDataConstructor();
+        encoded.putT<std::uint16_t>(bitsNum);
+        encoded.putT<std::uint16_t>(tail.size());
+        encoded.putT<std::uint8_t>(contextLength);
+        const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        auto [wordsCount, bitsCount] = coder.encode(encoded, dict, os);
+        encoded.putTToPosition(wordsCount, wordsCountPos);
+        encoded.putTToPosition(bitsCount, bitsCountPos);
+        std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
+        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
     }
 };
 
