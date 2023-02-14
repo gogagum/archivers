@@ -7,24 +7,21 @@
 
 #include <cstdint>
 
-#include <boost/icl/interval_map.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <boost/range/irange.hpp>
 
 namespace ga::dict {
 
-namespace bicl = boost::icl;
-namespace br = boost::range;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DecreasingOnUpdateDictionary class
 ///
-template <class WordT, typename CountT = std::uint64_t>
+template <class WordT>
 class DecreasingOnUpdateDictionary
-        : public impl::AdaptiveDictionaryBase<typename WordT::Ord, CountT> {
+        : public impl::AdaptiveDictionaryBase<typename WordT::Ord, std::uint64_t> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
-    using Count = CountT;
+    using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 
     ////////////////////////////////////////////////////////////////////////////
@@ -78,7 +75,7 @@ public:
      * @return total words count in a dictionary.
      */
     [[nodiscard]] Count
-    getTotalWordsCnt() const { return this->_totalWordsCnt; };
+    getTotalWordsCnt() const { return this->_totalWordsCnt; }
 
 private:
 
@@ -90,9 +87,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
+template <class WordT>
 template <std::ranges::input_range RangeT>
-DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
+DecreasingOnUpdateDictionary<WordT>::DecreasingOnUpdateDictionary(
         const RangeT& countRng) : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount, 0) {
     for (const auto& [word, count] : countRng) {
         const auto ord = Word::ord(word);
@@ -103,9 +100,8 @@ DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
-        Count count)
+template <class WordT>
+DecreasingOnUpdateDictionary<WordT>::DecreasingOnUpdateDictionary(Count count)
     : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount, WordT::wordsCount * count) {
     for (auto ord : boost::irange<typename WordT::Ord>(0, WordT::wordsCount)) {
         this->_wordCnts[ord] = count;
@@ -114,8 +110,8 @@ DecreasingOnUpdateDictionary<WordT, CountT>::DecreasingOnUpdateDictionary(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto DecreasingOnUpdateDictionary<WordT, CountT>::getWord(
+template <class WordT>
+auto DecreasingOnUpdateDictionary<WordT>::getWord(
         Count cumulativeNumFound) const -> Word {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
@@ -130,9 +126,8 @@ auto DecreasingOnUpdateDictionary<WordT, CountT>::getWord(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto
-DecreasingOnUpdateDictionary<WordT, CountT>::getProbabilityStats(
+template <class WordT>
+auto DecreasingOnUpdateDictionary<WordT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     auto ord = Word::ord(word);
     if (!this->_wordCnts.contains(ord)
@@ -147,9 +142,8 @@ DecreasingOnUpdateDictionary<WordT, CountT>::getProbabilityStats(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto
-DecreasingOnUpdateDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
+template <class WordT>
+auto DecreasingOnUpdateDictionary<WordT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
     if (ord == 0) {
         return Count{0};
@@ -158,8 +152,8 @@ DecreasingOnUpdateDictionary<WordT, CountT>::_getLowerCumulativeNumFound(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-void DecreasingOnUpdateDictionary<WordT, CountT>::_updateWordCnt(Ord ord) {
+template <class WordT>
+void DecreasingOnUpdateDictionary<WordT>::_updateWordCnt(Ord ord) {
     this->_totalWordsCnt -= 1;
     this->_cumulativeWordCounts.update(ord, WordT::wordsCount, -1);;
     --this->_wordCnts[ord];

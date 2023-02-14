@@ -25,7 +25,7 @@ public:
     ///
     class NonDecreasingWord : public std::logic_error {
     public:
-        NonDecreasingWord() : std::logic_error("Count increased.") {};
+        NonDecreasingWord() : std::logic_error("Count increased.") {}
     };
 
 public:
@@ -49,7 +49,7 @@ public:
      * @brief getTotalWordsCount - current number of words.
      * @return number of words. In fact, it is last decoded/encoded word.
      */
-    [[nodiscard]] Count getTotalWordsCnt() const { return _currentCount; };
+    [[nodiscard]] Count getTotalWordsCnt() const { return _currentCount; }
 
 private:
     Count _currentCount;

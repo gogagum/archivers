@@ -8,19 +8,18 @@
 #include <boost/container_hash/hash.hpp>
 
 #include <dst/dynamic_segment_tree.hpp>
-#include <dictionary/impl/a_d_dictionary_base.hpp>
 #include <dictionary/word_probability_stats.hpp>
 #include <dictionary/adaptive_d_dictionary.hpp>
 
 namespace ga::dict {
 
-template <class WordT, std::uint8_t contextLen = 5, typename CountT = std::uint64_t>
-class PPMDDictionary {
+template <class WordT, std::uint8_t contextLen = 5>
+class PPMDDictionary : protected AdaptiveDDictionary<WordT> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
-    using Count = CountT;
-    using ProbabilityStats = WordProbabilityStats<CountT>;
+    using Count = std::uint64_t;
+    using ProbabilityStats = WordProbabilityStats<Count>;
 private:
 
     using DST =
@@ -29,14 +28,13 @@ private:
             std::plus<void>, std::int64_t>;
 
 
-    using ConditionalProbability = AdaptiveDDictionary<Word, CountT>;
+    using _DDict = AdaptiveDDictionary<Word>;
 
-    using Context = std::deque<Ord>;
-    using SearchContext = boost::container::static_vector<Ord, contextLen>;
+    using _Ctx = std::deque<Ord>;
+    using _SearchCtx = boost::container::static_vector<Ord, contextLen>;
+    using _SearchCtxHash = boost::hash<_SearchCtx>;
 
 public:
-
-    PPMDDictionary() { _contextProbs.emplace(SearchContext{}, ConditionalProbability()); }
 
     /**
      * @brief getWord
@@ -44,14 +42,12 @@ public:
      * @return
      */
     [[nodiscard]] Word getWord(Count cumulativeNumFound) const {
-        auto currCtx = SearchContext(_ctx.rbegin(), _ctx.rend());
-        do {
-            if (_foundContext(currCtx)) {
-                return _contextProbs.at(currCtx).getWord(cumulativeNumFound);
+        for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
+            if (_foundContext(ctx)) {
+                return _contextProbs.at(ctx).getWord(cumulativeNumFound);
             }
-            currCtx.pop_back();
-        } while (!currCtx.empty());
-        assert(false && "Unreachable.");
+        }
+        return AdaptiveDDictionary<WordT>::getWord(cumulativeNumFound);
     }
 
     /**
@@ -63,35 +59,15 @@ public:
         const auto ord = Word::ord(word);
         std::optional<ProbabilityStats> ret;
 
-        {
-            auto currCtx = SearchContext(_ctx.rbegin(), _ctx.rend());
-            while(true) {
-                if (_contextProbs.contains(currCtx)) {
-                    ret = _contextProbs.at(currCtx)._getProbabilityStats(ord);
-                    break;
-                }
-                currCtx.pop_back();
+        for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
+            if (_contextProbs.contains(ctx) && !ret.has_value()) {
+                ret = _contextProbs.at(ctx)._getProbabilityStats(ord);
             }
+            _contextProbs[ctx]._updateWordCnt(ord, 1);
         }
-
-        {
-            auto currCtx = SearchContext(_ctx.rbegin(), _ctx.rend());
-            do {
-                _contextProbs[currCtx]._updateWordCnt(ord, 1);
-                if (!currCtx.empty()) {
-                    currCtx.pop_back();
-                    if (currCtx.empty()) {
-                        _contextProbs[currCtx]._updateWordCnt(ord, 1);
-                    }
-                }
-            } while (!currCtx.empty());
-
-            if (_ctx.size() == contextLen) {
-                _ctx.pop_front();
-            }
-            _ctx.push_back(ord);
-        }
-
+        ret = ret.value_or(this->_getProbabilityStats(ord));
+        this->_updateWordCnt(ord, 1);
+        _updateCtx(ord);
         return ret.value();
     }
 
@@ -100,18 +76,28 @@ public:
      * @return totalWordsCount according to dictionary model.
      */
     [[nodiscard]] Count getTotalWordsCnt() const {
-        auto currCtx = SearchContext(_ctx.rbegin(), _ctx.rend());
-        do {
-            if (_contextProbs.contains(currCtx)) {
-                return _contextProbs.at(currCtx).getTotalWordsCnt();
+        for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
+            if (_contextProbs.contains(ctx)) {
+                return _contextProbs.at(ctx).getTotalWordsCnt();
             }
-        } while (!currCtx.empty());
-        assert(false && "Unreachable.");
+        }
+        return AdaptiveDDictionary<WordT>::getTotalWordsCnt();
     }
 
 private:
-    std::unordered_map<SearchContext, ConditionalProbability, boost::hash<SearchContext>> _contextProbs;
-    Context _ctx;
+
+    _SearchCtx _getInitSearchCtx() const { return {_ctx.rbegin(), _ctx.rend()}; }
+
+    void _updateCtx(typename Word::Ord ord) {
+        if (_ctx.size() == contextLen) {
+            _ctx.pop_front();
+        }
+        _ctx.push_back(ord);
+    }
+
+private:
+    std::unordered_map<_SearchCtx, _DDict, _SearchCtxHash> _contextProbs;
+    _Ctx _ctx;
 };
 
 }
