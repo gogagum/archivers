@@ -7,24 +7,24 @@
 
 #include <unordered_set>
 #include <cstdint>
-#include <boost/range/irange.hpp>
+#include <boost/range/iterator_range.hpp>
 
 namespace ga::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDDictionary class
 ///
-template <class WordT, typename CountT = std::uint64_t>
+template <class WordT>
 class AdaptiveDDictionary :
-        impl::ADDictionaryBase<typename WordT::Ord, CountT, WordT::wordsCount> {
+        protected impl::ADDictionaryBase<typename WordT::Ord, std::uint64_t, WordT::wordsCount> {
 public:
     using Word = WordT;
     using Ord = typename WordT::Ord;
-    using Count = CountT;
+    using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 public:
     AdaptiveDDictionary() = default;
-    AdaptiveDDictionary(AdaptiveDDictionary<WordT, CountT>&& other) = default;
+    AdaptiveDDictionary(AdaptiveDDictionary<WordT>&& other) = default;
 
     /**
      * @brief getWord - get word by cumulative num found.
@@ -51,13 +51,19 @@ private:
     Count _getLowerCumulativeCnt(Ord ord) const;
 
     Count _getWordCnt(Ord ord) const;
+
+    ProbabilityStats _getProbabilityStats(Ord ord) const;
+
+private:
+    template <class _WordT, std::uint8_t _numBits>
+    friend class PPMDDictionary;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
+template <class WordT>
 WordT
-AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
+AdaptiveDDictionary<WordT>::getWord(Count cumulativeNumFound) const {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
     auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
     // TODO: replace
@@ -71,20 +77,18 @@ AdaptiveDDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::getProbabilityStats(
+template <class WordT>
+auto AdaptiveDDictionary<WordT>::getProbabilityStats(
         const Word& word) -> ProbabilityStats {
     const auto ord = Word::ord(word);
-    const auto low = _getLowerCumulativeCnt(ord);
-    const auto high = low + _getWordCnt(ord);
-    const auto total = getTotalWordsCnt();
+    auto ret = _getProbabilityStats(ord);
     this->_updateWordCnt(ord, 1);
-    return { low, high, total };
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
+template <class WordT>
+auto AdaptiveDDictionary<WordT>::getTotalWordsCnt() const -> Count {
     if (this->_totalFoundWordsCnt == 0) {
         return WordT::wordsCount;
     }
@@ -96,9 +100,8 @@ auto AdaptiveDDictionary<WordT, CountT>::getTotalWordsCnt() const -> Count {
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeCnt(
-        Ord ord) const -> Count {
+template <class WordT>
+auto AdaptiveDDictionary<WordT>::_getLowerCumulativeCnt(Ord ord) const -> Count {
     if (this->_totalFoundWordsCnt == 0) {
         return ord;
     }
@@ -114,8 +117,8 @@ auto AdaptiveDDictionary<WordT, CountT>::_getLowerCumulativeCnt(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto AdaptiveDDictionary<WordT, CountT>::_getWordCnt(Ord ord) const -> Count {
+template <class WordT>
+auto AdaptiveDDictionary<WordT>::_getWordCnt(Ord ord) const -> Count {
     if (this->_totalFoundWordsCnt == 0) {
         return 1;
     }
@@ -127,6 +130,16 @@ auto AdaptiveDDictionary<WordT, CountT>::_getWordCnt(Ord ord) const -> Count {
     return (Word::wordsCount - totalUniqueWordsCount) * 2 * realWordCount
         + totalUniqueWordsCount
         - Word::wordsCount * ((realWordCount > 0) ? 1 : 0);
+}
+
+//----------------------------------------------------------------------------//
+template <class WordT>
+auto AdaptiveDDictionary<WordT>::_getProbabilityStats(
+        Ord ord) const -> ProbabilityStats {
+    const auto low = _getLowerCumulativeCnt(ord);
+    const auto high = low + _getWordCnt(ord);
+    const auto total = getTotalWordsCnt();
+    return { low, high, total };
 }
 
 }

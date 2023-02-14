@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cstdint>
+#include <optional>
 #include <boost/timer/progress_display.hpp>
 
 #include "flow/traits.hpp"
@@ -46,7 +47,7 @@ public:
     template <class DictT>
     EncodeRet encode(ByteDataConstructor& dataConstructor,
                      DictT& dict,
-                     std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
+                     auto os = std::nullopt);
 
 private:
     FlowT& _symFlow;
@@ -62,9 +63,8 @@ ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT& symbolsFlow) :
 template <class FlowT>
 template <class DictT>
 auto ArithmeticCoder<FlowT>::encode(
-        ByteDataConstructor& dataConstructor,
-        DictT& dict,
-        std::optional<std::reference_wrapper<std::ostream>> os) -> EncodeRet {
+        ByteDataConstructor& dataConstructor, 
+        DictT& dict, auto os) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 
@@ -119,3 +119,4 @@ auto ArithmeticCoder<FlowT>::encode(
 }  // namespace ga
 
 #endif // ARITHMETIC_CODER_HPP
+
