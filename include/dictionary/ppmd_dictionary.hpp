@@ -43,7 +43,7 @@ public:
      */
     [[nodiscard]] Word getWord(Count cumulativeNumFound) const {
         for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
-            if (_foundContext(ctx)) {
+            if (_contextProbs.contains(ctx)) {
                 return _contextProbs.at(ctx).getWord(cumulativeNumFound);
             }
         }

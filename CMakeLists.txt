@@ -69,6 +69,12 @@ target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES}
 add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
 target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
 
+add_executable(ppmd_encoder ppmd_archiever/encoder.cpp)
+target_link_libraries(ppmd_encoder encoding_lib common ${Boost_LIBRARIES})
+
+add_executable(ppmd_decoder ppmd_archiever/decoder.cpp)
+target_link_libraries(ppmd_decoder encoding_lib common ${Boost_LIBRARIES})
+
 add_executable(numerical_encoder numerical/encoder.cpp)
 target_link_libraries(numerical_encoder encoding_lib common ${Boost_LIBRARIES})
 
