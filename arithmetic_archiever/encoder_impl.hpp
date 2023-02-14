@@ -13,7 +13,7 @@ struct AdaptiveEncodeImpl {
                         std::uint64_t ratio,
                         optout::OptOstreamRef os) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
-        auto dict = Dict<bitsNum>(ratio);
+        auto dict = Dict(1 << bitsNum, ratio);
         auto coder = ga::ArithmeticCoder(flow);
         auto tail = flow.getTail();
         auto encoded = ga::ByteDataConstructor();

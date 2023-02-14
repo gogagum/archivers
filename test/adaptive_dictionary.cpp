@@ -18,94 +18,84 @@ using ga::ByteDataConstructor;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, ConstructBytesWord) {
-    auto dict = AdaptiveDictionary<BytesWord<2>>(1);
+    auto dict = AdaptiveDictionary<>(256 * 2, 1);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, ConstructBitsWord) {
-    auto dict = AdaptiveDictionary<BitsWord<2>>(2);
+    auto dict = AdaptiveDictionary<>(256 * 2, 2);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, ConstructIntWord) {
-    auto dict = AdaptiveDictionary<IntegerWord<int, 0, 3>>(3);
+    auto dict = AdaptiveDictionary<>(8, 3);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, LowerAfterConstruct) {
-    auto dict = AdaptiveDictionary<ga::w::BytesWord<1>>(3);
-    const auto word = BytesWord<1>(std::array{std::byte{37}}.begin());
-    const auto [low, _0, _1] = dict.getProbabilityStats(word);
+    auto dict = AdaptiveDictionary<>(256, 3);
+    const auto [low, _0, _1] = dict.getProbabilityStats(37);
     EXPECT_EQ(low, 37);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, LowerZeroAfterConstruct) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(2);
-    const auto symData = std::array<std::byte, 1>{std::byte{0}};
-    const auto word = BytesWord<1>(symData.data());
-    const auto [low, _0, _1] = dict.getProbabilityStats(word);
+    auto dict = AdaptiveDictionary<>(256, 2);
+    const auto [low, _0, _1] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, HigherZeroAfterConstruct) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(2);
-    const auto word = ga::w::BytesWord<1>(std::array{std::byte{42}}.begin());
-    const auto [_0, high, _1] = dict.getProbabilityStats(word);
+    auto dict = AdaptiveDictionary<>(256, 2);
+    const auto [_0, high, _1] = dict.getProbabilityStats(42);
     EXPECT_EQ(high, 43);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, Increase) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
-    [[maybe_unused]] const auto stats =
-        dict.getProbabilityStats(
-            BytesWord<1>(std::array{std::byte{12}}.begin()));
-    const auto symData = std::array{std::byte{42}};
-    const auto word = BytesWord<1>(symData.data());
-    const auto [low, _0, _1] = dict.getProbabilityStats(word);
+    auto dict = AdaptiveDictionary<>(256, 1);
+    [[maybe_unused]] const auto stats = dict.getProbabilityStats(12);
+    const auto [low, _0, _1] = dict.getProbabilityStats(42);
     EXPECT_EQ(low, 43);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, IncreaseExactTheSame) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
-    const auto increasedWord = BytesWord<1>(std::array{std::byte{12}}.begin());
+    auto dict = AdaptiveDictionary<>(256, 1);
 
-    const auto [low1, high1, _1] = dict.getProbabilityStats(increasedWord);
+    const auto [low1, high1, _1] = dict.getProbabilityStats(12);
     EXPECT_EQ(low1, 12);  // before first increase
     EXPECT_EQ(high1, 13); // before first increase
-    const auto [low2, high2, _2] = dict.getProbabilityStats(increasedWord);
+    const auto [low2, high2, _2] = dict.getProbabilityStats(12);
     EXPECT_EQ(low2, 12);  // after first increase
     EXPECT_EQ(high2, 14); // after first increase
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, IncreaseZero) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
-    const auto increasedWord = BytesWord<1>(std::array{std::byte{0}}.begin());
+    auto dict = AdaptiveDictionary<>(256, 1);
 
-    const auto [low1, high1, _1] = dict.getProbabilityStats(increasedWord);
+    const auto [low1, high1, _1] = dict.getProbabilityStats(0);
     EXPECT_EQ(low1, 0);   // before first increase
     EXPECT_EQ(high1, 1);  // before first increase
-    const auto [low2, high2, _2] = dict.getProbabilityStats(increasedWord);
+    const auto [low2, high2, _2] = dict.getProbabilityStats(0);
     EXPECT_EQ(low2, 0);   // after first increase
     EXPECT_EQ(high2, 2);  // after first increase
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, GetWordOnStart) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
-    const auto word = dict.getWord(42);
-    EXPECT_EQ(word, BytesWord<1>::byOrd(42));
+    auto dict = AdaptiveDictionary<>(256, 1);
+    const auto ord = dict.getWordOrd(42);
+    EXPECT_EQ(ord, 42);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDictionary, GetWordAfterUpdate) {
-    auto dict = AdaptiveDictionary<BytesWord<1>>(1);
+    auto dict = AdaptiveDictionary<>(256, 1);
     [[maybe_unused]] const auto stats =
-            dict.getProbabilityStats(BytesWord<1>::byOrd(42));
-    EXPECT_EQ(dict.getWord(42), BytesWord<1>::byOrd(42));
-    EXPECT_EQ(dict.getWord(43), BytesWord<1>::byOrd(42));
+            dict.getProbabilityStats(42);
+    EXPECT_EQ(dict.getWordOrd(42), 42);
+    EXPECT_EQ(dict.getWordOrd(43), 42);
 }

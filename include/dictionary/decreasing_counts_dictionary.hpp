@@ -14,20 +14,9 @@ namespace ga::dict {
 template <typename CountT>
 class DecreasingCountDictionary {
 public:
-    using Word = w::UIntWord<CountT>;
     using Ord = CountT;
     using Count = CountT;
     using ProbabilityStats = WordProbabilityStats<CountT>;
-public:
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The NonDecreasingWord class
-    ///
-    class NonDecreasingWord : public std::logic_error {
-    public:
-        NonDecreasingWord() : std::logic_error("Count increased.") {}
-    };
-
 public:
     DecreasingCountDictionary(Count initialCount);
 
@@ -36,14 +25,14 @@ public:
      * @param cumulativeNumFound
      * @return word.
      */
-    [[nodiscard]] Word getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats
      * @param word - number to get stats for.
      * @return [low, high, total] counts.
      */
-    [[nodiscard]] ProbabilityStats getProbabilityStats(Word word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
     /**
      * @brief getTotalWordsCount - current number of words.
@@ -63,22 +52,17 @@ DecreasingCountDictionary<CountT>::DecreasingCountDictionary(Count initialCount)
 
 //----------------------------------------------------------------------------//
 template <typename CountT>
-auto DecreasingCountDictionary<CountT>::getWord(
-        Count cumulativeNumFound) const -> Word {
-    if (cumulativeNumFound > _currentCount) {
-        throw NonDecreasingWord();
-    }
-    return Word(cumulativeNumFound + 1);
+auto DecreasingCountDictionary<CountT>::getWordOrd(
+        Count cumulativeNumFound) const -> Ord {
+    assert (cumulativeNumFound <= _currentCount && "Non decreasing word!");
+    return cumulativeNumFound + 1;
 }
 
 //----------------------------------------------------------------------------//
 template <typename CountT>
 auto DecreasingCountDictionary<CountT>::getProbabilityStats(
-        Word word) -> ProbabilityStats {
-    const auto ord = Word::ord(word);
-    if (ord > _currentCount) {
-        throw NonDecreasingWord();
-    }
+        Ord ord) -> ProbabilityStats {
+    assert(ord <= _currentCount && "Non decreasing word!");
     const auto ret = ProbabilityStats{ ord - 1, ord, _currentCount };
     _currentCount = ord;
     return ret;

@@ -13,38 +13,37 @@ using ga::w::BytesWord;
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, Construct) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
+    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCount) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
+    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
     EXPECT_EQ(dict.getTotalWordsCnt(), 32);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountEmpty) {
-    const auto freqMapping = std::array<std::pair<BytesWord<2>, std::uint64_t>, 0>{};
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
+    const auto freqMapping = std::array<std::pair<std::uint64_t, std::uint64_t>, 0>{};
+    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
     EXPECT_EQ(dict.getTotalWordsCnt(), 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    [[maybe_unused]] auto stats =
-            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
     EXPECT_EQ(dict.getTotalWordsCnt(), 31);
 }
@@ -52,14 +51,13 @@ TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    [[maybe_unused]] auto stats =
-            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
-    auto [low, high, _0] = dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    auto [low, high, _0] = dict.getProbabilityStats(42);
 
     EXPECT_EQ(low, 0);
     EXPECT_EQ(high, 14);
@@ -68,30 +66,29 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, QueryForAnEmptyWord) {
     auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    EXPECT_THROW(auto stats = dict.getProbabilityStats(BytesWord<2>::byOrd(13)),
-                 DecreasingOnUpdateDictionary<BytesWord<2>>::NoSuchWord);
+    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    EXPECT_THROW(auto stats = dict.getProbabilityStats(13),
+                 DecreasingOnUpdateDictionary<>::NoSuchWord);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
-    [[maybe_unused]] auto stats =
-            dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
-    auto [low0, high0, _0] = dict.getProbabilityStats(BytesWord<2>::byOrd(42));
+    auto [low0, high0, _0] = dict.getProbabilityStats(42);
 
     EXPECT_EQ(low0, 0);
     EXPECT_EQ(high0, 14);
 
-    auto [low1, high1, _1] = dict.getProbabilityStats(BytesWord<2>::byOrd(105));
+    auto [low1, high1, _1] = dict.getProbabilityStats(105);
 
     EXPECT_EQ(low1, 13);
     EXPECT_EQ(high1, 30);
@@ -100,11 +97,11 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, GetWord) {
     const auto freqMapping = std::array{
-        std::make_pair(BytesWord<2>::byOrd(42), std::uint64_t(15)),
-        std::make_pair(BytesWord<2>::byOrd(105), std::uint64_t(17))
+        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
+        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<BytesWord<2>>(freqMapping);
+    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
 
-    auto word = dict.getWord(12);
-    EXPECT_EQ(word, BytesWord<2>::byOrd(42));
+    const auto ord = dict.getWordOrd(12);
+    EXPECT_EQ(ord, 42);
 }

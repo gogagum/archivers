@@ -76,7 +76,8 @@ auto ArithmeticCoder<FlowT>::encode(
     }
 
     for (auto sym : _symFlow) {
-        const auto [low, high, total] = dict.getProbabilityStats(sym);
+        auto ord = decltype(sym)::ord(sym);
+        const auto [low, high, total] = dict.getProbabilityStats(ord);
         currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {

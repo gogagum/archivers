@@ -13,7 +13,7 @@ struct PPMDEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
                         std::uint16_t contextLength,
                         optout::OptOstreamRef os) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
-        auto dict = Dict<bitsNum>();
+        auto dict = Dict(1 << bitsNum);
         auto coder = ga::ArithmeticCoder(flow);
         auto tail = flow.getTail();
         auto encoded = ga::ByteDataConstructor();

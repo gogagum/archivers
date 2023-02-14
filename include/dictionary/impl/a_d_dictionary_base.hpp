@@ -8,16 +8,17 @@ namespace ga::dict::impl {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BaseADDictionary class
 ///
-template <typename OrdT, typename CountT, OrdT ordEnd>
+template <typename OrdT, typename CountT>
 class ADDictionaryBase {
 protected:
     using Ord = OrdT;
     using Count = CountT;
 protected:
-    ADDictionaryBase()
-        : _cumulativeFoundUniqueWords(0, ordEnd, 0),
+    ADDictionaryBase(OrdT maxOrd)
+        : _cumulativeFoundUniqueWords(0, maxOrd, 0),
           _totalFoundWordsCnt(0),
-          _cumulativeFoundWordsCnt(0, ordEnd, 0) {}
+          _cumulativeFoundWordsCnt(0, maxOrd, 0),
+          _maxOrd(maxOrd) {}
 
     Count _getTotalUniqueWordsCnt() const;
 
@@ -39,39 +40,36 @@ protected:
     Count _totalFoundWordsCnt;
     DST _cumulativeFoundUniqueWords;
     std::unordered_map<Ord, Count> _foundWordsCount;
+    const OrdT _maxOrd;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <typename OrdT, typename CountT, OrdT ordEnd>
+template <typename OrdT, typename CountT>
 auto
-ADDictionaryBase<OrdT, CountT, ordEnd>::_getTotalUniqueWordsCnt(
-        ) const -> Count {
+ADDictionaryBase<OrdT, CountT>::_getTotalUniqueWordsCnt() const -> Count {
     return _foundWordsCount.size();
 }
 
 //----------------------------------------------------------------------------//
-template <typename OrdT, typename CountT, OrdT ordEnd>
-auto
-ADDictionaryBase<OrdT, CountT, ordEnd>::_getLowerCumulativeUniqueNumFound(
+template <typename OrdT, typename CountT>
+auto ADDictionaryBase<OrdT, CountT>::_getLowerCumulativeUniqueNumFound(
         Ord ord) const -> Count {
     return _cumulativeFoundUniueWords(ord - 1);
 }
 
 //----------------------------------------------------------------------------//
-template <typename OrdT, typename CountT, OrdT ordEnd>
-auto ADDictionaryBase<OrdT, CountT, ordEnd>::_getRealWordCnt(
-        Ord ord) const -> Count {
+template <typename OrdT, typename CountT>
+auto ADDictionaryBase<OrdT, CountT>::_getRealWordCnt(Ord ord) const -> Count {
     return _foundWordsCount.contains(ord) ? _foundWordsCount.at(ord) : 0;
 }
 
 //----------------------------------------------------------------------------//
-template <typename OrdT, typename CountT, OrdT ordEnd>
-void
-ADDictionaryBase<OrdT, CountT, ordEnd>::_updateWordCnt(Ord ord, Count cnt) {
-    _cumulativeFoundWordsCnt.update(ord, ordEnd, 1);
+template <typename OrdT, typename CountT>
+void ADDictionaryBase<OrdT, CountT>::_updateWordCnt(Ord ord, Count cnt) {
+    _cumulativeFoundWordsCnt.update(ord, _maxOrd, 1);
     if (!_foundWordsCount.contains(ord)) {
-        _cumulativeFoundUniqueWords.update(ord, ordEnd, 1);
+        _cumulativeFoundUniqueWords.update(ord, _maxOrd, 1);
     }
     ++_totalFoundWordsCnt;
     ++_foundWordsCount[ord];

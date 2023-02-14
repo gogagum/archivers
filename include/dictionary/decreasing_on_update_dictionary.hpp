@@ -15,12 +15,11 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DecreasingOnUpdateDictionary class
 ///
-template <class WordT>
+template <std::integral OrdT = std::uint64_t>
 class DecreasingOnUpdateDictionary
-        : public impl::AdaptiveDictionaryBase<typename WordT::Ord, std::uint64_t> {
+        : public impl::AdaptiveDictionaryBase<OrdT, std::uint64_t> {
 public:
-    using Word = WordT;
-    using Ord = typename WordT::Ord;
+    using Ord = OrdT;
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 
@@ -29,13 +28,13 @@ public:
     ///
     class NoSuchWord : public std::runtime_error {
     public:
-        NoSuchWord(const Word& word) :
-            std::runtime_error(_formWord(word)) {}
+        NoSuchWord(Ord ord) :
+            std::runtime_error(_formWord(ord)) {}
     private:
-        std::string _formWord(const Word& word) {
+        std::string _formWord(Ord ord) {
             std::string ret;
             auto retStream = std::stringstream(ret);
-            retStream << "No such word: " << word;
+            retStream << "No such word: " << ord;
             return ret;
         }
     };
@@ -47,28 +46,28 @@ public:
      * @param probRng - counts mapping.
      */
     template <std::ranges::input_range RangeT>
-    DecreasingOnUpdateDictionary(const RangeT& probRng);
+    DecreasingOnUpdateDictionary(Ord maxOrd, const RangeT& probRng);
 
     /**
      * @brief DecreasingOnUpdateDictionary - generate uniform with `count for
      * each word.
      * @param count
      */
-    DecreasingOnUpdateDictionary(Count count);
+    DecreasingOnUpdateDictionary(Ord maxOrd, Count count);
 
     /**
      * @brief getWord - word by cumulatove count.
      * @param cumulativeNumFound - count to search for.
      * @return found word.
      */
-    [[nodiscard]] Word getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
     /**
      * @brief getWordProbabilityStats - get stats for a word.
      * @param word - word to get stats for.
      * @return [low, high, total]
      */
-    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
     /**
      * @brief getTotalWordsCount - get total words count.
@@ -83,38 +82,45 @@ private:
 
     void _updateWordCnt(Ord ord);
 
+private:
+    const Ord _maxOrd;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT>
+template <std::integral OrdT>
 template <std::ranges::input_range RangeT>
-DecreasingOnUpdateDictionary<WordT>::DecreasingOnUpdateDictionary(
-        const RangeT& countRng) : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount, 0) {
-    for (const auto& [word, count] : countRng) {
-        const auto ord = Word::ord(word);
+DecreasingOnUpdateDictionary<OrdT>::DecreasingOnUpdateDictionary(
+        Ord maxOrd,
+        const RangeT& countRng
+        ) : impl::AdaptiveDictionaryBase<Ord, Count>(maxOrd, 0),
+            _maxOrd(maxOrd) {
+    for (const auto& [ord, count] : countRng) {
         this->_wordCnts[ord] = count;
-        this->_cumulativeWordCounts.update(ord, WordT::wordsCount, count);
+        this->_cumulativeWordCounts.update(ord, _maxOrd, count);
         this->_totalWordsCnt += count;
     }
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-DecreasingOnUpdateDictionary<WordT>::DecreasingOnUpdateDictionary(Count count)
-    : impl::AdaptiveDictionaryBase<Ord, Count>(WordT::wordsCount, WordT::wordsCount * count) {
-    for (auto ord : boost::irange<typename WordT::Ord>(0, WordT::wordsCount)) {
+template <std::integral OrdT>
+DecreasingOnUpdateDictionary<OrdT>::DecreasingOnUpdateDictionary(
+        Ord maxOrd,
+        Count count
+        ) : impl::AdaptiveDictionaryBase<Ord, Count>(_maxOrd, _maxOrd * count),
+            _maxOrd(maxOrd) {
+    for (auto ord : boost::irange<Ord>(0, _maxOrd)) {
         this->_wordCnts[ord] = count;
-        this->_cumulativeWordCounts.update(ord, WordT::wordsCount, count);
+        this->_cumulativeWordCounts.update(ord, _maxOrd, count);
     }
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-auto DecreasingOnUpdateDictionary<WordT>::getWord(
-        Count cumulativeNumFound) const -> Word {
+template <std::integral OrdT>
+auto DecreasingOnUpdateDictionary<OrdT>::getWordOrd(
+        Count cumulativeNumFound) const -> Ord {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
-    auto idxs = boost::make_iterator_range<UintIt>(0, WordT::wordsCount);
+    auto idxs = boost::make_iterator_range<UintIt>(0, _maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
@@ -122,17 +128,16 @@ auto DecreasingOnUpdateDictionary<WordT>::getWord(
     };
     auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
-    return Word::byOrd(it - idxs.begin());
+    return it - idxs.begin();
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-auto DecreasingOnUpdateDictionary<WordT>::getProbabilityStats(
-        const Word& word) -> ProbabilityStats {
-    auto ord = Word::ord(word);
+template <std::integral OrdT>
+auto DecreasingOnUpdateDictionary<OrdT>::getProbabilityStats(
+        Ord ord) -> ProbabilityStats {
     if (!this->_wordCnts.contains(ord)
             || this->_wordCnts.at(ord) == Count(0)) {
-        throw NoSuchWord(word);
+        throw NoSuchWord(ord);
     }
     const auto low = _getLowerCumulativeNumFound(ord);
     const auto high = low + this->_wordCnts[ord];
@@ -142,8 +147,8 @@ auto DecreasingOnUpdateDictionary<WordT>::getProbabilityStats(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-auto DecreasingOnUpdateDictionary<WordT>::_getLowerCumulativeNumFound(
+template <std::integral OrdT>
+auto DecreasingOnUpdateDictionary<OrdT>::_getLowerCumulativeNumFound(
         Ord ord) const -> Count {
     if (ord == 0) {
         return Count{0};
@@ -152,10 +157,10 @@ auto DecreasingOnUpdateDictionary<WordT>::_getLowerCumulativeNumFound(
 }
 
 //----------------------------------------------------------------------------//
-template <class WordT>
-void DecreasingOnUpdateDictionary<WordT>::_updateWordCnt(Ord ord) {
+template <std::integral OrdT>
+void DecreasingOnUpdateDictionary<OrdT>::_updateWordCnt(Ord ord) {
     this->_totalWordsCnt -= 1;
-    this->_cumulativeWordCounts.update(ord, WordT::wordsCount, -1);;
+    this->_cumulativeWordCounts.update(ord, _maxOrd, - 1);;
     --this->_wordCnts[ord];
 }
 

@@ -23,15 +23,15 @@ public:
 
     ArithmeticDecoder() : _currRange{ 0, RC::total } {}
 
-    template <class DictT,
-              std::output_iterator<typename DictT::Word> OutIterT>
+    template <class WordT>
     void decode(
             auto& source,
-            DictT& dict,
-            OutIterT outIter,
+            auto& dict,
+            auto outIter,
             std::size_t wordsCount,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
-            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
+            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
+            ) requires std::output_iterator<decltype(outIter), WordT>;
 
 private:
 
@@ -45,15 +45,15 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class DictT,
-          std::output_iterator<typename DictT::Word> OutIterT>
+template <class WordT>
 void ArithmeticDecoder::decode(
         auto& source,
-        DictT& dict,
-        OutIterT outIter,
+        auto& dict,
+        auto outIter,
         std::size_t wordsCount,
         std::size_t bitsLimit,
-        std::optional<std::reference_wrapper<std::ostream>> os) {
+        std::optional<std::reference_wrapper<std::ostream>> os
+) requires std::output_iterator<decltype(outIter), WordT> {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -80,11 +80,11 @@ void ArithmeticDecoder::decode(
 
         const auto aux128 = (offset128 * dictTotalWords128 - 1) / range128;
         const auto aux = aux128.convert_to<std::uint64_t>();
-        const auto word = dict.getWord(aux);
-        *outIter = word;
+        const auto ord = dict.getWordOrd(aux);
+        *outIter = WordT::byOrd(ord);
         ++outIter;
 
-        auto [low, high, total] = dict.getProbabilityStats(word);
+        auto [low, high, total] = dict.getProbabilityStats(ord);
         _currRange = RC::rangeFromStatsAndPrev(_currRange, low, high, total);
 
         while (true) {

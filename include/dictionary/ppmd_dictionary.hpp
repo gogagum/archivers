@@ -14,11 +14,10 @@
 
 namespace ga::dict {
 
-template <class WordT>
-class PPMDDictionary : protected AdaptiveDDictionary<WordT> {
+template <std::integral OrdT = std::uint64_t>
+class PPMDDictionary : protected AdaptiveDDictionary<OrdT> {
 public:
-    using Word = WordT;
-    using Ord = typename WordT::Ord;
+    using Ord = OrdT;
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 private:
@@ -28,7 +27,7 @@ private:
             Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
             std::plus<void>, std::int64_t>;
 
-    using _DDict = AdaptiveDDictionary<Word>;
+    using _DDict = AdaptiveDDictionary<OrdT>;
 
     constexpr static std::uint8_t maxContextLength = 8;
     using _Ctx = std::deque<Ord>;
@@ -37,7 +36,9 @@ private:
 
 public:
 
-    PPMDDictionary(std::uint8_t contextLen = 5) : _contextLen(contextLen) {
+    PPMDDictionary(Ord maxOrd, std::uint8_t contextLen = 5)
+        : AdaptiveDDictionary<OrdT>(maxOrd),
+          _contextLen(contextLen) {
         assert(contextLen < maxContextLength && "Unsupported context length.");
     }
 
@@ -46,13 +47,13 @@ public:
      * @param cumulativeNumFound
      * @return
      */
-    [[nodiscard]] Word getWord(Count cumulativeNumFound) const {
+    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const {
         for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
             if (_contextProbs.contains(ctx)) {
-                return _contextProbs.at(ctx).getWord(cumulativeNumFound);
+                return _contextProbs.at(ctx).getWordOrd(cumulativeNumFound);
             }
         }
-        return AdaptiveDDictionary<WordT>::getWord(cumulativeNumFound);
+        return AdaptiveDDictionary<Ord>::getWordOrd(cumulativeNumFound);
     }
 
     /**
@@ -60,15 +61,18 @@ public:
      * @param word
      * @return
      */
-    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word) {
-        const auto ord = Word::ord(word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord) {
         std::optional<ProbabilityStats> ret;
 
         for (auto ctx = _getInitSearchCtx(); !ctx.empty(); ctx.pop_back()) {
-            if (_contextProbs.contains(ctx) && !ret.has_value()) {
-                ret = _contextProbs.at(ctx)._getProbabilityStats(ord);
+            if (_contextProbs.contains(ctx)) {
+                if (!ret.has_value()) {
+                    ret = _contextProbs.at(ctx)._getProbabilityStats(ord);
+                }
+            } else {
+                _contextProbs.emplace(ctx, this->_maxOrd);
             }
-            _contextProbs[ctx]._updateWordCnt(ord, 1);
+            _contextProbs.at(ctx)._updateWordCnt(ord, 1);
         }
         ret = ret.value_or(this->_getProbabilityStats(ord));
         this->_updateWordCnt(ord, 1);
@@ -86,14 +90,14 @@ public:
                 return _contextProbs.at(ctx).getTotalWordsCnt();
             }
         }
-        return AdaptiveDDictionary<WordT>::getTotalWordsCnt();
+        return AdaptiveDDictionary<Ord>::getTotalWordsCnt();
     }
 
 private:
 
     _SearchCtx _getInitSearchCtx() const { return {_ctx.rbegin(), _ctx.rend()}; }
 
-    void _updateCtx(typename Word::Ord ord) {
+    void _updateCtx(Ord ord) {
         if (_ctx.size() == _contextLen) {
             _ctx.pop_front();
         }

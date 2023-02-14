@@ -13,22 +13,19 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 struct TypeChoise {
-    using Dict = ga::dict::AdaptiveDDictionary<ga::w::BitsWord<numBits>>;
     using Flow = ga::fl::BitsWordFlow<numBits>;
-    using WordVec = std::vector<ga::w::BitsWord<numBits>>;
+    using Word = ga::w::BitsWord<numBits>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits> requires (numBits % 8 == 0)
 struct TypeChoise<numBits>{
-    using Dict = ga::dict::AdaptiveDDictionary<ga::w::BytesWord<numBits/8>>;
     using Flow = ga::fl::BytesWordFlow<numBits/8>;
-    using WordVec = std::vector<ga::w::BytesWord<numBits/8>>;
+    using Word = ga::w::BytesWord<numBits/8>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-template <std::uint16_t numBits>
-using Dict = typename TypeChoise<numBits>::Dict;
+using Dict = ga::dict::AdaptiveDDictionary<>;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
@@ -36,6 +33,6 @@ using Flow = typename TypeChoise<numBits>::Flow;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
-using WordVec = typename TypeChoise<numBits>::WordVec;
+using Word = typename TypeChoise<numBits>::Word;
 
 #endif // ARITHMETIC_D_ARCHIEVER_INCLUDE_HPP
