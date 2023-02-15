@@ -16,7 +16,8 @@ int main(int argc, char* argv[]) {
     std::string inFileName;
     std::string outFileName;
     std::uint16_t numBits;
-    std::uint16_t contextLength;
+    std::uint16_t ctxCellsCnt;
+    std::uint16_t ctxCellLength;
     std::string logStreamParam;
 
     try {
@@ -33,8 +34,12 @@ int main(int argc, char* argv[]) {
                 bpo::value(&numBits)->default_value(16),
                 "Word bits count."
             ) (
-                "context-length,c",
-                bpo::value(&contextLength)->default_value(4),
+                "cells-cnt,c",
+                bpo::value(&ctxCellsCnt)->default_value(4),
+                "Contect cells count."
+            ) (
+                "cell-length,q",
+                bpo::value(&ctxCellLength)->default_value(8),
                 "Context length."
             ) (
                 "log-stream,l",
@@ -46,14 +51,10 @@ int main(int argc, char* argv[]) {
         bpo::store(bpo::parse_command_line(argc, argv, appOptionsDescr), vm);
         bpo::notify(vm);
 
-        if (contextLength > 16) {
-            throw std::logic_error("Context length is not supported.");
-        }
-
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ga::dict::PPMDDictionary(1ull << numBits);
+        auto dict = ga::dict::PPMDDictionary(numBits, ctxCellsCnt, ctxCellLength);
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
@@ -61,7 +62,8 @@ int main(int argc, char* argv[]) {
         auto encoded = ga::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
-        encoded.putT<std::uint8_t>(contextLength);
+        encoded.putT<std::uint8_t>(ctxCellsCnt);
+        encoded.putT<std::uint8_t>(ctxCellLength);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);

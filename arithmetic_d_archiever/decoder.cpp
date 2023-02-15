@@ -7,7 +7,7 @@
 #include <span>
 
 #include <arithmetic_decoder.hpp>
-#include <dictionary/ppmd_dictionary.hpp>
+#include <dictionary/adaptive_d_dictionary.hpp>
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::PPMDDictionary(1 << symBitLen);
+        auto dict = ga::dict::AdaptiveDDictionary(1ull << symBitLen);
 
         std::vector<std::uint64_t> ords;
 

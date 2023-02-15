@@ -10,6 +10,8 @@
 #include <dictionary/word_probability_stats.hpp>
 #include <dictionary/adaptive_d_dictionary.hpp>
 
+#include <stdexcept>
+
 namespace ga::dict {
 
 class PPMDDictionary : protected AdaptiveDDictionary {
@@ -27,16 +29,21 @@ private:
     using _DDict = AdaptiveDDictionary;
 
     constexpr static std::uint8_t maxContextLength = 8;
-    using _Ctx = std::deque<Ord>;
-    using _SearchCtx = boost::container::static_vector<Ord, maxContextLength>;
-    using _SearchCtxHash = boost::hash<_SearchCtx>;
 
 public:
 
-    PPMDDictionary(Ord maxOrd, std::uint8_t contextLen = 5)
-        : AdaptiveDDictionary(maxOrd),
-          _contextLen(contextLen) {
-        assert(contextLen < maxContextLength && "Unsupported context length.");
+    PPMDDictionary(std::uint16_t numBits,
+                   std::uint16_t contextLength,
+                   std::uint16_t contextCellBitsLength)
+        : AdaptiveDDictionary(1ull << numBits),
+          _ctx(0),
+          _currCtxLength(0),
+          _numBits(numBits),
+          _ctxCellBitsLength(contextCellBitsLength),
+          _ctxLength(contextLength) {
+        if (contextCellBitsLength * contextLength > 56) {
+            throw std::invalid_argument("Too big context length.");
+        }
     }
 
     /**
@@ -61,14 +68,29 @@ public:
 
 private:
 
-    _SearchCtx _getInitSearchCtx() const { return {_ctx.rbegin(), _ctx.rend()}; }
-
     void _updateCtx(Ord ord);
 
 private:
+
+    struct _SearchCtx {
+        std::uint16_t length;
+        Ord ctx;
+        friend bool operator==(_SearchCtx, _SearchCtx) = default;
+    };
+
+    struct _SearchCtxHash {
+        std::size_t operator()(_SearchCtx searchCtx) const {
+            return std::size_t{searchCtx.ctx} ^ std::size_t{searchCtx.length};
+        }
+    };
+
+private:
     std::unordered_map<_SearchCtx, _DDict, _SearchCtxHash> _contextProbs;
-    _Ctx _ctx;
-    const std::uint8_t _contextLen;
+    Ord _ctx;
+    std::uint16_t _currCtxLength;
+    const std::uint16_t _numBits;
+    const std::uint16_t _ctxCellBitsLength;
+    const std::uint16_t _ctxLength;
 };
 
 }

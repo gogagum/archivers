@@ -54,9 +54,13 @@ int main(int argc, char* argv[]) {
         const auto tailSize = decoded.takeT<std::uint16_t>();
         outStream << "Tail size: " << tailSize << std::endl;
 
-        const auto contextLength = decoded.takeT<std::uint8_t>();
-        outStream << "Context length: "
-                  << static_cast<std::uint32_t>(contextLength) << std::endl;
+        const auto ctxCellsCnt = decoded.takeT<std::uint8_t>();
+        outStream << "Context cells count: "
+                  << static_cast<std::uint32_t>(ctxCellsCnt) << std::endl;
+
+        const auto ctxCellLength = decoded.takeT<std::uint8_t>();
+        outStream << "Context cell bit length: "
+                  << static_cast<std::uint32_t>(ctxCellLength) << std::endl;
 
         const auto wordsCount = decoded.takeT<std::uint64_t>();
         outStream << "Words count: " << wordsCount << std::endl;
@@ -66,7 +70,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::PPMDDictionary(1 << bitsCount);
+        auto dict = ga::dict::PPMDDictionary(symBitLen, ctxCellsCnt, ctxCellLength);
 
         std::vector<std::uint64_t> ords;
 
