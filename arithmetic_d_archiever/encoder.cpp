@@ -4,11 +4,9 @@
 
 #include <boost/program_options.hpp>
 
-#include "arithmetic_d_archiever_include.hpp"
+#include <dictionary/adaptive_d_dictionary.hpp>
+#include <arithmetic_coder.hpp>
 #include "../common.hpp"
-
-#define BITS_CASE(bits, outIter, tail, fileOpener) \
-    case (bits): DAdaptiveEncodeImpl<bits>::process((fileOpener), (outIter), (tail)); break;
 
 namespace bpo = boost::program_options;
 
@@ -46,9 +44,9 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = Dict(1 << numBits);
+        auto dict = ga::dict::AdaptiveDDictionary(1ull << numBits);
 
-        auto [wordsOrds, tail] = OrdAndTailSplitter<Flow, Word>::process(fileOpener.getInData(), numBits);
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
         auto coder = ga::ArithmeticCoder();
         auto encoded = ga::ByteDataConstructor();

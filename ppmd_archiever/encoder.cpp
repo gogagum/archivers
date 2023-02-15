@@ -4,12 +4,9 @@
 
 #include <boost/program_options.hpp>
 
-#include "ppmd_archiever_include.hpp"
+#include <arithmetic_coder.hpp>
+#include <dictionary/ppmd_dictionary.hpp>
 #include "../common.hpp"
-#include <boost/container/static_vector.hpp>
-
-#define BITS_CASE(bits, outIter, tail, fileOpener) \
-    case (bits): PPMDEncodeImpl<bits>::process((fileOpener), (outIter), (tail)); break;
 
 namespace bpo = boost::program_options;
 
@@ -56,9 +53,9 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = Dict(1ull << numBits);
+        auto dict = ga::dict::PPMDDictionary(1ull << numBits);
 
-        auto [wordsOrds, tail] = OrdAndTailSplitter<Flow, Word>::process(fileOpener.getInData(), numBits);
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
         auto coder = ga::ArithmeticCoder();
         auto encoded = ga::ByteDataConstructor();

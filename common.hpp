@@ -8,8 +8,34 @@
 
 #include <word/bytes_word.hpp>
 #include <word/bits_word.hpp>
+#include <flow/bits_word_flow.hpp>
+#include <flow/bytes_word_flow.hpp>
+#include <byte_data_constructor.hpp>
 #include <boost/container/static_vector.hpp>
 #include "opt_ostream_ref.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <std::uint16_t numBits>
+struct TypeChoise {
+    using Flow = ga::fl::BitsWordFlow<numBits>;
+    using Word = ga::w::BitsWord<numBits>;
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <std::uint16_t numBits> requires (numBits % 8 == 0)
+struct TypeChoise<numBits>{
+    using Flow = ga::fl::BytesWordFlow<numBits/8>;
+    using Word = ga::w::BytesWord<numBits/8>;
+};
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <std::uint16_t numBits>
+using Flow = typename TypeChoise<numBits>::Flow;
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+template <std::uint16_t numBits>
+using Word = typename TypeChoise<numBits>::Word;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The UnsupportedBitsMode class
@@ -91,7 +117,6 @@ void packWordIntoData(const ga::w::BitsWord<_numBits> word, auto& cntr) {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The FileBytesAAdaptiveEncodeImpl class
 ///
-template<template<std::uint16_t> class Flow, template<std::uint16_t> class Word>
 class OrdAndTailSplitter {
 public:
     struct Ret {
@@ -154,5 +179,61 @@ private:
         return { retOrds, retTail };
     }
 };
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The WordPacker class
+///
+class WordPacker {
+public:
+    template <std::ranges::input_range RangeT>
+    static void process(RangeT rng, ga::ByteDataConstructor& dataConstructor, std::uint16_t numBits) {
+
+        #define BITS_DECODER_CASE(numBits) \
+            case (numBits): _process<RangeT, (numBits)>(rng, dataConstructor); break;
+
+        switch (numBits) {
+            BITS_DECODER_CASE(8);
+            BITS_DECODER_CASE(9);
+            BITS_DECODER_CASE(10);
+            BITS_DECODER_CASE(11);
+            BITS_DECODER_CASE(12);
+            BITS_DECODER_CASE(13);
+            BITS_DECODER_CASE(14);
+            BITS_DECODER_CASE(15);
+            BITS_DECODER_CASE(16);
+            BITS_DECODER_CASE(17);
+            BITS_DECODER_CASE(18);
+            BITS_DECODER_CASE(19);
+            BITS_DECODER_CASE(20);
+            BITS_DECODER_CASE(21);
+            BITS_DECODER_CASE(22);
+            BITS_DECODER_CASE(23);
+            BITS_DECODER_CASE(24);
+            BITS_DECODER_CASE(25);
+            BITS_DECODER_CASE(26);
+            BITS_DECODER_CASE(27);
+            BITS_DECODER_CASE(28);
+            BITS_DECODER_CASE(29);
+            BITS_DECODER_CASE(30);
+            BITS_DECODER_CASE(31);
+            BITS_DECODER_CASE(32);
+        default:
+            throw UnsupportedDecodeBitsMode(numBits);
+            break;
+        }
+
+        #undef BITS_DECODER_CASE
+    }
+private:
+    template <std::ranges::input_range RangeT, std::uint16_t numBits>
+    static void _process(RangeT rng, ga::ByteDataConstructor& dataConstructor) {
+        for (std::uint64_t ord: rng) {
+            packWordIntoData(Word<numBits>::byOrd(ord), dataConstructor);
+        }
+    }
+};
+
+
+
 
 #endif // COMMON_HPP

@@ -9,15 +9,11 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
+#include <arithmetic_decoder.hpp>
+#include <dictionary/ppmd_dictionary.hpp>
 #include "../common.hpp"
-#include "../opt_ostream_ref.hpp"
-#include "ppmd_archiever_include.hpp"
 
 namespace bpo = boost::program_options;
-
-#define BITS_DECODER_CASE(bits) \
-    case (bits): packIntoByteDataConstructor(std::vector<Word<bits>>()); break;
-
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {
@@ -70,47 +66,14 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = Dict(1 << bitsCount);
+        auto dict = ga::dict::PPMDDictionary(1 << bitsCount);
 
-        const auto packIntoByteDataConstructor = [&]<class _Word>(
-                    std::vector<_Word>&& words) {
-            decoder.decode<_Word>(
-                    decoded, dict, std::back_inserter(words),
-                    wordsCount, bitsCount, outStream);
-            std::ranges::for_each(
-                words, [&](auto& w){ packWordIntoData(w, dataConstructor); });
-        };
+        std::vector<std::uint64_t> ords;
 
-        switch (symBitLen) {
-            BITS_DECODER_CASE(8);
-            BITS_DECODER_CASE(9);
-            BITS_DECODER_CASE(10);
-            BITS_DECODER_CASE(11);
-            BITS_DECODER_CASE(12);
-            BITS_DECODER_CASE(13);
-            BITS_DECODER_CASE(14);
-            BITS_DECODER_CASE(15);
-            BITS_DECODER_CASE(16);
-            BITS_DECODER_CASE(17);
-            BITS_DECODER_CASE(18);
-            BITS_DECODER_CASE(19);
-            BITS_DECODER_CASE(20);
-            BITS_DECODER_CASE(21);
-            BITS_DECODER_CASE(22);
-            BITS_DECODER_CASE(23);
-            BITS_DECODER_CASE(24);
-            BITS_DECODER_CASE(25);
-            BITS_DECODER_CASE(26);
-            BITS_DECODER_CASE(27);
-            BITS_DECODER_CASE(28);
-            BITS_DECODER_CASE(29);
-            BITS_DECODER_CASE(30);
-            BITS_DECODER_CASE(31);
-            BITS_DECODER_CASE(32);
-        default:
-            throw UnsupportedDecodeBitsMode(symBitLen);
-            break;
-        }
+        decoder.decode(decoded, dict, std::back_inserter(ords),
+                       wordsCount, bitsCount, outStream);
+
+        WordPacker::process(ords, dataConstructor, symBitLen);
 
         std::copy(decoded.getEndBitsIter() - tailSize, decoded.getEndBitsIter(),
                   dataConstructor.getBitBackInserter());

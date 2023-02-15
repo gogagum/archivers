@@ -4,7 +4,8 @@
 
 #include <boost/program_options.hpp>
 
-#include "arithmetic_a_archiever_include.hpp"
+#include <arithmetic_coder.hpp>
+#include <dictionary/adaptive_a_dictionary.hpp>
 #include "../common.hpp"
 
 namespace bpo = boost::program_options;
@@ -43,9 +44,9 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = Dict(1ull << numBits);
+        auto dict = ga::dict::AdaptiveADictionary(1ull << numBits);
 
-        auto [wordsOrds, tail] = OrdAndTailSplitter<Flow, Word>::process(fileOpener.getInData(), numBits);
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
         auto coder = ga::ArithmeticCoder();
         auto encoded = ga::ByteDataConstructor();
