@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 
 #include <arithmetic_coder.hpp>
-#include <dictionary/adaptive_a_dictionary.hpp>
+#include <dictionary/ppmd_dictionary.hpp>
 #include "../common.hpp"
 
 namespace bpo = boost::program_options;
@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
     std::string inFileName;
     std::string outFileName;
     std::uint16_t numBits;
+    std::uint16_t ctxCellsCnt;
+    std::uint16_t ctxCellLength;
     std::string logStreamParam;
 
     try {
@@ -32,6 +34,14 @@ int main(int argc, char* argv[]) {
                 bpo::value(&numBits)->default_value(16),
                 "Word bits count."
             ) (
+                "cells-cnt,c",
+                bpo::value(&ctxCellsCnt)->default_value(4),
+                "Contect cells count."
+            ) (
+                "cell-length,q",
+                bpo::value(&ctxCellLength)->default_value(8),
+                "Context length."
+            ) (
                 "log-stream,l",
                 bpo::value(&logStreamParam)->default_value("stdout"),
                 "Log stream."
@@ -44,7 +54,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ga::dict::AdaptiveADictionary(1ull << numBits);
+        auto dict = ga::dict::PPMDDictionary(numBits, ctxCellsCnt, ctxCellLength);
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
@@ -52,6 +62,8 @@ int main(int argc, char* argv[]) {
         auto encoded = ga::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
+        encoded.putT<std::uint8_t>(ctxCellsCnt);
+        encoded.putT<std::uint8_t>(ctxCellLength);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);

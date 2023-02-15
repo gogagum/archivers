@@ -4,11 +4,9 @@
 
 #include <boost/program_options.hpp>
 
+#include <arithmetic_coder.hpp>
+#include <dictionary/adaptive_dictionary.hpp>
 #include "../common.hpp"
-#include "encoder_impl.hpp"
-
-#define BITS_CASE(bits, fileOpener, ratio, outStream) \
-    case (bits): AdaptiveEncodeImpl<bits>::process((fileOpener), (ratio), (outStream)); break;
 
 namespace bpo = boost::program_options;
 
@@ -51,36 +49,21 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
+        auto dict = ga::dict::AdaptiveDictionary(1ull << numBits, ratio);
 
-        switch (numBits) {
-            BITS_CASE(8, fileOpener, ratio, outStream);
-            BITS_CASE(9, fileOpener, ratio, outStream);
-            BITS_CASE(10, fileOpener, ratio, outStream);
-            BITS_CASE(11, fileOpener, ratio, outStream);
-            BITS_CASE(12, fileOpener, ratio, outStream);
-            BITS_CASE(13, fileOpener, ratio, outStream);
-            BITS_CASE(14, fileOpener, ratio, outStream);
-            BITS_CASE(15, fileOpener, ratio, outStream);
-            BITS_CASE(16, fileOpener, ratio, outStream);
-            BITS_CASE(17, fileOpener, ratio, outStream);
-            BITS_CASE(18, fileOpener, ratio, outStream);
-            BITS_CASE(19, fileOpener, ratio, outStream);
-            BITS_CASE(20, fileOpener, ratio, outStream);
-            BITS_CASE(21, fileOpener, ratio, outStream);
-            BITS_CASE(22, fileOpener, ratio, outStream);
-            BITS_CASE(23, fileOpener, ratio, outStream);
-            BITS_CASE(24, fileOpener, ratio, outStream);
-            BITS_CASE(25, fileOpener, ratio, outStream);
-            BITS_CASE(26, fileOpener, ratio, outStream);
-            BITS_CASE(27, fileOpener, ratio, outStream);
-            BITS_CASE(28, fileOpener, ratio, outStream);
-            BITS_CASE(29, fileOpener, ratio, outStream);
-            BITS_CASE(30, fileOpener, ratio, outStream);
-            BITS_CASE(31, fileOpener, ratio, outStream);
-            BITS_CASE(32, fileOpener, ratio, outStream);
-        default:
-            throw UnsupportedEncodeBitsMode(numBits); break;
-        }
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
+
+        auto coder = ga::ArithmeticCoder();
+        auto encoded = ga::ByteDataConstructor();
+        encoded.putT<std::uint16_t>(numBits);
+        encoded.putT<std::uint16_t>(tail.size());
+        const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
+        auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);
+        encoded.putTToPosition(wordsCount, wordsCountPos);
+        encoded.putTToPosition(bitsCount, bitsCountPos);
+        std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
+        fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;
         return 2;

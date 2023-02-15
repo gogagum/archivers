@@ -42,7 +42,8 @@ TEST(BytesWordFlow, Tail) {
     const auto data = std::array{ std::byte{0b00011101} };
     const auto wf = BytesWordFlow<4>(data);
     const auto expectedTail = std::array<bool, 8>{0, 0, 0, 1, 1, 1, 0, 1};
-    for (const auto& [expected, found] : boost::range::combine(wf.getTail(), expectedTail)) {
+    const auto foundTail = wf.getTail();
+    for (const auto& [expected, found] : boost::range::combine(expectedTail, foundTail)) {
         EXPECT_EQ(expected, found);
     }
 }

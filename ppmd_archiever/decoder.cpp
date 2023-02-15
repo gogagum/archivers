@@ -9,9 +9,9 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include "../common.hpp"
-#include <dictionary/adaptive_dictionary.hpp>
 #include <arithmetic_decoder.hpp>
+#include <dictionary/ppmd_dictionary.hpp>
+#include "../common.hpp"
 
 namespace bpo = boost::program_options;
 
@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
 
         outFileName = outFileName.empty() ? inFileName + "-decoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
+
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
         auto decoded = ga::DataParser(filesOpener.getInData());
 
@@ -53,8 +54,13 @@ int main(int argc, char* argv[]) {
         const auto tailSize = decoded.takeT<std::uint16_t>();
         outStream << "Tail size: " << tailSize << std::endl;
 
-        const auto ratio = decoded.takeT<std::uint64_t>();
-        outStream << "Ratio: " << ratio << std::endl;
+        const auto ctxCellsCnt = decoded.takeT<std::uint8_t>();
+        outStream << "Context cells count: "
+                  << static_cast<std::uint32_t>(ctxCellsCnt) << std::endl;
+
+        const auto ctxCellLength = decoded.takeT<std::uint8_t>();
+        outStream << "Context cell bit length: "
+                  << static_cast<std::uint32_t>(ctxCellLength) << std::endl;
 
         const auto wordsCount = decoded.takeT<std::uint64_t>();
         outStream << "Words count: " << wordsCount << std::endl;
@@ -64,7 +70,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::AdaptiveDictionary(1 << bitsCount, ratio);
+        auto dict = ga::dict::PPMDDictionary(symBitLen, ctxCellsCnt, ctxCellLength);
 
         std::vector<std::uint64_t> ords;
 
@@ -78,7 +84,7 @@ int main(int argc, char* argv[]) {
 
         filesOpener.getOutFileStream().write(
                     dataConstructor.data<char>(), dataConstructor.size());
-    } catch (const std::runtime_error&  error) {
+    } catch (const std::exception&  error) {
         std::cerr << error.what();
         return 1;
     }

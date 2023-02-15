@@ -21,8 +21,7 @@ class BytesWordFlow {
 private:
     using _Word = w::BytesWord<numBytes>;
 public:
-    constexpr static std::uint16_t numBits = _Word::numBits;
-    using Tail = boost::container::static_vector<bool, numBits>;
+    using Tail = boost::container::static_vector<bool, 32>;
 private:
     class _Iterator;
 public:

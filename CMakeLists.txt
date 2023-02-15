@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 
 project(archievers LANGUAGES CXX)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -30,13 +28,22 @@ add_library(encoding_lib STATIC
     include/data_parser.hpp
     include/data_parser.cpp
     include/ranges_calc.hpp
+    include/dictionary/impl/a_d_dictionary_base.hpp
     include/dictionary/uniform_dictionary.hpp
+    include/dictionary/uniform_dictionary.cpp
     include/dictionary/static_dictionary.hpp
+    include/dictionary/static_dictionary.cpp
     include/dictionary/adaptive_dictionary.hpp
+    include/dictionary/adaptive_dictionary.cpp
     include/dictionary/adaptive_a_dictionary.hpp
+    include/dictionary/adaptive_a_dictionary.cpp
     include/dictionary/adaptive_d_dictionary.hpp
+    include/dictionary/adaptive_d_dictionary.cpp
+    include/dictionary/ppmd_dictionary.hpp
+    include/dictionary/ppmd_dictionary.cpp
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
+    include/dictionary/decreasing_on_update_dictionary.cpp
     include/dictionary/integer_random_access_iterator.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
@@ -69,6 +76,12 @@ target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES}
 add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
 target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
 
+add_executable(ppmd_encoder ppmd_archiever/encoder.cpp)
+target_link_libraries(ppmd_encoder encoding_lib common ${Boost_LIBRARIES})
+
+add_executable(ppmd_decoder ppmd_archiever/decoder.cpp)
+target_link_libraries(ppmd_decoder encoding_lib common ${Boost_LIBRARIES})
+
 add_executable(numerical_encoder numerical/encoder.cpp)
 target_link_libraries(numerical_encoder encoding_lib common ${Boost_LIBRARIES})
 
@@ -100,6 +113,7 @@ add_executable(archiever_tests
     test/adaptive_dictionary.cpp
     test/adaptive_a_dictionary.cpp
     test/adaptive_d_dictionary.cpp
+    test/ppmd_dictionary.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
     test/traits.cpp

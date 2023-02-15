@@ -23,15 +23,15 @@ public:
 
     ArithmeticDecoder() : _currRange{ 0, RC::total } {}
 
-    template <class DictT,
-              std::output_iterator<typename DictT::Word> OutIterT>
+    template <std::output_iterator<std::uint64_t> OutIter>
     void decode(
             auto& source,
-            DictT& dict,
-            OutIterT outIter,
+            auto& dict,
+            OutIter outIter,
             std::size_t wordsCount,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
-            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt);
+            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
+            );
 
 private:
 
@@ -45,12 +45,11 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class DictT,
-          std::output_iterator<typename DictT::Word> OutIterT>
+template <std::output_iterator<std::uint64_t> OutIter>
 void ArithmeticDecoder::decode(
         auto& source,
-        DictT& dict,
-        OutIterT outIter,
+        auto& dict,
+        OutIter outIter,
         std::size_t wordsCount,
         std::size_t bitsLimit,
         std::optional<std::reference_wrapper<std::ostream>> os) {
@@ -80,11 +79,11 @@ void ArithmeticDecoder::decode(
 
         const auto aux128 = (offset128 * dictTotalWords128 - 1) / range128;
         const auto aux = aux128.convert_to<std::uint64_t>();
-        const auto word = dict.getWord(aux);
-        *outIter = word;
+        const auto ord = dict.getWordOrd(aux);
+        *outIter = ord;
         ++outIter;
 
-        auto [low, high, total] = dict.getProbabilityStats(word);
+        auto [low, high, total] = dict.getProbabilityStats(ord);
         _currRange = RC::rangeFromStatsAndPrev(_currRange, low, high, total);
 
         while (true) {

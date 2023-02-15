@@ -4,72 +4,64 @@
 #include <cstddef>
 
 #include "dictionary/uniform_dictionary.hpp"
-#include "word/bytes_word.hpp"
 
 using ga::dict::UniformDictionary;
-using ga::w::BytesWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, Construct) {
-    const auto dict = UniformDictionary<BytesWord<2>>();
+    [[maybe_unused]] const auto dict = UniformDictionary(1 << 16);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, Ord2Bytes) {
-    const auto dict = UniformDictionary<BytesWord<2>>();
-    EXPECT_EQ(dict.getWord(2), BytesWord<2>::byOrd(2));
+    const auto dict = UniformDictionary(1 << 16);
+    EXPECT_EQ(dict.getWordOrd(2), 2);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, Ord3Bytes) {
-    const auto dict = UniformDictionary<BytesWord<3>>();
-    EXPECT_EQ(dict.getWord(26), BytesWord<3>::byOrd(26));
+    const auto dict = UniformDictionary(1 << 24);
+    EXPECT_EQ(dict.getWordOrd(26), 26);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, OrdLongOrd) {
-    const auto dict = UniformDictionary<BytesWord<2>>();
-    const auto symBytes = std::array{ std::byte{8}, std::byte{42} };
-    EXPECT_EQ(dict.getWord(256 * 8 + 42), BytesWord<2>(symBytes.begin()));
+    const auto dict = UniformDictionary(1 << 16);
+    EXPECT_EQ(dict.getWordOrd(256 * 8 + 42), 256 * 8 + 42);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, CumulativeNumFoundLow) {
-    auto dict = UniformDictionary<BytesWord<1>>();
-    const auto word = BytesWord<1>::byOrd(37);
-    const auto [low, _0, _1] = dict.getProbabilityStats(word);
+    auto dict = UniformDictionary(256);
+    const auto [low, _0, _1] = dict.getProbabilityStats(37);
     EXPECT_EQ(low, 37);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, CumulativeNumFoundLowZero) {
-    auto dict = UniformDictionary<BytesWord<1>>();
-    const auto word = BytesWord<1>::byOrd(0);
-    const auto [low, _0, _1] = dict.getProbabilityStats(word);
+    auto dict = UniformDictionary(256);
+    const auto [low, _0, _1] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, CumulativeNumFoundHigh) {
-    auto dict = UniformDictionary<BytesWord<1>>();
-    const auto word = BytesWord<1>::byOrd(37);
-    const auto [_0, high, _1] = dict.getProbabilityStats(word);
+    auto dict = UniformDictionary(256);
+    const auto [_0, high, _1] = dict.getProbabilityStats(37);
     EXPECT_EQ(high, 38);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, CumulativeNumFoundHighZero) {
-    auto dict = UniformDictionary<BytesWord<1>>();
-    const auto word = BytesWord<1>::byOrd(0);
-    const auto [_0, high, _1] = dict.getProbabilityStats(word);
+    auto dict = UniformDictionary(256);
+    const auto [_0, high, _1] = dict.getProbabilityStats(0);
     EXPECT_EQ(high, 1);
 }
 
 //----------------------------------------------------------------------------//
 TEST(UniformDictionary, TotalWordsCount) {
-    auto dict = UniformDictionary<BytesWord<1>>();
-    const auto word = BytesWord<1>::byOrd(0);
-    const auto [_0, _1, total] = dict.getProbabilityStats(word);
+    auto dict = UniformDictionary(256);
+    const auto [_0, _1, total] = dict.getProbabilityStats(0);
     EXPECT_EQ(total, 256);
 }

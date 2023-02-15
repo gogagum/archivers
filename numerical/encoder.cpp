@@ -19,15 +19,13 @@ using ga::dict::DecreasingCountDictionary;
 using ga::dict::DecreasingOnUpdateDictionary;
 
 using CountsDict = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
-using ContentDict = DecreasingOnUpdateDictionary<BytesWord<1>>;
+using DictWordsDict = DecreasingOnUpdateDictionary;
+using ContentDict = DecreasingOnUpdateDictionary;
 
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 
-using CountsCoder = ga::ArithmeticCoder<UIntWordsFlow>;
-using DictWordsCoder = ga::ArithmeticCoder<DictWordsFlow>;
-using ContentCoder = ga::ArithmeticCoder<BytesWordFlow<1>>;
+using ga::ArithmeticCoder;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -67,25 +65,25 @@ int main(int argc, char* argv[]) {
             ++countsMap[BytesWord<1>::ord(word)];
         }
 
-        std::vector<std::pair<BytesWord<1>, std::uint64_t>> counts;
+        std::vector<std::pair<std::uint64_t, std::uint64_t>> countsMapping;
 
         for (auto [ord, count] : countsMap) {
-            counts.emplace_back(BytesWord<1>::byOrd(ord), count);
+            countsMapping.emplace_back(ord, count);
         }
 
-        std::sort(counts.begin(), counts.end(),
+        std::sort(countsMapping.begin(), countsMapping.end(),
                   [](const auto& c0, const auto& c1){
                       return c0.second > c1.second;
                   });
 
         auto dataConstructor = ga::ByteDataConstructor();
 
-        UIntWordsFlow countsWords;
-        DictWordsFlow dictWords;
+        std::vector<std::uint64_t> counts;
+        std::vector<std::uint64_t> dictWordsOrds;
 
-        for (auto [word, count] : counts) {
-            countsWords.emplace_back(count);
-            dictWords.push_back(word);
+        for (auto [ord, count] : countsMapping) {
+            counts.push_back(count);
+            dictWordsOrds.push_back(ord);
         }
 
         dataConstructor.putT<std::uint64_t>(counts.size());
@@ -101,23 +99,29 @@ int main(int argc, char* argv[]) {
 
         {
             auto countsDict = CountsDict(wordFlow.size());
-            auto countsCoder = CountsCoder(countsWords);
+            auto countsCoder = ArithmeticCoder();
             auto [_0, countsBits] =
-                    countsCoder.encode(dataConstructor, countsDict, outStream);
+                    countsCoder.encode(counts, dataConstructor, countsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
-            auto wordsDict = DictWordsDict(1);
-            auto dictWordsCoder = DictWordsCoder(dictWords);
-            auto [_1, dictWordsBits] = dictWordsCoder.encode(dataConstructor, wordsDict, outStream);
+            auto wordsDict = DictWordsDict(256, 1);
+            auto dictWordsCoder = ArithmeticCoder();
+            auto [_1, dictWordsBits] = dictWordsCoder.encode(dictWordsOrds, dataConstructor, wordsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
         {
-            auto contentDict = ContentDict(counts);
-            auto contentCoder = ContentCoder(wordFlow);
-            auto [_2, contentWordsBits] = contentCoder.encode(dataConstructor, contentDict, outStream);
+            auto contentDict = ContentDict(256, countsMapping);
+            auto contentCoder = ArithmeticCoder();
+            std::vector<std::uint64_t> wordsOrds;
+            std::transform(wordFlow.begin(), wordFlow.end(),
+                           std::back_inserter(wordsOrds),
+                           [](const auto& word) {
+                               return BytesWord<1>::ord(word);
+                           });
+            auto [_2, contentWordsBits] = contentCoder.encode(wordsOrds, dataConstructor, contentDict, outStream);
             dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
 

@@ -4,21 +4,18 @@
 #include "word_probability_stats.hpp"
 
 #include <vector>
-#include <boost/range/irange.hpp>
+#include <cstdint>
 
 namespace ga::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The StaticDictionary class
 ///
-template <class WordT, class CountT = std::uint64_t>
 class StaticDictionary {
 public:
-
-    using Word = WordT;
-    using Ord = typename WordT::Ord;
-    using Count = CountT;
-    using ProbabilityStats = WordProbabilityStats<CountT>;
+    using Ord = std::uint64_t;
+    using Count = std::uint64_t;
+    using ProbabilityStats = WordProbabilityStats<Count>;
 
 private:
 
@@ -35,14 +32,14 @@ public:
      * @return
      */
     template <class RangeT>
-    StaticDictionary(const RangeT& countsRng);
+    StaticDictionary(Ord maxOrd, const RangeT& countsRng);
 
     /**
      * @brief getWord - get word by cumulative num found.
      * @param cumulativeNumFound - search key.
      * @return word with exact cumulative number found.
      */
-    [[nodiscard]] WordT getWord(Count cumulativeNumFound) const;
+    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
     /**
      * @brief getProbabilityStats - get lower cumulative number of words,
@@ -50,7 +47,7 @@ public:
      * @param word - word to get info for.
      * @return statistics.
      */
-    [[nodiscard]] ProbabilityStats getProbabilityStats(const Word& word);
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
     /**
      * @brief totalWordsCount
@@ -61,9 +58,8 @@ public:
 
 private:
 
-    /**************************************************************************/
     Count _getLowerCumulativeCnt(Ord ord) const;
-    /**************************************************************************/
+
     Count
     _getHigherCumulativeCnt(Ord ord) const { return _cumulativeNumFound[ord]; }
 
@@ -73,48 +69,20 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
 template <class RangeT>
-StaticDictionary<WordT, CountT>::StaticDictionary(const RangeT& countMap) {
-    _cumulativeNumFound.resize(Word::wordsCount);
+StaticDictionary::StaticDictionary(Ord maxOrd, const RangeT& countMap) {
+    _cumulativeNumFound.resize(maxOrd);
     auto currOrd = Ord{0};
     auto currCumulativeNumFound = Count{0};
-    for (auto& [word, count]: countMap) {
-        auto ord = WordT::ord(word);
+    for (auto& [ord, count]: countMap) {
         for (; currOrd < ord; ++currOrd) {
             _cumulativeNumFound[currOrd] = currCumulativeNumFound;
         }
         currCumulativeNumFound += count;
     }
-    for (; currOrd < Word::wordsCount; ++currOrd) {
+    for (; currOrd < maxOrd; ++currOrd) {
         _cumulativeNumFound[currOrd] = currCumulativeNumFound;
     }
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-WordT
-StaticDictionary<WordT, CountT>::getWord(Count cumulativeNumFound) const {
-    auto it = std::ranges::upper_bound(_cumulativeNumFound, cumulativeNumFound);
-    return WordT::byOrd(it - _cumulativeNumFound.begin());
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto
-StaticDictionary<WordT, CountT>::getProbabilityStats(
-        const Word& word) -> ProbabilityStats {
-    auto ord = Word::ord(word);
-    auto low = _getLowerCumulativeCnt(ord);
-    auto high = _getHigherCumulativeCnt(ord);
-    return { low, high, *_cumulativeNumFound.rbegin() };
-}
-
-//----------------------------------------------------------------------------//
-template <class WordT, typename CountT>
-auto StaticDictionary<WordT, CountT>::_getLowerCumulativeCnt(
-        Ord ord) const -> Count {
-    return ord != 0 ? _cumulativeNumFound[ord - 1] : 0;
 }
 
 }  // namespace ga::dict
