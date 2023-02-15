@@ -4,7 +4,6 @@
 #include <stdexcept>
 
 #include "word_probability_stats.hpp"
-#include "word/uint_word.hpp"
 
 namespace ga::dict {
 
@@ -69,9 +68,6 @@ auto DecreasingCountDictionary<CountT>::getProbabilityStats(
 }
 
 }
-
-
-
 
 #endif // DECREASING_COUNTS_DICTIONARY_HPP
 

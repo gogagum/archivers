@@ -3,7 +3,6 @@
 #include "dictionary/decreasing_counts_dictionary.hpp"
 
 using ga::dict::DecreasingCountDictionary;
-using ga::w::UIntWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

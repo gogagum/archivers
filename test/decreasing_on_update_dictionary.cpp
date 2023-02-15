@@ -16,7 +16,7 @@ TEST(DecreasingOnUpdateDictionary, Construct) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256, freqMapping);
 }
 
 //----------------------------------------------------------------------------//
@@ -25,14 +25,14 @@ TEST(DecreasingOnUpdateDictionary, TotalCount) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256, freqMapping);
     EXPECT_EQ(dict.getTotalWordsCnt(), 32);
 }
 
 //----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, TotalCountEmpty) {
     const auto freqMapping = std::array<std::pair<std::uint64_t, std::uint64_t>, 0>{};
-    auto dict = DecreasingOnUpdateDictionary<>(256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256, freqMapping);
     EXPECT_EQ(dict.getTotalWordsCnt(), 0);
 }
 
@@ -42,7 +42,7 @@ TEST(DecreasingOnUpdateDictionary, TotalCountAfterDecrease) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
     [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
     EXPECT_EQ(dict.getTotalWordsCnt(), 31);
@@ -54,7 +54,7 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
     [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
     auto [low, high, _0] = dict.getProbabilityStats(42);
@@ -69,9 +69,9 @@ TEST(DecreasingOnUpdateDictionary, QueryForAnEmptyWord) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
     EXPECT_THROW(auto stats = dict.getProbabilityStats(13),
-                 DecreasingOnUpdateDictionary<>::NoSuchWord);
+                 DecreasingOnUpdateDictionary::NoSuchWord);
 }
 
 //----------------------------------------------------------------------------//
@@ -80,7 +80,7 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
     [[maybe_unused]] auto stats = dict.getProbabilityStats(42);
 
     auto [low0, high0, _0] = dict.getProbabilityStats(42);
@@ -100,7 +100,7 @@ TEST(DecreasingOnUpdateDictionary, GetWord) {
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
         std::make_pair(std::uint64_t{105}, std::uint64_t(17))
     };
-    auto dict = DecreasingOnUpdateDictionary<>(256 * 256, freqMapping);
+    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
 
     const auto ord = dict.getWordOrd(12);
     EXPECT_EQ(ord, 42);

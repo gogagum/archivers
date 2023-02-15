@@ -10,9 +10,8 @@
 template <std::uint16_t bitsNum>
 struct AAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
     using Base = BaseAdaptiveEncodeImpl<bitsNum>;
-    static void process(FileOpener& fileOpener, optout::OptOstreamRef os) {
+    static void process(FileOpener& fileOpener, optout::OptOstreamRef os, Dict& dict) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
-        auto dict = Dict(1 << bitsNum);
         auto coder = ga::ArithmeticCoder(flow);
         Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
     }

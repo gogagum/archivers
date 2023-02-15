@@ -11,9 +11,9 @@ template <std::uint16_t bitsNum>
 struct AdaptiveEncodeImpl {
     static void process(FileOpener& fileOpener,
                         std::uint64_t ratio,
+                        Dict& dict,
                         optout::OptOstreamRef os) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
-        auto dict = Dict(1 << bitsNum, ratio);
         auto coder = ga::ArithmeticCoder(flow);
         auto tail = flow.getTail();
         auto encoded = ga::ByteDataConstructor();

@@ -21,8 +21,8 @@ using ga::dict::DecreasingOnUpdateDictionary;
 using ga::ArithmeticDecoder;
 
 using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDictionary = DecreasingOnUpdateDictionary<>;
-using ContentDictionary = DecreasingOnUpdateDictionary<>;
+using DictWordsDictionary = DecreasingOnUpdateDictionary;
+using ContentDictionary = DecreasingOnUpdateDictionary;
 
 struct CountMappingRow {
     std::uint64_t word;

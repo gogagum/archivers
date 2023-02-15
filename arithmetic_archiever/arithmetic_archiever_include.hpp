@@ -33,6 +33,6 @@ template <std::uint16_t numBits>
 using WordVec = typename TypeChoise<numBits>::WordVec;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-using Dict = ga::dict::AdaptiveDictionary<>;
+using Dict = ga::dict::AdaptiveDictionary;
 
 #endif // ARITHMETIC_ARCHIEVER_INCLUDE_HPP

@@ -4,29 +4,25 @@
 #include <cstddef>
 
 #include "dictionary/adaptive_a_dictionary.hpp"
-#include "word/bytes_word.hpp"
-#include "word/bits_word.hpp"
 
-using ga::w::BytesWord;
-using ga::w::BitsWord;
 using ga::dict::AdaptiveADictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, Construct) {
-    auto dict = AdaptiveADictionary<>(256 * 256);
+    auto dict = AdaptiveADictionary(256 * 256);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStats) {
-    auto dict = AdaptiveADictionary<>(256 * 256);
+    auto dict = AdaptiveADictionary(256 * 256);
     [[maybe_unused]] const auto [low, high, total] =
             dict.getProbabilityStats(1);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdapriveADictionary, GetStatsOnStartCenter) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(6);
     EXPECT_EQ(low, 6);
     EXPECT_EQ(high, 7);
@@ -36,7 +32,7 @@ TEST(AdapriveADictionary, GetStatsOnStartCenter) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsOnStartEnd) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(7);
     EXPECT_EQ(low, 7);
     EXPECT_EQ(high, 8);
@@ -46,7 +42,7 @@ TEST(AdaptiveADictionary, GetStatsOnStartEnd) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsOnStartBegin) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
     EXPECT_EQ(high, 1);
@@ -56,7 +52,7 @@ TEST(AdaptiveADictionary, GetStatsOnStartBegin) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterUpdate) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     [[maybe_unused]] auto stats0 = dict.getProbabilityStats(0);
     auto [low, high, total] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
@@ -67,7 +63,7 @@ TEST(AdaptiveADictionary, GetStatsAfterUpdate) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterCenter) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     [[maybe_unused]] auto stats0 = dict.getProbabilityStats(2);
     const auto [low, high, total] = dict.getProbabilityStats(5);
     EXPECT_EQ(low, 11);
@@ -78,7 +74,7 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterCenter) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterBegin) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     [[maybe_unused]] auto stats0 = dict.getProbabilityStats(2);
     const auto [low, high, total] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
@@ -88,7 +84,7 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterBegin) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterEnd) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     [[maybe_unused]] auto _stats0 = dict.getProbabilityStats(2);
     auto [low, high, total] = dict.getProbabilityStats(7);
     EXPECT_EQ(low, 13);
@@ -98,7 +94,7 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterEnd) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherBeginCenter) {
-    auto dict = AdaptiveADictionary<>(8);
+    auto dict = AdaptiveADictionary(8);
     [[maybe_unused]] const auto _stats0 = dict.getProbabilityStats(0);
     const auto [low, high, total] = dict.getProbabilityStats(5);
     EXPECT_EQ(low, 11);
@@ -108,7 +104,7 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherBeginCenter) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, Example) {
-    auto dict = AdaptiveADictionary<>(256);
+    auto dict = AdaptiveADictionary(256);
     const auto [low0, high0, total0] = dict.getProbabilityStats('I');
     EXPECT_EQ(high0 - low0, 1);
     EXPECT_EQ(total0, 256);

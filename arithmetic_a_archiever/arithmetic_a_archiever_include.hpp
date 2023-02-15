@@ -33,6 +33,6 @@ template <std::uint16_t numBits>
 using Word = typename TypeChoise<numBits>::Word;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-using Dict = ga::dict::AdaptiveADictionary<>;
+using Dict = ga::dict::AdaptiveADictionary;
 
 #endif // ARITHMETIC_A_ARCHIEVER_INCLUDE_HPP

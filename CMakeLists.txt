@@ -30,13 +30,20 @@ add_library(encoding_lib STATIC
     include/ranges_calc.hpp
     include/dictionary/impl/a_d_dictionary_base.hpp
     include/dictionary/uniform_dictionary.hpp
+    include/dictionary/uniform_dictionary.cpp
     include/dictionary/static_dictionary.hpp
+    include/dictionary/static_dictionary.cpp
     include/dictionary/adaptive_dictionary.hpp
+    include/dictionary/adaptive_dictionary.cpp
     include/dictionary/adaptive_a_dictionary.hpp
+    include/dictionary/adaptive_a_dictionary.cpp
     include/dictionary/adaptive_d_dictionary.hpp
+    include/dictionary/adaptive_d_dictionary.cpp
     include/dictionary/ppmd_dictionary.hpp
+    include/dictionary/ppmd_dictionary.cpp
     include/dictionary/decreasing_counts_dictionary.hpp
     include/dictionary/decreasing_on_update_dictionary.hpp
+    include/dictionary/decreasing_on_update_dictionary.cpp
     include/dictionary/integer_random_access_iterator.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp

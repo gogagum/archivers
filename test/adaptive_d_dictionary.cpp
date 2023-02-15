@@ -10,18 +10,18 @@ using ga::dict::AdaptiveDDictionary;
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDDictionary, Construct) {
-    auto dict = AdaptiveDDictionary<>(256 * 256);
+    auto dict = AdaptiveDDictionary(256 * 256);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDDictionary, GetStats) {
-    auto dict = AdaptiveDDictionary<>(256 * 256);
+    auto dict = AdaptiveDDictionary(256 * 256);
     [[maybe_unused]] const auto _stats = dict.getProbabilityStats(1);
 }
 
 //----------------------------------------------------------------------------//
 TEST(AdapriveDDictionary, GetStatsOnStartCenter) {
-    auto dict = AdaptiveDDictionary<>(8);
+    auto dict = AdaptiveDDictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(6);
     EXPECT_EQ(low, 6);
     EXPECT_EQ(high, 7);
@@ -31,7 +31,7 @@ TEST(AdapriveDDictionary, GetStatsOnStartCenter) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDDictionary, GetStatsOnStartEnd) {
-    auto dict = AdaptiveDDictionary<>(8);
+    auto dict = AdaptiveDDictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(7);
     EXPECT_EQ(low, 7);
     EXPECT_EQ(high, 8);
@@ -41,7 +41,7 @@ TEST(AdaptiveDDictionary, GetStatsOnStartEnd) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDDictionary, GetStatsOnStartBegin) {
-    auto dict = AdaptiveDDictionary<>(8);
+    auto dict = AdaptiveDDictionary(8);
     const auto [low, high, total] = dict.getProbabilityStats(0);
     EXPECT_EQ(low, 0);
     EXPECT_EQ(high, 1);
@@ -51,7 +51,7 @@ TEST(AdaptiveDDictionary, GetStatsOnStartBegin) {
 
 //----------------------------------------------------------------------------//
 TEST(AdaptiveDDictionary, Example) {
-    auto dict = AdaptiveDDictionary<>(256);
+    auto dict = AdaptiveDDictionary(256);
     const auto [low0, high0, total0] = dict.getProbabilityStats('I');
     EXPECT_EQ(high0 - low0, 1);
     EXPECT_EQ(total0, 256);

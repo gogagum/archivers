@@ -25,7 +25,7 @@ struct TypeChoise<numBits>{
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-using Dict = ga::dict::AdaptiveDDictionary<>;
+using Dict = ga::dict::AdaptiveDDictionary;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>

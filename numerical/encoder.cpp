@@ -19,8 +19,8 @@ using ga::dict::DecreasingCountDictionary;
 using ga::dict::DecreasingOnUpdateDictionary;
 
 using CountsDict = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDict = DecreasingOnUpdateDictionary<>;
-using ContentDict = DecreasingOnUpdateDictionary<>;
+using DictWordsDict = DecreasingOnUpdateDictionary;
+using ContentDict = DecreasingOnUpdateDictionary;
 
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
