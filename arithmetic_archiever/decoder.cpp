@@ -15,7 +15,7 @@
 namespace bpo = boost::program_options;
 
 #define BITS_DECODER_CASE(bits) \
-    case (bits): packIntoByteDataConstructor(WordVec<bits>()); break;
+    case (bits): packIntoByteDataConstructor(std::vector<Word<bits>>()); break;
 
 //----------------------------------------------------------------------------//
 int main(int argc, char* argv[]) {

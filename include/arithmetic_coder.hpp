@@ -17,11 +17,8 @@ namespace ga {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-template <class FlowT>
 class ArithmeticCoder : RangesCalc {
 public:
-
-    using Word = ga::fl::traits::WordT<FlowT>;
 
     struct EncodeRet {
         std::size_t wordsCount;
@@ -34,35 +31,21 @@ private:
 public:
 
     /**
-     * @brief ArithmeticCoder
-     * @param byteFlow
-     * @param constructor
-     */
-    ArithmeticCoder(FlowT& byteFlow);
-
-    /**
      * @brief encode - encode byte flow.
      * @param bitFlow - byte
      */
     template <class DictT>
-    EncodeRet encode(ByteDataConstructor& dataConstructor,
+    EncodeRet encode(auto ordFlow,
+                     ByteDataConstructor& dataConstructor,
                      DictT& dict,
                      auto os = std::nullopt);
-
-private:
-    FlowT& _symFlow;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <class FlowT>
-ArithmeticCoder<FlowT>::ArithmeticCoder(FlowT& symbolsFlow) :
-    _symFlow(symbolsFlow) {}
-
-//----------------------------------------------------------------------------//
-template <class FlowT>
 template <class DictT>
-auto ArithmeticCoder<FlowT>::encode(
+auto ArithmeticCoder::encode(
+        auto ordFlow,
         ByteDataConstructor& dataConstructor, 
         DictT& dict, auto os) -> EncodeRet {
     auto ret = EncodeRet();
@@ -72,11 +55,10 @@ auto ArithmeticCoder<FlowT>::encode(
 
     auto barOpt = std::optional<boost::timer::progress_display>();
     if (os.has_value()) {
-        barOpt.emplace(_symFlow.size(), os.value(), "");
+        barOpt.emplace(ordFlow.size(), os.value(), "");
     }
 
-    for (auto sym : _symFlow) {
-        auto ord = decltype(sym)::ord(sym);
+    for (auto ord : ordFlow) {
         const auto [low, high, total] = dict.getProbabilityStats(ord);
         currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 

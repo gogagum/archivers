@@ -71,7 +71,6 @@ TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterCenter) {
     EXPECT_EQ(total, 14);
 }
 
-
 //----------------------------------------------------------------------------//
 TEST(AdaptiveADictionary, GetStatsAfterIncreaseOneUpdateOtherCenterBegin) {
     auto dict = AdaptiveADictionary(8);

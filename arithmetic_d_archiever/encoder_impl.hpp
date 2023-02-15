@@ -2,18 +2,25 @@
 #define ENCODE_IMPL_HPP
 
 #include "arithmetic_d_archiever_include.hpp"
+
 #include "../common.hpp"
+#include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The FileBitsDAdaptiveEncodeImpl class
 ///
 template <std::uint16_t bitsNum>
-struct DAdaptiveEncodeImpl : public BaseAdaptiveEncodeImpl<bitsNum> {
-    using Base = BaseAdaptiveEncodeImpl<bitsNum>;
-    static void process(FileOpener& fileOpener, optout::OptOstreamRef os, Dict& dict) {
+struct DAdaptiveEncodeImpl {
+    static void process(FileOpener& fileOpener,
+                        auto outIter,
+                        boost::container::static_vector<bool, 32>& tail) {
         auto flow = Flow<bitsNum>(fileOpener.getInData());
-        auto coder = ga::ArithmeticCoder(flow);
-        Base::processImpl(fileOpener, flow.getTail(), coder, dict, os);
+        std::transform(flow.begin(), flow.end(), outIter,
+                       [](const Word<bitsNum>& w) {
+                           return Word<bitsNum>::ord(w);
+                       });
+        auto flowTail = flow.getTail();
+        tail = boost::container::static_vector<bool, 32>(flowTail.begin(), flowTail.end());
     }
 };
 
