@@ -4,8 +4,8 @@
 
 #include <boost/program_options.hpp>
 
+#include "ppmd_archiever_include.hpp"
 #include "../common.hpp"
-#include "encoder_impl.hpp"
 #include <boost/container/static_vector.hpp>
 
 #define BITS_CASE(bits, outIter, tail, fileOpener) \
@@ -58,39 +58,7 @@ int main(int argc, char* argv[]) {
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
         auto dict = Dict(1ull << numBits);
 
-        std::vector<std::uint64_t> wordsOrds;
-        auto outIter = std::back_inserter(wordsOrds);
-        auto tail = boost::container::static_vector<bool, 32>();
-
-        switch (numBits) {
-            BITS_CASE(8, outIter, tail, fileOpener);
-            BITS_CASE(9, outIter, tail, fileOpener);
-            BITS_CASE(10, outIter, tail, fileOpener);
-            BITS_CASE(11, outIter, tail, fileOpener);
-            BITS_CASE(12, outIter, tail, fileOpener);
-            BITS_CASE(13, outIter, tail, fileOpener);
-            BITS_CASE(14, outIter, tail, fileOpener);
-            BITS_CASE(15, outIter, tail, fileOpener);
-            BITS_CASE(16, outIter, tail, fileOpener);
-            BITS_CASE(17, outIter, tail, fileOpener);
-            BITS_CASE(18, outIter, tail, fileOpener);
-            BITS_CASE(19, outIter, tail, fileOpener);
-            BITS_CASE(20, outIter, tail, fileOpener);
-            BITS_CASE(21, outIter, tail, fileOpener);
-            BITS_CASE(22, outIter, tail, fileOpener);
-            BITS_CASE(23, outIter, tail, fileOpener);
-            BITS_CASE(24, outIter, tail, fileOpener);
-            BITS_CASE(25, outIter, tail, fileOpener);
-            BITS_CASE(26, outIter, tail, fileOpener);
-            BITS_CASE(27, outIter, tail, fileOpener);
-            BITS_CASE(28, outIter, tail, fileOpener);
-            BITS_CASE(29, outIter, tail, fileOpener);
-            BITS_CASE(30, outIter, tail, fileOpener);
-            BITS_CASE(31, outIter, tail, fileOpener);
-            BITS_CASE(32, outIter, tail, fileOpener);
-        default:
-            throw UnsupportedEncodeBitsMode(numBits); break;
-        }
+        auto [wordsOrds, tail] = OrdAndTailSplitter<Flow, Word>::process(fileOpener.getInData(), numBits);
 
         auto coder = ga::ArithmeticCoder();
         auto encoded = ga::ByteDataConstructor();
