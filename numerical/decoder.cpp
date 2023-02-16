@@ -11,9 +11,9 @@
 
 namespace bpo = boost::program_options;
 
-using ga::w::BytesWord;
+using ael::w::BytesWord;
 
-using ga::ArithmeticDecoder;
+using ael::ArithmeticDecoder;
 
 using CountsDictionary = ael::dict::DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDictionary = ael::dict::DecreasingOnUpdateDictionary;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-out" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
-        auto decoded = ga::DataParser(filesOpener.getInData());
+        auto decoded = ael::DataParser(filesOpener.getInData());
 
         const auto dictWordsCount = decoded.takeT<std::uint64_t>();
         outStream << "Dictionary size: " << dictWordsCount << std::endl;
@@ -115,10 +115,10 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////
 
-        auto dataConstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ael::ByteDataConstructor();
 
         for (auto& wordOrd: contentWordsOrds) {
-            auto word = ga::w::BytesWord<1>::byOrd(wordOrd);
+            auto word = ael::w::BytesWord<1>::byOrd(wordOrd);
             word.bytesOut(dataConstructor.getByteBackInserter());
         }
 

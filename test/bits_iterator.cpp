@@ -5,8 +5,8 @@
 
 #include <ael/bits_iterator.hpp>
 
-using ga::impl::BitsIterator;
-using ga::impl::ReverseBitsIterator;
+using ael::impl::BitsIterator;
+using ael::impl::ReverseBitsIterator;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

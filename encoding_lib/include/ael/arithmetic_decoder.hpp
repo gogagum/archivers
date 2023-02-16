@@ -13,7 +13,7 @@
 
 #include "ranges_calc.hpp"
 
-namespace ga {
+namespace ael {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class

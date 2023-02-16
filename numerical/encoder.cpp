@@ -12,18 +12,16 @@
 
 namespace bpo = boost::program_options;
 
-using ga::fl::BytesWordFlow;
-using ga::w::BytesWord;
-using ga::w::UIntWord;
+using ael::fl::BytesWordFlow;
+using ael::w::BytesWord;
 
 using CountsDict = ael::dict::DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDict = ael::dict::DecreasingOnUpdateDictionary;
 using ContentDict = ael::dict::DecreasingOnUpdateDictionary;
 
-using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 
-using ga::ArithmeticCoder;
+using ael::ArithmeticCoder;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -74,7 +72,7 @@ int main(int argc, char* argv[]) {
                       return c0.second > c1.second;
                   });
 
-        auto dataConstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ael::ByteDataConstructor();
 
         std::vector<std::uint64_t> counts;
         std::vector<std::uint64_t> dictWordsOrds;

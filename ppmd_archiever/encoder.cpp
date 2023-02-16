@@ -58,8 +58,8 @@ int main(int argc, char* argv[]) {
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
-        auto coder = ga::ArithmeticCoder();
-        auto encoded = ga::ByteDataConstructor();
+        auto coder = ael::ArithmeticCoder();
+        auto encoded = ael::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
         encoded.putT<std::uint8_t>(ctxCellsCnt);

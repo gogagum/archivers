@@ -14,9 +14,7 @@
 
 #include <ael/bits_iterator.hpp>
 
-namespace ga::w{
-
-namespace rng = std::ranges;
+namespace ael::w{
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWord class
@@ -96,7 +94,7 @@ private:
 
 private:
 
-    using BitsIter = ga::impl::BitsIterator<std::uint64_t>;
+    using BitsIter = ael::impl::BitsIterator<std::uint64_t>;
 
 private:
 

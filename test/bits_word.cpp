@@ -6,7 +6,7 @@
 #include <ael/word/bits_word.hpp>
 #include <ael/bits_iterator.hpp>
 
-using ga::w::BitsWord;
+using ael::w::BitsWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -17,13 +17,13 @@ TEST(BitsWord, Construct) {
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ConstructFromInt) {
     auto num = std::uint8_t{42};
-    [[maybe_unused]] auto bw = BitsWord<8>(ga::impl::BitsIterator(num, 0));
+    [[maybe_unused]] auto bw = BitsWord<8>(ael::impl::BitsIterator(num, 0));
 }
 
 //----------------------------------------------------------------------------//
 TEST(BitsWord, ConstructFromIntNotFromStart) {
     auto num = std::uint8_t{42};
-    [[maybe_unused]] auto bw = BitsWord<5>(ga::impl::BitsIterator(num, 4));
+    [[maybe_unused]] auto bw = BitsWord<5>(ael::impl::BitsIterator(num, 4));
 }
 
 //----------------------------------------------------------------------------//

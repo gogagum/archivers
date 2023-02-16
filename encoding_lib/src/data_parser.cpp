@@ -1,7 +1,7 @@
 #include <boost/range/irange.hpp>
 #include <ael/data_parser.hpp>
 
-namespace ga {
+namespace ael {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 DataParser::DataParser(std::span<const std::byte> data)

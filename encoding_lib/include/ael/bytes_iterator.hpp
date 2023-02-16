@@ -5,7 +5,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace ga::impl {
+namespace ael::impl {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesIterator class

@@ -13,7 +13,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace ga {
+namespace ael {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoderDecoded class

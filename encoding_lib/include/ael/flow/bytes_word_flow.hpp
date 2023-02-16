@@ -11,7 +11,7 @@
 #include <boost/container/static_vector.hpp>
 #include <boost/range/algorithm_ext.hpp>
 
-namespace ga::fl {
+namespace ael::fl {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteFlow class

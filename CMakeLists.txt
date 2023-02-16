@@ -15,9 +15,8 @@ add_subdirectory(thirdparty/dynamic-segment-tree)
 add_subdirectory(encoding_lib)
 
 include_directories(${Boost_INCLUDE_DIRS}
-    encoding_lib/include/
-    thirdparty/dynamic-segment-tree/include/
-)
+                    encoding_lib/include/
+                    thirdparty/dynamic-segment-tree/include/)
 
 add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 

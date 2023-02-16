@@ -18,7 +18,7 @@
 #include <ael/bits_iterator.hpp>
 #include <ael/bytes_iterator.hpp>
 
-namespace ga::w {
+namespace ael::w {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class

@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <boost/container/static_vector.hpp>
 
-namespace ga::fl {
+namespace ael::fl {
 
 namespace bi = boost::iterators;
 
@@ -19,7 +19,7 @@ namespace bi = boost::iterators;
 template <std::uint16_t _numBits>
 class BitsWordFlow {
 private:
-    using _Word = ga::w::BitsWord<_numBits>;
+    using _Word = ael::w::BitsWord<_numBits>;
 public:
     constexpr static std::uint16_t numBits = w::BitsWord<_numBits>::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;

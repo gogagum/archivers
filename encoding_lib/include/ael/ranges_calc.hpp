@@ -5,7 +5,7 @@
 #include <iostream>
 #include <boost/multiprecision/cpp_int.hpp>
 
-namespace ga {
+namespace ael {
 
 namespace bm = boost::multiprecision;
 

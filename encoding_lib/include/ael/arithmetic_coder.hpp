@@ -11,7 +11,7 @@
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
-namespace ga {
+namespace ael {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class

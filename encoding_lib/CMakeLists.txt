@@ -1,4 +1,4 @@
-project("arithmetic-encoding-lib")
+project(arithmetic-encoding-lib)
 
 add_library(${PROJECT_NAME} STATIC)
 
@@ -13,7 +13,6 @@ target_sources(${PROJECT_NAME}
         src/ppmd_dictionary.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
-        
 )
 
 target_include_directories(${PROJECT_NAME}

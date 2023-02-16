@@ -5,29 +5,31 @@
 
 #include <ael/byte_data_constructor.hpp>
 
+using ael::ByteDataConstructor;
+
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, Consruct) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
 }
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBitFalse) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putBit(false);
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b00000000});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBitTrue) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putBit(true);
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{0b10000000});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBits) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putBit(true);
     encoded.putBit(false);
     encoded.putBit(false);
@@ -37,7 +39,7 @@ TEST(ByteDataConstructor, PutBits) {
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBits2) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putBit(true);
     encoded.putBit(false);
     encoded.putBit(false);
@@ -53,14 +55,14 @@ TEST(ByteDataConstructor, PutBits2) {
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutByte) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putByte(std::byte{42});
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{42});
 }
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutBitAfterByte) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putByte(std::byte{42});
     encoded.putBit(true);
     EXPECT_EQ(encoded.data<std::byte>()[0], std::byte{42});
@@ -69,7 +71,7 @@ TEST(ByteDataConstructor, PutBitAfterByte) {
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutByte2) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     encoded.putByte(std::byte{42});
     encoded.putByte(std::byte{37});
     encoded.putByte(std::byte{73});
@@ -80,7 +82,7 @@ TEST(ByteDataConstructor, PutByte2) {
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutInt64) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     std::int64_t tested =
             0b0000000000100000100000000000100000000000000000100000000000100000;
             //0000000011111111222222223333333344444444555555556666666677777777
@@ -99,7 +101,7 @@ TEST(ByteDataConstructor, PutInt64) {
 
 //----------------------------------------------------------------------------//
 TEST(ByteDataConstructor, PutUInt32) {
-    auto encoded = ga::ByteDataConstructor();
+    auto encoded = ByteDataConstructor();
     std::uint32_t tested = 0b00000000001000001000000000001000;
                            //00000000111111112222222233333333
 

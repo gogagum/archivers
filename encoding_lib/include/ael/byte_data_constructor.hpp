@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <ranges>
 
-namespace ga {
+namespace ael {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoderEncoded class
