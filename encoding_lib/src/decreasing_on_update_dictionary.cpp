@@ -1,7 +1,7 @@
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 #include <ranges>
 
-#include <ael/dictionary/integer_random_access_iterator.hpp>
+#include "integer_random_access_iterator.hpp"
 #include <boost/range/iterator_range.hpp>
 
 namespace ael::dict {

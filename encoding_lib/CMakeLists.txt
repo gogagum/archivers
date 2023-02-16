@@ -13,6 +13,7 @@ target_sources(${PROJECT_NAME}
         src/ppmd_dictionary.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
+        src/integer_random_access_iterator.hpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -45,7 +46,6 @@ set(public_headers
     include/ael/dictionary/ppmd_dictionary.hpp
     include/ael/dictionary/decreasing_counts_dictionary.hpp
     include/ael/dictionary/decreasing_on_update_dictionary.hpp
-    include/ael/dictionary/integer_random_access_iterator.hpp
     include/ael/dictionary/word_probability_stats.hpp
     include/ael/flow/bytes_word_flow.hpp
     include/ael/flow/bits_word_flow.hpp
