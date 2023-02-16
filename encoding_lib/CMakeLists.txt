@@ -11,6 +11,7 @@ target_sources(${PROJECT_NAME}
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
         src/ppmd_dictionary.cpp
+        src/ppma_dictionary.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp
@@ -43,6 +44,7 @@ set(public_headers
     include/ael/dictionary/adaptive_dictionary.hpp
     include/ael/dictionary/adaptive_a_dictionary.hpp
     include/ael/dictionary/adaptive_d_dictionary.hpp
+    include/ael/dictionary/ppmd_dictionary.hpp
     include/ael/dictionary/ppmd_dictionary.hpp
     include/ael/dictionary/decreasing_counts_dictionary.hpp
     include/ael/dictionary/decreasing_on_update_dictionary.hpp

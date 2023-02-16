@@ -49,6 +49,11 @@ private:
     Count _getLowerCumulativeCnt(Ord ord) const;
 
     Count _getWordCnt(Ord ord) const;
+
+    ProbabilityStats _getProbabilityStats(Ord ord) const;
+
+private:
+    friend class PPMADictionary;
 };
 
 }

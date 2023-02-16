@@ -11,8 +11,7 @@ AdaptiveADictionary::AdaptiveADictionary(Ord maxOrd)
     : impl::ADDictionaryBase<std::uint64_t>(maxOrd) {}
 
 //----------------------------------------------------------------------------//
-auto AdaptiveADictionary::getWordOrd(
-        Count cumulativeNumFound) const -> Ord {
+auto AdaptiveADictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
     const auto idxs = boost::make_iterator_range<UintIt>(0, this->_maxOrd);
     // TODO: replace
@@ -21,17 +20,15 @@ auto AdaptiveADictionary::getWordOrd(
         return this->_getLowerCumulativeCnt(ord + 1);
     };
     const auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
-                                       getLowerCumulNumFound_);
+                                             getLowerCumulNumFound_);
     return it - idxs.begin();
 }
 
 //----------------------------------------------------------------------------//
 auto AdaptiveADictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
-    const auto low = _getLowerCumulativeCnt(ord);
-    const auto high = low + _getWordCnt(ord);
-    const auto total = getTotalWordsCnt();
+    const auto ret = _getProbabilityStats(ord);
     this->_updateWordCnt(ord, 1);
-    return { low, high, total };
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
@@ -68,6 +65,15 @@ auto AdaptiveADictionary::_getWordCnt(Ord ord) const -> Count {
             ? this->_foundWordsCount.at(ord)
               * (this->_maxOrd - totalUniqueWordsCnt)
             : 1;
+}
+
+//----------------------------------------------------------------------------//
+auto AdaptiveADictionary::_getProbabilityStats(
+        Ord ord) const -> ProbabilityStats {
+    const auto low = _getLowerCumulativeCnt(ord);
+    const auto high = low + _getWordCnt(ord);
+    const auto total = getTotalWordsCnt();
+    return { low, high, total };
 }
 
 }  // namespace ga::dict

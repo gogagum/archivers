@@ -19,14 +19,14 @@ auto AdaptiveDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
         return this->_getLowerCumulativeCnt(ord + 1);
     };
-    auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
-                                       getLowerCumulNumFound_);
+    const auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
+                                             getLowerCumulNumFound_);
     return it - idxs.begin();
 }
 
 //----------------------------------------------------------------------------//
 auto AdaptiveDDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
-    auto ret = _getProbabilityStats(ord);
+    const auto ret = _getProbabilityStats(ord);
     this->_updateWordCnt(ord, 1);
     return ret;
 }

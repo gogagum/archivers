@@ -1,19 +1,15 @@
-#ifndef PPMD_DICTIONARY_HPP
-#define PPMD_DICTIONARY_HPP
+#ifndef PPMA_DICTIONARY_HPP
+#define PPMA_DICTIONARY_HPP
 
-#include <unordered_map>
 #include <cstdint>
-
-#include "word_probability_stats.hpp"
-#include "adaptive_d_dictionary.hpp"
-
-#include <stdexcept>
+#include <unordered_map>
+#include "adaptive_a_dictionary.hpp"
 
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
-// \brief the PPMD dictionary class
-class PPMDDictionary : protected AdaptiveDDictionary {
+// \brief The PPMA Dictionary class
+class PPMADictionary : protected AdaptiveADictionary {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
@@ -25,7 +21,7 @@ private:
             Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
             std::plus<void>, std::int64_t>;
 
-    using _DDict = AdaptiveDDictionary;
+    using _DDict = AdaptiveADictionary;
 
     constexpr static std::uint8_t maxContextLength = 8;
 
@@ -37,7 +33,7 @@ public:
      * @param contextLength - number of context cells.
      * @param contextCellBitsLength - context cell bits length.
      */
-    PPMDDictionary(std::uint16_t wordNumBits,
+    PPMADictionary(std::uint16_t wordNumBits,
                    std::uint16_t contextLength,
                    std::uint16_t contextCellBitsLength);
 
@@ -90,4 +86,4 @@ private:
 
 }
 
-#endif // PPMD_DICTIONARY_HPP
+#endif  // PPMA_DICTIONARY_HPP
