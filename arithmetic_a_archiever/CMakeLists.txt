@@ -1,4 +1,4 @@
-project(a_archiever)
+project(arithmetic_a_archiever)
 
 find_library(encoding_lib common ${Boost_LIBRARIES})
 

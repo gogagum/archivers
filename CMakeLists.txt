@@ -57,63 +57,10 @@ target_link_libraries(encoding_lib dynamic-segment-tree)
 
 add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 
-add_executable(archiever_encoder arithmetic_archiever/encoder.cpp)
-target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_decoder arithmetic_archiever/decoder.cpp)
-target_link_libraries(archiever_decoder encoding_lib common ${Boost_LIBRARIES})
-
+add_subdirectory(arithmetic_archiever)
 add_subdirectory(arithmetic_a_archiever)
+add_subdirectory(arithmetic_d_archiever)
+add_subdirectory(ppmd_archiever)
+add_subdirectory(numerical)
 
-add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp)
-target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
-target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(ppmd_encoder ppmd_archiever/encoder.cpp)
-target_link_libraries(ppmd_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(ppmd_decoder ppmd_archiever/decoder.cpp)
-target_link_libraries(ppmd_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(numerical_encoder numerical/encoder.cpp)
-target_link_libraries(numerical_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(numerical_decoder numerical/decoder.cpp)
-target_link_libraries(numerical_decoder encoding_lib common ${Boost_LIBRARIES})
-
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-)
-
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
-add_executable(archiever_tests
-    test/bits_iterator.cpp
-    test/bytes_iterator.cpp
-    test/bits_word.cpp
-    test/bits_word_flow.cpp
-    test/byte_data_constructor.cpp
-    test/bytes_word.cpp
-    test/bytes_word_flow.cpp
-    test/data_parser.cpp
-    test/adaptive_dictionary.cpp
-    test/integer_word.cpp
-    test/static_dictionary.cpp
-    test/uniform_dictionary.cpp
-    test/adaptive_dictionary.cpp
-    test/adaptive_a_dictionary.cpp
-    test/adaptive_d_dictionary.cpp
-    test/ppmd_dictionary.cpp
-    test/decreasing_counts_dictionary.cpp
-    test/decreasing_on_update_dictionary.cpp
-)
-
-target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)
-
-include(GoogleTest)
-gtest_discover_tests(archiever_tests)
+add_subdirectory(test)
