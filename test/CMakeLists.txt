@@ -17,7 +17,6 @@ add_executable(archiever_tests
     bytes_word_flow.cpp
     data_parser.cpp
     adaptive_dictionary.cpp
-    integer_word.cpp
     static_dictionary.cpp
     uniform_dictionary.cpp
     adaptive_dictionary.cpp

@@ -4,7 +4,6 @@
 
 #include <ael/arithmetic_coder.hpp>
 #include <ael/flow/bytes_word_flow.hpp>
-#include <ael/word/uint_word.hpp>
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
