@@ -2,27 +2,22 @@
 #include <boost/program_options.hpp>
 
 #include "../common.hpp"
-#include "data_parser.hpp"
-#include "byte_data_constructor.hpp"
-#include "word/uint_word.hpp"
-#include "word/bytes_word.hpp"
-#include "dictionary/decreasing_counts_dictionary.hpp"
-#include "dictionary/decreasing_on_update_dictionary.hpp"
-#include "arithmetic_decoder.hpp"
+#include <ael/data_parser.hpp>
+#include <ael/byte_data_constructor.hpp>
+#include <ael/word/bytes_word.hpp>
+#include <ael/dictionary/decreasing_counts_dictionary.hpp>
+#include <ael/dictionary/decreasing_on_update_dictionary.hpp>
+#include <ael/arithmetic_decoder.hpp>
 
 namespace bpo = boost::program_options;
 
-using ga::dict::DecreasingCountDictionary;
-using ga::w::BytesWord;
-using ga::w::UIntWord;
-using ga::dict::DecreasingCountDictionary;
-using ga::dict::DecreasingOnUpdateDictionary;
+using ael::w::BytesWord;
 
-using ga::ArithmeticDecoder;
+using ael::ArithmeticDecoder;
 
-using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDictionary = DecreasingOnUpdateDictionary;
-using ContentDictionary = DecreasingOnUpdateDictionary;
+using CountsDictionary = ael::dict::DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDictionary = ael::dict::DecreasingOnUpdateDictionary;
+using ContentDictionary = ael::dict::DecreasingOnUpdateDictionary;
 
 struct CountMappingRow {
     std::uint64_t word;
@@ -58,7 +53,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-out" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
-        auto decoded = ga::DataParser(filesOpener.getInData());
+        auto decoded = ael::DataParser(filesOpener.getInData());
 
         const auto dictWordsCount = decoded.takeT<std::uint64_t>();
         outStream << "Dictionary size: " << dictWordsCount << std::endl;
@@ -120,10 +115,10 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////
 
-        auto dataConstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ael::ByteDataConstructor();
 
         for (auto& wordOrd: contentWordsOrds) {
-            auto word = ga::w::BytesWord<1>::byOrd(wordOrd);
+            auto word = ael::w::BytesWord<1>::byOrd(wordOrd);
             word.bytesOut(dataConstructor.getByteBackInserter());
         }
 

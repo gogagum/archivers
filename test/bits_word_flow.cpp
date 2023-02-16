@@ -2,10 +2,9 @@
 #include <array>
 #include <cstddef>
 
-#include "flow/bits_word_flow.hpp"
+#include <ael/flow/bits_word_flow.hpp>
 
-using ga::fl::BitsWordFlow;
-using ga::w::BitsWord;
+using ael::fl::BitsWordFlow;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

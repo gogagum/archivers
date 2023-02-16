@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "dictionary/decreasing_counts_dictionary.hpp"
+#include <ael/dictionary/decreasing_counts_dictionary.hpp>
 
-using ga::dict::DecreasingCountDictionary;
+using ael::dict::DecreasingCountDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

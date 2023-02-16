@@ -6,10 +6,12 @@
 #include <vector>
 #include <span>
 
-#include <arithmetic_decoder.hpp>
-#include <dictionary/adaptive_d_dictionary.hpp>
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
+
+#include <ael/arithmetic_decoder.hpp>
+#include <ael/dictionary/adaptive_d_dictionary.hpp>
+
 
 #include "../common.hpp"
 #include "../opt_ostream_ref.hpp"
@@ -47,7 +49,7 @@ int main(int argc, char* argv[]) {
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
 
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
-        auto decoded = ga::DataParser(filesOpener.getInData());
+        auto decoded = ael::DataParser(filesOpener.getInData());
 
         const auto symBitLen = decoded.takeT<std::uint16_t>();
         outStream << "Word bits length: " << symBitLen << std::endl;
@@ -61,9 +63,9 @@ int main(int argc, char* argv[]) {
         const auto bitsCount = decoded.takeT<std::uint64_t>();
         outStream << "Bits count: " << bitsCount << std::endl;
 
-        auto dataConstructor = ga::ByteDataConstructor();
-        auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::AdaptiveDDictionary(1ull << symBitLen);
+        auto dataConstructor = ael::ByteDataConstructor();
+        auto decoder = ael::ArithmeticDecoder();
+        auto dict = ael::dict::AdaptiveDDictionary(1ull << symBitLen);
 
         std::vector<std::uint64_t> ords;
 

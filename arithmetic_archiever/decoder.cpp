@@ -10,8 +10,8 @@
 #include <boost/format.hpp>
 
 #include "../common.hpp"
-#include <dictionary/adaptive_dictionary.hpp>
-#include <arithmetic_decoder.hpp>
+#include <ael/dictionary/adaptive_dictionary.hpp>
+#include <ael/arithmetic_decoder.hpp>
 
 namespace bpo = boost::program_options;
 
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-decoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto filesOpener = FileOpener(inFileName, outFileName, outStream);
-        auto decoded = ga::DataParser(filesOpener.getInData());
+        auto decoded = ael::DataParser(filesOpener.getInData());
 
         const auto symBitLen = decoded.takeT<std::uint16_t>();
         outStream << "Word bits length: " << symBitLen << std::endl;
@@ -62,9 +62,9 @@ int main(int argc, char* argv[]) {
         const auto bitsCount = decoded.takeT<std::uint64_t>();
         outStream << "Bits count: " << bitsCount << std::endl;
 
-        auto dataConstructor = ga::ByteDataConstructor();
-        auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::AdaptiveDictionary(1 << bitsCount, ratio);
+        auto dataConstructor = ael::ByteDataConstructor();
+        auto decoder = ael::ArithmeticDecoder();
+        auto dict = ael::dict::AdaptiveDictionary(1 << bitsCount, ratio);
 
         std::vector<std::uint64_t> ords;
 

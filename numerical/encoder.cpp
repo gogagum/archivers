@@ -2,30 +2,25 @@
 #include <ranges>
 #include <boost/program_options.hpp>
 
-#include "arithmetic_coder.hpp"
-#include "flow/bytes_word_flow.hpp"
-#include "word/uint_word.hpp"
-#include "dictionary/decreasing_counts_dictionary.hpp"
-#include "dictionary/decreasing_on_update_dictionary.hpp"
+#include <ael/arithmetic_coder.hpp>
+#include <ael/flow/bytes_word_flow.hpp>
+#include <ael/dictionary/decreasing_counts_dictionary.hpp>
+#include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
 #include "../common.hpp"
 
 namespace bpo = boost::program_options;
 
-using ga::fl::BytesWordFlow;
-using ga::w::BytesWord;
-using ga::w::UIntWord;
-using ga::dict::DecreasingCountDictionary;
-using ga::dict::DecreasingOnUpdateDictionary;
+using ael::fl::BytesWordFlow;
+using ael::w::BytesWord;
 
-using CountsDict = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDict = DecreasingOnUpdateDictionary;
-using ContentDict = DecreasingOnUpdateDictionary;
+using CountsDict = ael::dict::DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDict = ael::dict::DecreasingOnUpdateDictionary;
+using ContentDict = ael::dict::DecreasingOnUpdateDictionary;
 
-using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;
 
-using ga::ArithmeticCoder;
+using ael::ArithmeticCoder;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -76,7 +71,7 @@ int main(int argc, char* argv[]) {
                       return c0.second > c1.second;
                   });
 
-        auto dataConstructor = ga::ByteDataConstructor();
+        auto dataConstructor = ael::ByteDataConstructor();
 
         std::vector<std::uint64_t> counts;
         std::vector<std::uint64_t> dictWordsOrds;

@@ -3,9 +3,9 @@
 #include <array>
 #include <cstddef>
 
-#include "dictionary/adaptive_a_dictionary.hpp"
+#include <ael/dictionary/adaptive_a_dictionary.hpp>
 
-using ga::dict::AdaptiveADictionary;
+using ael::dict::AdaptiveADictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

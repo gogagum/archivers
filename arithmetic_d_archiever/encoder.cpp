@@ -4,8 +4,8 @@
 
 #include <boost/program_options.hpp>
 
-#include <dictionary/adaptive_d_dictionary.hpp>
-#include <arithmetic_coder.hpp>
+#include <ael/dictionary/adaptive_d_dictionary.hpp>
+#include <ael/arithmetic_coder.hpp>
 #include "../common.hpp"
 
 namespace bpo = boost::program_options;
@@ -44,12 +44,12 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ga::dict::AdaptiveDDictionary(1ull << numBits);
+        auto dict = ael::dict::AdaptiveDDictionary(1ull << numBits);
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
-        auto coder = ga::ArithmeticCoder();
-        auto encoded = ga::ByteDataConstructor();
+        auto coder = ael::ArithmeticCoder();
+        auto encoded = ael::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();

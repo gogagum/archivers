@@ -6,11 +6,11 @@
 #include <iostream>
 #include <span>
 
-#include <word/bytes_word.hpp>
-#include <word/bits_word.hpp>
-#include <flow/bits_word_flow.hpp>
-#include <flow/bytes_word_flow.hpp>
-#include <byte_data_constructor.hpp>
+#include <ael/word/bytes_word.hpp>
+#include <ael/word/bits_word.hpp>
+#include <ael/flow/bits_word_flow.hpp>
+#include <ael/flow/bytes_word_flow.hpp>
+#include <ael/byte_data_constructor.hpp>
 #include <boost/container/static_vector.hpp>
 #include "opt_ostream_ref.hpp"
 
@@ -18,15 +18,15 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 struct TypeChoise {
-    using Flow = ga::fl::BitsWordFlow<numBits>;
-    using Word = ga::w::BitsWord<numBits>;
+    using Flow = ael::fl::BitsWordFlow<numBits>;
+    using Word = ael::w::BitsWord<numBits>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits> requires (numBits % 8 == 0)
 struct TypeChoise<numBits>{
-    using Flow = ga::fl::BytesWordFlow<numBits/8>;
-    using Word = ga::w::BytesWord<numBits/8>;
+    using Flow = ael::fl::BytesWordFlow<numBits/8>;
+    using Word = ael::w::BytesWord<numBits/8>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -104,13 +104,13 @@ optout::OptOstreamRef get_out_stream(const std::string& arg);
 
 //----------------------------------------------------------------------------//
 template <std::uint8_t _numBytes>
-void packWordIntoData(const ga::w::BytesWord<_numBytes> word, auto& cntr) {
+void packWordIntoData(const ael::w::BytesWord<_numBytes> word, auto& cntr) {
     word.bytesOut(cntr.getByteBackInserter());
 }
 
 //----------------------------------------------------------------------------//
 template <std::uint16_t _numBits>
-void packWordIntoData(const ga::w::BitsWord<_numBits> word, auto& cntr) {
+void packWordIntoData(const ael::w::BitsWord<_numBits> word, auto& cntr) {
     word.bitsOut(cntr.getBitBackInserter());
 }
 
@@ -186,7 +186,7 @@ private:
 class WordPacker {
 public:
     template <std::ranges::input_range RangeT>
-    static void process(RangeT rng, ga::ByteDataConstructor& dataConstructor, std::uint16_t numBits) {
+    static void process(RangeT rng, ael::ByteDataConstructor& dataConstructor, std::uint16_t numBits) {
 
         #define BITS_DECODER_CASE(numBits) \
             case (numBits): _process<RangeT, (numBits)>(rng, dataConstructor); break;
@@ -226,7 +226,7 @@ public:
     }
 private:
     template <std::ranges::input_range RangeT, std::uint16_t numBits>
-    static void _process(RangeT rng, ga::ByteDataConstructor& dataConstructor) {
+    static void _process(RangeT rng, ael::ByteDataConstructor& dataConstructor) {
         for (std::uint64_t ord: rng) {
             packWordIntoData(Word<numBits>::byOrd(ord), dataConstructor);
         }

@@ -3,11 +3,9 @@
 #include <array>
 #include <cstdint>
 
-#include "dictionary/decreasing_on_update_dictionary.hpp"
-#include "word/bytes_word.hpp"
+#include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
-using ga::dict::DecreasingOnUpdateDictionary;
-using ga::w::BytesWord;
+using ael::dict::DecreasingOnUpdateDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

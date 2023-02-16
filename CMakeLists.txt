@@ -5,9 +5,6 @@ project(archievers LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -15,111 +12,19 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost COMPONENTS system program_options REQUIRED)
 
 add_subdirectory(thirdparty/dynamic-segment-tree)
+add_subdirectory(encoding_lib)
+
 include_directories(${Boost_INCLUDE_DIRS}
-    include/
-    thirdparty/dynamic-segment-tree/include/)
-
-add_library(encoding_lib STATIC
-    include/arithmetic_coder.hpp
-    include/arithmetic_decoder.hpp
-    include/bits_iterator.hpp
-    include/byte_data_constructor.hpp
-    include/byte_data_constructor.cpp
-    include/data_parser.hpp
-    include/data_parser.cpp
-    include/ranges_calc.hpp
-    include/dictionary/impl/a_d_dictionary_base.hpp
-    include/dictionary/uniform_dictionary.hpp
-    include/dictionary/uniform_dictionary.cpp
-    include/dictionary/static_dictionary.hpp
-    include/dictionary/static_dictionary.cpp
-    include/dictionary/adaptive_dictionary.hpp
-    include/dictionary/adaptive_dictionary.cpp
-    include/dictionary/adaptive_a_dictionary.hpp
-    include/dictionary/adaptive_a_dictionary.cpp
-    include/dictionary/adaptive_d_dictionary.hpp
-    include/dictionary/adaptive_d_dictionary.cpp
-    include/dictionary/ppmd_dictionary.hpp
-    include/dictionary/ppmd_dictionary.cpp
-    include/dictionary/decreasing_counts_dictionary.hpp
-    include/dictionary/decreasing_on_update_dictionary.hpp
-    include/dictionary/decreasing_on_update_dictionary.cpp
-    include/dictionary/integer_random_access_iterator.hpp
-    include/flow/bytes_word_flow.hpp
-    include/flow/bits_word_flow.hpp
-    include/flow/traits.hpp
-    include/word/bytes_word.hpp
-    include/word/bits_word.hpp
-    include/word/integer_word.hpp
-    include/word/uint_word.hpp
-)
-
-target_link_libraries(encoding_lib dynamic-segment-tree)
+                    encoding_lib/include/
+                    thirdparty/dynamic-segment-tree/include/)
 
 add_library(common STATIC common.hpp common.cpp opt_ostream_ref.hpp opt_ostream_ref.cpp)
 
-add_executable(archiever_encoder arithmetic_archiever/encoder.cpp)
-target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
+add_subdirectory(arithmetic_archiever)
+add_subdirectory(arithmetic_a_archiever)
+add_subdirectory(arithmetic_d_archiever)
+add_subdirectory(ppmd_archiever)
+add_subdirectory(ppma_archiever)
+add_subdirectory(numerical)
 
-add_executable(archiever_decoder arithmetic_archiever/decoder.cpp)
-target_link_libraries(archiever_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp)
-target_link_libraries(archiever_a_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp)
-target_link_libraries(archiever_a_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp)
-target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_d_decoder arithmetic_d_archiever/decoder.cpp)
-target_link_libraries(archiever_d_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(ppmd_encoder ppmd_archiever/encoder.cpp)
-target_link_libraries(ppmd_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(ppmd_decoder ppmd_archiever/decoder.cpp)
-target_link_libraries(ppmd_decoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(numerical_encoder numerical/encoder.cpp)
-target_link_libraries(numerical_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(numerical_decoder numerical/decoder.cpp)
-target_link_libraries(numerical_decoder encoding_lib common ${Boost_LIBRARIES})
-
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-)
-
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
-add_executable(archiever_tests
-    test/bits_iterator.cpp
-    test/bytes_iterator.cpp
-    test/bits_word.cpp
-    test/bits_word_flow.cpp
-    test/byte_data_constructor.cpp
-    test/bytes_word.cpp
-    test/bytes_word_flow.cpp
-    test/data_parser.cpp
-    test/adaptive_dictionary.cpp
-    test/integer_word.cpp
-    test/static_dictionary.cpp
-    test/uniform_dictionary.cpp
-    test/adaptive_dictionary.cpp
-    test/adaptive_a_dictionary.cpp
-    test/adaptive_d_dictionary.cpp
-    test/ppmd_dictionary.cpp
-    test/decreasing_counts_dictionary.cpp
-    test/decreasing_on_update_dictionary.cpp
-    test/traits.cpp
-)
-
-target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)
-
-include(GoogleTest)
-gtest_discover_tests(archiever_tests)
+add_subdirectory(test)
