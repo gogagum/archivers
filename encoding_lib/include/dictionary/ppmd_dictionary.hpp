@@ -7,8 +7,8 @@
 #include <boost/container/static_vector.hpp>
 #include <boost/container_hash/hash.hpp>
 
-#include <dictionary/word_probability_stats.hpp>
-#include <dictionary/adaptive_d_dictionary.hpp>
+#include "word_probability_stats.hpp"
+#include "adaptive_d_dictionary.hpp"
 
 #include <stdexcept>
 
