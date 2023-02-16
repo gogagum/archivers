@@ -24,6 +24,7 @@ add_subdirectory(arithmetic_archiever)
 add_subdirectory(arithmetic_a_archiever)
 add_subdirectory(arithmetic_d_archiever)
 add_subdirectory(ppmd_archiever)
+add_subdirectory(ppma_archiever)
 add_subdirectory(numerical)
 
 add_subdirectory(test)
