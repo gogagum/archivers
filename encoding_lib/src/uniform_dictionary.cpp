@@ -1,4 +1,4 @@
-#include "uniform_dictionary.hpp"
+#include <ael/dictionary/uniform_dictionary.hpp>
 
 namespace ga::dict {
 

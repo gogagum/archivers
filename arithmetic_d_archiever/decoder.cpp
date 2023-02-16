@@ -6,10 +6,12 @@
 #include <vector>
 #include <span>
 
-#include <arithmetic_decoder.hpp>
-#include <dictionary/adaptive_d_dictionary.hpp>
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
+
+#include <ael/arithmetic_decoder.hpp>
+#include <ael/dictionary/adaptive_d_dictionary.hpp>
+
 
 #include "../common.hpp"
 #include "../opt_ostream_ref.hpp"

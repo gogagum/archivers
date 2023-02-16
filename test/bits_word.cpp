@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <boost/range/combine.hpp>
 
-#include "word/bits_word.hpp"
-#include "bits_iterator.hpp"
+#include <ael/word/bits_word.hpp>
+#include <ael/bits_iterator.hpp>
 
 using ga::w::BitsWord;
 

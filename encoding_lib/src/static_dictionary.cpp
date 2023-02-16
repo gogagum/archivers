@@ -1,4 +1,4 @@
-#include "static_dictionary.hpp"
+#include <ael/dictionary/static_dictionary.hpp>
 
 #include <algorithm>
 #include <boost/range/irange.hpp>

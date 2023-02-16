@@ -1,4 +1,4 @@
-#include "ppmd_dictionary.hpp"
+#include <ael/dictionary/ppmd_dictionary.hpp>
 
 #include <boost/multiprecision/cpp_int.hpp>
 

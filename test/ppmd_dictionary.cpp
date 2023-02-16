@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <dictionary/ppmd_dictionary.hpp>
+#include <ael/dictionary/ppmd_dictionary.hpp>
 
 using ga::dict::PPMDDictionary;
 

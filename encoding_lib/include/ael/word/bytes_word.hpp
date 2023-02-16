@@ -15,8 +15,8 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include <bits_iterator.hpp>
-#include <bytes_iterator.hpp>
+#include <ael/bits_iterator.hpp>
+#include <ael/bytes_iterator.hpp>
 
 namespace ga::w {
 

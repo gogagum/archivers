@@ -5,7 +5,7 @@
 #include <vector>
 #include <boost/range/combine.hpp>
 
-#include "word/bytes_word.hpp"
+#include <ael/word/bytes_word.hpp>
 
 using ga::w::BytesWord;
 

@@ -9,8 +9,8 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include <arithmetic_decoder.hpp>
-#include <dictionary/ppmd_dictionary.hpp>
+#include <ael/arithmetic_decoder.hpp>
+#include <ael/dictionary/ppmd_dictionary.hpp>
 #include "../common.hpp"
 
 namespace bpo = boost::program_options;

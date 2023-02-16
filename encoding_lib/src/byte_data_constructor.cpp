@@ -1,7 +1,7 @@
 #include <boost/range/irange.hpp>
 
-#include "byte_data_constructor.hpp"
-#include "bits_iterator.hpp"
+#include <ael/byte_data_constructor.hpp>
+#include <ael/bits_iterator.hpp>
 
 namespace ga {
 

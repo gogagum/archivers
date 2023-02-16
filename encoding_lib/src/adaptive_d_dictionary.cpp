@@ -1,6 +1,6 @@
-#include "adaptive_d_dictionary.hpp"
+#include <ael/dictionary/adaptive_d_dictionary.hpp>
 
-#include "integer_random_access_iterator.hpp"
+#include <ael/dictionary/integer_random_access_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
 namespace ga::dict {

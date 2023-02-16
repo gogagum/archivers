@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "word/integer_word.hpp"
+#include <ael/word/integer_word.hpp>
 
 using ga::w::IntegerWord;
 

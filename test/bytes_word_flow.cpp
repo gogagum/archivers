@@ -4,10 +4,9 @@
 #include <cstddef>
 #include <boost/range/combine.hpp>
 
-#include "flow/bytes_word_flow.hpp"
+#include <ael/flow/bytes_word_flow.hpp>
 
 using ga::fl::BytesWordFlow;
-using ga::w::BytesWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

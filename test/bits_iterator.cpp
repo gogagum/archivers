@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "bits_iterator.hpp"
+#include <ael/bits_iterator.hpp>
 
 using ga::impl::BitsIterator;
 using ga::impl::ReverseBitsIterator;

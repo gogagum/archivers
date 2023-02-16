@@ -1,7 +1,7 @@
 #ifndef BIT_FLOW_HPP
 #define BIT_FLOW_HPP
 
-#include "word/bytes_word.hpp"
+#include <ael/word/bytes_word.hpp>
 
 #include <span>
 #include <cstddef>

@@ -3,7 +3,7 @@
 #include <array>
 #include <cstddef>
 
-#include "dictionary/adaptive_d_dictionary.hpp"
+#include <ael/dictionary/adaptive_d_dictionary.hpp>
 
 using ga::dict::AdaptiveDDictionary;
 

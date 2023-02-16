@@ -28,7 +28,7 @@ add_executable(archiever_tests
     decreasing_on_update_dictionary.cpp
 )
 
-target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)
+target_link_libraries(archiever_tests LINK_PUBLIC gtest_main arithmetic-encoding-lib)
 
 include(GoogleTest)
 gtest_discover_tests(archiever_tests)

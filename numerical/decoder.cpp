@@ -2,19 +2,17 @@
 #include <boost/program_options.hpp>
 
 #include "../common.hpp"
-#include "data_parser.hpp"
-#include "byte_data_constructor.hpp"
-#include "word/uint_word.hpp"
-#include "word/bytes_word.hpp"
-#include "dictionary/decreasing_counts_dictionary.hpp"
-#include "dictionary/decreasing_on_update_dictionary.hpp"
-#include "arithmetic_decoder.hpp"
+#include <ael/data_parser.hpp>
+#include <ael/byte_data_constructor.hpp>
+#include <ael/word/bytes_word.hpp>
+#include <ael/dictionary/decreasing_counts_dictionary.hpp>
+#include <ael/dictionary/decreasing_on_update_dictionary.hpp>
+#include <ael/arithmetic_decoder.hpp>
 
 namespace bpo = boost::program_options;
 
 using ga::dict::DecreasingCountDictionary;
 using ga::w::BytesWord;
-using ga::w::UIntWord;
 using ga::dict::DecreasingCountDictionary;
 using ga::dict::DecreasingOnUpdateDictionary;
 

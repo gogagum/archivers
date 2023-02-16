@@ -8,7 +8,7 @@
 #include <boost/range/combine.hpp>
 #include <boost/range/irange.hpp>
 
-#include "data_parser.hpp"
+#include <ael/data_parser.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

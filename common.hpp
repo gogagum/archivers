@@ -6,11 +6,11 @@
 #include <iostream>
 #include <span>
 
-#include <word/bytes_word.hpp>
-#include <word/bits_word.hpp>
-#include <flow/bits_word_flow.hpp>
-#include <flow/bytes_word_flow.hpp>
-#include <byte_data_constructor.hpp>
+#include <ael/word/bytes_word.hpp>
+#include <ael/word/bits_word.hpp>
+#include <ael/flow/bits_word_flow.hpp>
+#include <ael/flow/bytes_word_flow.hpp>
+#include <ael/byte_data_constructor.hpp>
 #include <boost/container/static_vector.hpp>
 #include "opt_ostream_ref.hpp"
 

@@ -10,8 +10,8 @@
 #include <boost/format.hpp>
 
 #include "../common.hpp"
-#include <dictionary/adaptive_dictionary.hpp>
-#include <arithmetic_decoder.hpp>
+#include <ael/dictionary/adaptive_dictionary.hpp>
+#include <ael/arithmetic_decoder.hpp>
 
 namespace bpo = boost::program_options;
 
