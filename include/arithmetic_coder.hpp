@@ -8,7 +8,6 @@
 #include <optional>
 #include <boost/timer/progress_display.hpp>
 
-#include "flow/traits.hpp"
 #include "byte_data_constructor.hpp"
 #include "ranges_calc.hpp"
 
@@ -47,7 +46,8 @@ template <class DictT>
 auto ArithmeticCoder::encode(
         auto ordFlow,
         ByteDataConstructor& dataConstructor, 
-        DictT& dict, auto os) -> EncodeRet {
+        DictT& dict,
+        auto os) -> EncodeRet {
     auto ret = EncodeRet();
     auto currRange = OrdRange { 0, RC::total };
 

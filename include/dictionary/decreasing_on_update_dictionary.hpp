@@ -2,7 +2,6 @@
 #define DECREASING_ON_UPDATE_DICTIONARY_HPP
 
 #include "word_probability_stats.hpp"
-#include "integer_random_access_iterator.hpp"
 #include "impl/adaptive_dictionary_base.hpp"
 
 #include <cstdint>
@@ -17,8 +16,8 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DecreasingOnUpdateDictionary class
 ///
-class DecreasingOnUpdateDictionary
-        : public impl::AdaptiveDictionaryBase<std::uint64_t, std::uint64_t> {
+class DecreasingOnUpdateDictionary 
+    : public impl::AdaptiveDictionaryBase<std::uint64_t> {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
@@ -92,7 +91,7 @@ template <std::ranges::input_range RangeT>
 DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
         Ord maxOrd,
         const RangeT& countRng
-        ) : impl::AdaptiveDictionaryBase<Ord, Count>(maxOrd, 0),
+        ) : impl::AdaptiveDictionaryBase<Count>(maxOrd, 0),
             _maxOrd(maxOrd) {
     for (const auto& [ord, count] : countRng) {
         this->_wordCnts[ord] = count;

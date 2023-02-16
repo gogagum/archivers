@@ -47,7 +47,6 @@ add_library(encoding_lib STATIC
     include/dictionary/integer_random_access_iterator.hpp
     include/flow/bytes_word_flow.hpp
     include/flow/bits_word_flow.hpp
-    include/flow/traits.hpp
     include/word/bytes_word.hpp
     include/word/bits_word.hpp
     include/word/integer_word.hpp
@@ -64,11 +63,7 @@ target_link_libraries(archiever_encoder encoding_lib common ${Boost_LIBRARIES})
 add_executable(archiever_decoder arithmetic_archiever/decoder.cpp)
 target_link_libraries(archiever_decoder encoding_lib common ${Boost_LIBRARIES})
 
-add_executable(archiever_a_encoder arithmetic_a_archiever/encoder.cpp)
-target_link_libraries(archiever_a_encoder encoding_lib common ${Boost_LIBRARIES})
-
-add_executable(archiever_a_decoder arithmetic_a_archiever/decoder.cpp)
-target_link_libraries(archiever_a_decoder encoding_lib common ${Boost_LIBRARIES})
+add_subdirectory(arithmetic_a_archiever)
 
 add_executable(archiever_d_encoder arithmetic_d_archiever/encoder.cpp)
 target_link_libraries(archiever_d_encoder encoding_lib common ${Boost_LIBRARIES})
@@ -116,7 +111,6 @@ add_executable(archiever_tests
     test/ppmd_dictionary.cpp
     test/decreasing_counts_dictionary.cpp
     test/decreasing_on_update_dictionary.cpp
-    test/traits.cpp
 )
 
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main encoding_lib)

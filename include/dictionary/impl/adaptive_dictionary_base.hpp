@@ -1,6 +1,7 @@
 #ifndef ADAPTIVE_DICTIONARY_BASE_HPP
 #define ADAPTIVE_DICTIONARY_BASE_HPP
 
+#include <cstdint>
 #include <unordered_map>
 #include <dst/dynamic_segment_tree.hpp>
 
@@ -9,16 +10,17 @@ namespace ga::dict::impl {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionaryBase class
 ///
-template <typename OrdT, typename CountT>
+template <typename CountT>
 class AdaptiveDictionaryBase {
 protected:
-    using Ord = OrdT;
+
+    using Ord = std::uint64_t;
     using Count = CountT;
 
 protected:
 
-    AdaptiveDictionaryBase(OrdT wordsCount, Count initialTotalWordsCount)
-        : _cumulativeWordCounts(OrdT{0}, wordsCount, 0),
+    AdaptiveDictionaryBase(Ord wordsCount, Count initialTotalWordsCount)
+        : _cumulativeWordCounts(Ord{0}, wordsCount, 0),
           _totalWordsCnt(initialTotalWordsCount) {}
 
 protected:

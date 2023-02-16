@@ -11,8 +11,7 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionary class
 ///
-class AdaptiveDictionary
-        : public impl::AdaptiveDictionaryBase<std::uint64_t, std::uint64_t> {
+class AdaptiveDictionary : public impl::AdaptiveDictionaryBase<std::uint64_t> {
 public:
 
     using Ord = std::uint64_t;
@@ -21,8 +20,12 @@ public:
 
 public:
 
+    /**
+     * @brief AdaptiveDictionary constructor.
+     * @param maxOrd - maximal order.
+     * @param ratio - old to new symbol probability ratio.
+     */
     AdaptiveDictionary(Ord maxOrd, std::uint64_t ratio);
-    AdaptiveDictionary(AdaptiveDictionary&& other) = default;
 
     /**
      * @brief getWord - get word by cumulative num found.

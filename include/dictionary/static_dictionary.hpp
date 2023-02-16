@@ -17,14 +17,7 @@ public:
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 
-private:
-
-    StaticDictionary() = default;
-
 public:
-
-    StaticDictionary(const StaticDictionary& other) = default;
-    StaticDictionary(StaticDictionary&& other) = default;
 
     /**
      * @brief fromCounts construct from simple wordsCounts

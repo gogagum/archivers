@@ -11,15 +11,18 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveADictionary class
 ///
-class AdaptiveADictionary
-        : impl::ADDictionaryBase<std::uint64_t, std::uint64_t> {
+class AdaptiveADictionary : impl::ADDictionaryBase<std::uint64_t> {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
 public:
-    AdaptiveADictionary(Ord maxOrd) : impl::ADDictionaryBase<Ord, std::uint64_t>(maxOrd) {}
-    AdaptiveADictionary(AdaptiveADictionary&& other) = default;
+
+    /**
+     * Adaptive <<A>> dictionary constructor.
+     * @param maxOrd - maximal order. 
+     */
+    AdaptiveADictionary(Ord maxOrd);
 
     /**
      * @brief getWord - get word by cumulative num found.

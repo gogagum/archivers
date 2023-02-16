@@ -17,6 +17,11 @@ public:
     using Count = CountT;
     using ProbabilityStats = WordProbabilityStats<CountT>;
 public:
+
+    /**
+     * @brief DecreasingCountDictionary constructor.
+     * @param initialCount - intintal count.
+     */
     DecreasingCountDictionary(Count initialCount);
 
     /**

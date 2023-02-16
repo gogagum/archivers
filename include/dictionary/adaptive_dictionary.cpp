@@ -8,7 +8,7 @@ namespace ga::dict {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 AdaptiveDictionary::AdaptiveDictionary(Ord maxOrd, std::uint64_t ratio)
-    : impl::AdaptiveDictionaryBase<Ord, Count>(maxOrd, maxOrd),
+    : impl::AdaptiveDictionaryBase<Count>(maxOrd, maxOrd),
       _ratio(ratio),
       _maxOrder(maxOrd) {}
 

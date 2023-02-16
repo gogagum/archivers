@@ -7,6 +7,10 @@ namespace ga::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
+AdaptiveADictionary::AdaptiveADictionary(Ord maxOrd)
+    : impl::ADDictionaryBase<std::uint64_t>(maxOrd) {}
+
+//----------------------------------------------------------------------------//
 auto AdaptiveADictionary::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
@@ -16,7 +20,7 @@ auto AdaptiveADictionary::getWordOrd(
     const auto getLowerCumulNumFound_ = [this](std::uint64_t ord) {
         return this->_getLowerCumulativeCnt(ord + 1);
     };
-    auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
+    const auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                        getLowerCumulNumFound_);
     return it - idxs.begin();
 }
@@ -49,7 +53,7 @@ auto AdaptiveADictionary::_getLowerCumulativeCnt(
     }
     const auto numUniqueWordsTotal = this->_getTotalUniqueWordsCnt();
     const auto cumulativeUniqueWordsNumFound =
-            this->_cumulativeFoundUniqueWords.get(ord - 1);
+        this->_getLowerCumulativeUniqueNumFound(ord);
     return (this->_maxOrd - numUniqueWordsTotal) * cumulativeNumFound
             + (ord - cumulativeUniqueWordsNumFound);
 }

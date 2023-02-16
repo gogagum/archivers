@@ -1,4 +1,8 @@
 #include "decreasing_on_update_dictionary.hpp"
+#include <ranges>
+
+#include "integer_random_access_iterator.hpp"
+#include <boost/range/iterator_range.hpp>
 
 namespace ga::dict {
 
@@ -7,7 +11,7 @@ namespace ga::dict {
 DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
         Ord maxOrd,
         Count count
-        ) : impl::AdaptiveDictionaryBase<Ord, Count>(_maxOrd, _maxOrd * count),
+        ) : impl::AdaptiveDictionaryBase<Count>(maxOrd, maxOrd * count),
             _maxOrd(maxOrd) {
     for (auto ord : boost::irange<Ord>(0, _maxOrd)) {
         this->_wordCnts[ord] = count;
@@ -19,14 +23,14 @@ DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
 auto DecreasingOnUpdateDictionary::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
     using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
-    auto idxs = boost::make_iterator_range<UintIt>(0, _maxOrd);
+    const auto idxs = boost::make_iterator_range<UintIt>(0, _maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
         return this->_getLowerCumulativeNumFound(ord + 1);
     };
-    auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
-                                       getLowerCumulNumFound_);
+    const auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
+                                             getLowerCumulNumFound_);
     return it - idxs.begin();
 }
 

@@ -32,19 +32,15 @@ private:
 
 public:
 
-    PPMDDictionary(std::uint16_t numBits,
+    /**
+     * @brief PPMD dictionary constructor
+     * @param wordNumBits - word bits length.
+     * @param contextLength - number of context cells.
+     * @param contextCellBitsLength - context cell bits length.
+     */
+    PPMDDictionary(std::uint16_t wordNumBits,
                    std::uint16_t contextLength,
-                   std::uint16_t contextCellBitsLength)
-        : AdaptiveDDictionary(1ull << numBits),
-          _ctx(0),
-          _currCtxLength(0),
-          _numBits(numBits),
-          _ctxCellBitsLength(contextCellBitsLength),
-          _ctxLength(contextLength) {
-        if (contextCellBitsLength * contextLength > 56) {
-            throw std::invalid_argument("Too big context length.");
-        }
-    }
+                   std::uint16_t contextCellBitsLength);
 
     /**
      * @brief getWord

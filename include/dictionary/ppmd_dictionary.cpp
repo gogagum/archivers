@@ -8,6 +8,21 @@ namespace bmp = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
+PPMDDictionary::PPMDDictionary(std::uint16_t wordNumBits,
+                               std::uint16_t contextLength,
+                               std::uint16_t contextCellBitsLength)
+    : AdaptiveDDictionary(1ull << wordNumBits),
+      _ctx(0),
+      _currCtxLength(0),
+      _numBits(wordNumBits),
+      _ctxCellBitsLength(contextCellBitsLength),
+      _ctxLength(contextLength) {
+    if (contextCellBitsLength * contextLength > 56) {
+        throw std::invalid_argument("Too big context length.");
+    }
+}
+
+//----------------------------------------------------------------------------//
 auto PPMDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
