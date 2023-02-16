@@ -5,7 +5,7 @@
 
 #include <ael/dictionary/adaptive_a_dictionary.hpp>
 
-using ga::dict::AdaptiveADictionary;
+using ael::dict::AdaptiveADictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

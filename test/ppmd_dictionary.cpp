@@ -2,7 +2,7 @@
 
 #include <ael/dictionary/ppmd_dictionary.hpp>
 
-using ga::dict::PPMDDictionary;
+using ael::dict::PPMDDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

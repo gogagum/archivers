@@ -12,7 +12,7 @@
 
 #include <stdexcept>
 
-namespace ga::dict {
+namespace ael::dict {
 
 class PPMDDictionary : protected AdaptiveDDictionary {
 public:

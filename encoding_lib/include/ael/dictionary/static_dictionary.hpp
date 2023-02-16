@@ -6,7 +6,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The StaticDictionary class

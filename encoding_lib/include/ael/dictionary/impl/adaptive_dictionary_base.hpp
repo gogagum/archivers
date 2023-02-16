@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <dst/dynamic_segment_tree.hpp>
 
-namespace ga::dict::impl {
+namespace ael::dict::impl {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionaryBase class

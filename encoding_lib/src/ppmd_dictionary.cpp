@@ -2,7 +2,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-namespace ga::dict {
+namespace ael::dict {
 
 namespace bmp = boost::multiprecision;
 

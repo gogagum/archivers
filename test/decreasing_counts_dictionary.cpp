@@ -2,7 +2,7 @@
 
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 
-using ga::dict::DecreasingCountDictionary;
+using ael::dict::DecreasingCountDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

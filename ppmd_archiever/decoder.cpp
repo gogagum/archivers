@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::PPMDDictionary(symBitLen, ctxCellsCnt, ctxCellLength);
+        auto dict = ael::dict::PPMDDictionary(symBitLen, ctxCellsCnt, ctxCellLength);
 
         std::vector<std::uint64_t> ords;
 

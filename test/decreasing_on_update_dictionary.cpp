@@ -5,7 +5,7 @@
 
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
-using ga::dict::DecreasingOnUpdateDictionary;
+using ael::dict::DecreasingOnUpdateDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

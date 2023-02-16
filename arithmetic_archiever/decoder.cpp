@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
         auto dataConstructor = ga::ByteDataConstructor();
         auto decoder = ga::ArithmeticDecoder();
-        auto dict = ga::dict::AdaptiveDictionary(1 << bitsCount, ratio);
+        auto dict = ael::dict::AdaptiveDictionary(1 << bitsCount, ratio);
 
         std::vector<std::uint64_t> ords;
 

@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDictionary class

@@ -5,7 +5,7 @@
 
 #include <ael/dictionary/static_dictionary.hpp>
 
-using ga::dict::StaticDictionary;
+using ael::dict::StaticDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

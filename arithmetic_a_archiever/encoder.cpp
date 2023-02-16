@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ga::dict::AdaptiveADictionary(1ull << numBits);
+        auto dict = ael::dict::AdaptiveADictionary(1ull << numBits);
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 

@@ -11,16 +11,13 @@
 
 namespace bpo = boost::program_options;
 
-using ga::dict::DecreasingCountDictionary;
 using ga::w::BytesWord;
-using ga::dict::DecreasingCountDictionary;
-using ga::dict::DecreasingOnUpdateDictionary;
 
 using ga::ArithmeticDecoder;
 
-using CountsDictionary = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDictionary = DecreasingOnUpdateDictionary;
-using ContentDictionary = DecreasingOnUpdateDictionary;
+using CountsDictionary = ael::dict::DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDictionary = ael::dict::DecreasingOnUpdateDictionary;
+using ContentDictionary = ael::dict::DecreasingOnUpdateDictionary;
 
 struct CountMappingRow {
     std::uint64_t word;

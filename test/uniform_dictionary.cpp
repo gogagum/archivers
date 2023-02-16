@@ -5,7 +5,7 @@
 
 #include <ael/dictionary/uniform_dictionary.hpp>
 
-using ga::dict::UniformDictionary;
+using ael::dict::UniformDictionary;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

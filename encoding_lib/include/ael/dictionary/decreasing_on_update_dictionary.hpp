@@ -11,7 +11,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/irange.hpp>
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DecreasingOnUpdateDictionary class

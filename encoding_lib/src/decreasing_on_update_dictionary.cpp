@@ -4,7 +4,7 @@
 #include <ael/dictionary/integer_random_access_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

@@ -15,12 +15,10 @@ namespace bpo = boost::program_options;
 using ga::fl::BytesWordFlow;
 using ga::w::BytesWord;
 using ga::w::UIntWord;
-using ga::dict::DecreasingCountDictionary;
-using ga::dict::DecreasingOnUpdateDictionary;
 
-using CountsDict = DecreasingCountDictionary<std::uint64_t>;
-using DictWordsDict = DecreasingOnUpdateDictionary;
-using ContentDict = DecreasingOnUpdateDictionary;
+using CountsDict = ael::dict::DecreasingCountDictionary<std::uint64_t>;
+using DictWordsDict = ael::dict::DecreasingOnUpdateDictionary;
+using ContentDict = ael::dict::DecreasingOnUpdateDictionary;
 
 using UIntWordsFlow = std::vector<UIntWord<std::uint64_t>>;
 using DictWordsFlow = std::vector<BytesWord<1>>;

@@ -1,7 +1,7 @@
 #ifndef WORD_PROBABILITY_STATS_HPP
 #define WORD_PROBABILITY_STATS_HPP
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ProbabilityStats class

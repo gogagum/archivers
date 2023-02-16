@@ -5,7 +5,7 @@
 
 #include "word_probability_stats.hpp"
 
-namespace ga::dict {
+namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The DecreasingCountDictionary class
