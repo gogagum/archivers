@@ -4,6 +4,7 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/timer/progress_display.hpp>
 
 #include <iostream>
@@ -11,14 +12,16 @@
 #include <limits>
 #include <optional>
 
-#include "ranges_calc.hpp"
+#include <ael/impl/ranges_calc.hpp>
 
 namespace ael {
+
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-class ArithmeticDecoder : RangesCalc {
+class ArithmeticDecoder : impl::RangesCalc {
 public:
 
     ArithmeticDecoder() : _currRange{ 0, RC::total } {}

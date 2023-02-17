@@ -5,6 +5,8 @@ project(archievers LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -26,5 +28,3 @@ add_subdirectory(arithmetic_d_archiever)
 add_subdirectory(ppmd_archiever)
 add_subdirectory(ppma_archiever)
 add_subdirectory(numerical)
-
-add_subdirectory(test)

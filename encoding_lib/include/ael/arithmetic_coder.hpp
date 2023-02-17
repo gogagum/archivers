@@ -8,15 +8,15 @@
 #include <optional>
 #include <boost/timer/progress_display.hpp>
 
-#include "byte_data_constructor.hpp"
-#include "ranges_calc.hpp"
+#include <ael/byte_data_constructor.hpp>
+#include <ael/impl/ranges_calc.hpp>
 
 namespace ael {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-class ArithmeticCoder : RangesCalc {
+class ArithmeticCoder : impl::RangesCalc {
 public:
 
     struct EncodeRet {
@@ -25,7 +25,7 @@ public:
     };
 
 private:
-    using RC = RangesCalc;
+    using RC = impl::RangesCalc;
     using OrdRange = typename RC::Range;
 public:
 
