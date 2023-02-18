@@ -5,6 +5,7 @@ target_sources(archievers-applib
         src/exceptions.cpp
         src/file_opener.cpp
         src/opt_ostream.cpp
+        src/ord_and_tail_splitter.cpp
 )
 
 target_include_directories(archievers-applib

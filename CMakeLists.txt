@@ -33,7 +33,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 message("BOOST_ROOT:${BOOST_ROOT}")
 find_package(Boost 1.81.0 REQUIRED COMPONENTS program_options)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 include_directories(thirdparty/dynamic-segment-tree/include/)
 

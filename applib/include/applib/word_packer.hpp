@@ -12,7 +12,9 @@
 class WordPacker {
 public:
     template <std::ranges::input_range RangeT>
-    static void process(RangeT rng, ael::ByteDataConstructor& dataConstructor, std::uint16_t numBits) {
+    static void process(RangeT rng,
+                        ael::ByteDataConstructor& dataConstructor,
+                        std::uint16_t numBits) {
 
         #define BITS_DECODER_CASE(numBits) \
             case (numBits): _process<RangeT, (numBits)>(rng, dataConstructor); break;
@@ -50,22 +52,26 @@ public:
 
         #undef BITS_DECODER_CASE
     }
+    
 private:
+
+    ////////////////////////////////////////////////////////////////////////////
     template <std::ranges::input_range RangeT, std::uint16_t numBits>
-    static void _process(RangeT rng, ael::ByteDataConstructor& dataConstructor) {
+    static void _process(RangeT rng,
+                         ael::ByteDataConstructor& dataConstructor) {
         for (std::uint64_t ord: rng) {
             _packWordIntoData(Word<numBits>::byOrd(ord), dataConstructor);
         }
     }
 
-    //------------------------------------------------------------------------//
+    ////////////////////////////////////////////////////////////////////////////
     template <std::uint8_t _numBytes>
     static void _packWordIntoData(const ael::w::BytesWord<_numBytes> word,
                                   auto& cntr) {
         word.bytesOut(cntr.getByteBackInserter());
     }
 
-    //------------------------------------------------------------------------//
+    ////////////////////////////////////////////////////////////////////////////
     template <std::uint16_t _numBits>
     static void _packWordIntoData(const ael::w::BitsWord<_numBits> word,
                                   auto& cntr) {

@@ -13,6 +13,11 @@ class FileOpener{
 public:
 
     /**
+     * Default move-constructor.
+     */
+    FileOpener(FileOpener&&) = default;
+
+    /**
      * @brief FileOpener - opener constructor from two files names.
      * @param inFileName - input file name.
      * @param outFileName - output file name.
