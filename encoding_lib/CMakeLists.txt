@@ -4,8 +4,6 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-find_package(Boost COMPONENTS system program_options REQUIRED)
-
 add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
@@ -24,18 +22,18 @@ target_sources(${PROJECT_NAME}
         src/integer_random_access_iterator.hpp
 )
 
-include_directories(${Boost_INCLUDE_DIRS})
-
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         # where the library itself will look for its internal headers
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${Boost_INCLUDE_DIRS}
     PUBLIC
         # where top-level project will look for the library's public headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         # where external projects will look for the library's public headers
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        ${Boost_INCLUDE_DIRS}
 )
 
 

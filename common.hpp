@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <fstream>
-#include <iostream>
 #include <span>
 
 #include <ael/word/bytes_word.hpp>
