@@ -75,7 +75,8 @@ private:
 
     struct _SearchCtxHash {
         std::size_t operator()(_SearchCtx searchCtx) const {
-            return std::size_t{searchCtx.ctx} ^ std::size_t{searchCtx.length};
+            return static_cast<std::size_t>(searchCtx.ctx)
+                ^ std::size_t{searchCtx.length};
         }
     };
 
