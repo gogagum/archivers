@@ -2,6 +2,7 @@
 #define OPT_OSTREAM_REF_HPP
 
 #include <optional>
+#include <functional>
 #include <ostream>
 
 namespace optout {

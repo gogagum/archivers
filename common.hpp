@@ -1,6 +1,7 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include <cstdint>
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
@@ -38,8 +39,8 @@ template <std::uint16_t numBits>
 using Word = typename TypeChoise<numBits>::Word;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief The UnsupportedBitsMode class
-///
+// \brief The UnsupportedBitsMode class
+//
 class UnsupportedEncodeBitsMode : public std::invalid_argument {
 public:
     UnsupportedEncodeBitsMode(std::uint16_t bits);
