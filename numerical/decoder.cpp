@@ -1,13 +1,15 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
-#include "../common.hpp"
 #include <ael/data_parser.hpp>
 #include <ael/byte_data_constructor.hpp>
 #include <ael/word/bytes_word.hpp>
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 #include <ael/arithmetic_decoder.hpp>
+
+#include <applib/opt_ostream.hpp>
+#include <applib/file_opener.hpp>
 
 namespace bpo = boost::program_options;
 

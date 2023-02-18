@@ -11,7 +11,11 @@
 
 #include <ael/arithmetic_decoder.hpp>
 #include <ael/dictionary/ppma_dictionary.hpp>
-#include "../common.hpp"
+
+#include <applib/opt_ostream.hpp>
+#include <applib/ord_and_tail_splitter.hpp>
+#include <applib/file_opener.hpp>
+#include <applib/word_packer.hpp>
 
 namespace bpo = boost::program_options;
 

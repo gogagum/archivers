@@ -28,6 +28,12 @@ add_executable(archiever_tests
     decreasing_on_update_dictionary.cpp
 )
 
+if (CMAKE_CROSSCOMPILING)
+    message("Cross compiling. Use static libraries for tests.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+elseif()
+    message("Not cross compiling. Use dynamic libraries.")
+endif()
 target_link_libraries(archiever_tests LINK_PUBLIC gtest_main arithmetic-encoding-lib)
 
 include(GoogleTest)

@@ -9,9 +9,14 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
-#include "../common.hpp"
 #include <ael/dictionary/adaptive_dictionary.hpp>
 #include <ael/arithmetic_decoder.hpp>
+#include <ael/data_parser.hpp>
+#include <ael/byte_data_constructor.hpp>
+
+#include <applib/opt_ostream.hpp>
+#include <applib/file_opener.hpp>
+#include <applib/word_packer.hpp>
 
 namespace bpo = boost::program_options;
 
