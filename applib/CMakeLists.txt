@@ -22,3 +22,5 @@ target_include_directories(archievers-applib
         ${Boost_INCLUDE_DIRS}
 )
 
+target_link_libraries(archievers-applib boost_program_options)
+
