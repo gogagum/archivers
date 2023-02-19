@@ -54,6 +54,7 @@ private:
 
 private:
     friend class PPMDDictionary;
+    friend class PPMDPlusDictionary;
 };
 
 }
