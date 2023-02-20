@@ -8,9 +8,7 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-        src/adaptive_a_contextual_dictionary.cpp
         src/adaptive_a_dictionary.cpp
-        src/adaptive_d_contextual_dictionary.cpp
         src/adaptive_d_dictionary.cpp
         src/adaptive_dictionary.cpp
         src/byte_data_constructor.cpp

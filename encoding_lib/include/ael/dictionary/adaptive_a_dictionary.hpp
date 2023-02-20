@@ -3,6 +3,7 @@
 
 #include "word_probability_stats.hpp"
 #include "impl/a_d_dictionary_base.hpp"
+#include "impl/contextual_dictionary_base.hpp"
 
 #include <cstdint>
 
@@ -53,7 +54,7 @@ private:
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
 private:
-    friend class AdaptiveAContextualDictionary;
+    friend class impl::ContextualDictionaryBase<AdaptiveADictionary>;
 };
 
 }
