@@ -1,5 +1,5 @@
-#ifndef PPMA_DICTIONARY_HPP
-#define PPMA_DICTIONARY_HPP
+#ifndef ADAPTIVE_A_CONTEXTUAL_DICTIONARY_HPP
+#define ADAPTIVE_A_CONTEXTUAL_DICTIONARY_HPP
 
 #include <cstdint>
 #include <unordered_map>
@@ -9,7 +9,7 @@ namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
 // \brief The PPMA Dictionary class
-class PPMADictionary : protected AdaptiveADictionary {
+class AdaptiveAContextualDictionary : protected AdaptiveADictionary {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
@@ -28,14 +28,14 @@ private:
 public:
 
     /**
-     * @brief PPMD dictionary constructor
+     * @brief A contectual dictionary constructor
      * @param wordNumBits - word bits length.
      * @param contextLength - number of context cells.
      * @param contextCellBitsLength - context cell bits length.
      */
-    PPMADictionary(std::uint16_t wordNumBits,
-                   std::uint16_t contextLength,
-                   std::uint16_t contextCellBitsLength);
+    AdaptiveAContextualDictionary(std::uint16_t wordNumBits,
+                                  std::uint16_t contextLength,
+                                  std::uint16_t contextCellBitsLength);
 
     /**
      * @brief getWord
@@ -87,4 +87,4 @@ private:
 
 }
 
-#endif  // PPMA_DICTIONARY_HPP
+#endif  // ADAPTIVE_A_CONTEXTUAL_DICTIONARY_HPP

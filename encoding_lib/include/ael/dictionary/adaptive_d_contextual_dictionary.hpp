@@ -32,7 +32,7 @@ private:
 public:
 
     /**
-     * @brief PPMD dictionary constructor
+     * @brief D contextual dictionary constructor
      * @param wordNumBits - word bits length.
      * @param contextLength - number of context cells.
      * @param contextCellBitsLength - context cell bits length.
