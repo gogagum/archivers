@@ -15,7 +15,7 @@ target_sources(${PROJECT_NAME}
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
         src/ppma_dictionary.cpp
-        src/ppmd_dictionary.cpp
+        src/adaptive_d_contextual_dictionary.cpp
         src/ppmd_plus_dictionary.cpp
         src/ranges_calc.cpp
         src/static_dictionary.cpp
