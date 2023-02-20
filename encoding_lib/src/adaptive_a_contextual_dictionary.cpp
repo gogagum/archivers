@@ -1,4 +1,4 @@
-#include <ael/dictionary/ppmd_dictionary.hpp>
+#include <ael/dictionary/adaptive_a_contextual_dictionary.hpp>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -8,10 +8,11 @@ namespace bmp = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-PPMDDictionary::PPMDDictionary(std::uint16_t wordNumBits,
-                               std::uint16_t contextLength,
-                               std::uint16_t contextCellBitsLength)
-    : AdaptiveDDictionary(1ull << wordNumBits),
+AdaptiveAContextualDictionary::AdaptiveAContextualDictionary(
+        std::uint16_t wordNumBits,
+        std::uint16_t contextLength,
+        std::uint16_t contextCellBitsLength)
+    : AdaptiveADictionary(1ull << wordNumBits),
       _ctx(0),
       _currCtxLength(0),
       _numBits(wordNumBits),
@@ -23,18 +24,18 @@ PPMDDictionary::PPMDDictionary(std::uint16_t wordNumBits,
 }
 
 //----------------------------------------------------------------------------//
-auto PPMDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
+auto AdaptiveAContextualDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
         if (_contextProbs.contains({ctxLength, ctx})) {
             return _contextProbs.at({ctxLength, ctx}).getWordOrd(cumulativeNumFound);
         }
     }
-    return AdaptiveDDictionary::getWordOrd(cumulativeNumFound);
+    return AdaptiveADictionary::getWordOrd(cumulativeNumFound);
 }
 
 //----------------------------------------------------------------------------//
-auto PPMDDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
+auto AdaptiveAContextualDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
     std::optional<ProbabilityStats> ret;
 
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
@@ -55,18 +56,18 @@ auto PPMDDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
 }
 
 //----------------------------------------------------------------------------//
-auto PPMDDictionary::getTotalWordsCnt() const -> Count {
+auto AdaptiveAContextualDictionary::getTotalWordsCnt() const -> Count {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
         if (_contextProbs.contains({ctxLength, ctx})) {
             return _contextProbs.at({ctxLength, ctx}).getTotalWordsCnt();
         }
     }
-    return AdaptiveDDictionary::getTotalWordsCnt();
+    return AdaptiveADictionary::getTotalWordsCnt();
 }
 
 //----------------------------------------------------------------------------//
-void PPMDDictionary::_updateCtx(Ord ord) {
+void AdaptiveAContextualDictionary::_updateCtx(Ord ord) {
     if (_currCtxLength < _ctxLength) {
         ++_currCtxLength;
     }

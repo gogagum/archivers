@@ -53,7 +53,8 @@ private:
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
 private:
-    friend class PPMDDictionary;
+    friend class AdaptiveDContextualDictionary;
+    friend class PPMDPlusDictionary;
 };
 
 }

@@ -8,14 +8,15 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/adaptive_a_contextual_dictionary.cpp
         src/adaptive_a_dictionary.cpp
+        src/adaptive_d_contextual_dictionary.cpp
         src/adaptive_d_dictionary.cpp
         src/adaptive_dictionary.cpp
         src/byte_data_constructor.cpp
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
-        src/ppma_dictionary.cpp
-        src/ppmd_dictionary.cpp
+        src/ppmd_plus_dictionary.cpp
         src/ranges_calc.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
@@ -49,10 +50,11 @@ set(public_headers
     include/ael/dictionary/uniform_dictionary.hpp
     include/ael/dictionary/static_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp
+    include/ael/dictionary/adaptive_a_contextual_dictionary.hpp
     include/ael/dictionary/adaptive_a_dictionary.hpp
+    include/ael/dictionary/adaptive_d_contextual_dictionary.hpp
     include/ael/dictionary/adaptive_d_dictionary.hpp
-    include/ael/dictionary/ppmd_dictionary.hpp
-    include/ael/dictionary/ppmd_dictionary.hpp
+    include/ael/dictionary/ppmd_plus_dictionary.hpp
     include/ael/dictionary/decreasing_counts_dictionary.hpp
     include/ael/dictionary/decreasing_on_update_dictionary.hpp
     include/ael/dictionary/word_probability_stats.hpp
