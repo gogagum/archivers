@@ -66,12 +66,12 @@ auto ADDictionaryBase<CountT>::_getRealWordCnt(Ord ord) const -> Count {
 //----------------------------------------------------------------------------//
 template <typename CountT>
 void ADDictionaryBase<CountT>::_updateWordCnt(Ord ord, Count cnt) {
-    _cumulativeFoundWordsCnt.update(ord, _maxOrd, 1);
+    _cumulativeFoundWordsCnt.update(ord, _maxOrd, cnt);
     if (!_foundWordsCount.contains(ord)) {
         _cumulativeFoundUniqueWords.update(ord, _maxOrd, 1);
     }
-    ++_totalFoundWordsCnt;
-    ++_foundWordsCount[ord];
+    _totalFoundWordsCnt += cnt;
+    _foundWordsCount[ord] += cnt;
 }
 
 }

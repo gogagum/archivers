@@ -1,0 +1,7 @@
+project(arithmetic_a_contextual_archiever)
+
+add_executable(a_contextual_encoder encoder.cpp)
+target_link_libraries(a_contextual_encoder archievers-applib arithmetic-encoding-lib)
+
+add_executable(a_contextual_decoder decoder.cpp)
+target_link_libraries(a_contextual_decoder archievers-applib arithmetic-encoding-lib)

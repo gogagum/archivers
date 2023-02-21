@@ -77,7 +77,7 @@ public:
 private:
     using BitsIterator = DataParser::BitsIterator;
 public:
-    Iterator(BitsIterator bitsIteratar) : _bitsIter(bitsIteratar) {}
+    Iterator(BitsIterator bitsIterator) : _bitsIter(bitsIterator) {}
 protected:
     ////////////////////////////////////////////////////////////////////////////
     _Word dereference() const           { return _Word(_bitsIter); }

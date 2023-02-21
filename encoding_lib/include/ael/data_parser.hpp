@@ -62,6 +62,11 @@ public:
 public:
 
     /**
+     * @brief DataParser move constructor. 
+     */
+    DataParser(DataParser&&) = default;
+
+    /**
      * @brief ArithmeticDecoderDecoded
      * @param data
      */

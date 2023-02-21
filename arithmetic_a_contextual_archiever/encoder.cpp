@@ -5,8 +5,11 @@
 #include <boost/program_options.hpp>
 
 #include <ael/arithmetic_coder.hpp>
-#include <ael/dictionary/ppma_dictionary.hpp>
-#include "../common.hpp"
+#include <ael/dictionary/adaptive_a_contextual_dictionary.hpp>
+
+#include <applib/opt_ostream.hpp>
+#include <applib/ord_and_tail_splitter.hpp>
+#include <applib/file_opener.hpp>
 
 namespace bpo = boost::program_options;
 
@@ -54,7 +57,7 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ael::dict::PPMADictionary(numBits, ctxCellsCnt, ctxCellLength);
+        auto dict = ael::dict::AdaptiveAContextualDictionary(numBits, ctxCellsCnt, ctxCellLength);
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 

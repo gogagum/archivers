@@ -1,7 +1,8 @@
-#ifndef OPT_OSTREAM_REF_HPP
-#define OPT_OSTREAM_REF_HPP
+#ifndef APPLIB_OPT_OSTREAM_REF_HPP
+#define APPLIB_OPT_OSTREAM_REF_HPP
 
 #include <optional>
+#include <functional>
 #include <ostream>
 
 namespace optout {
@@ -30,4 +31,7 @@ OptOstreamRef operator<<(OptOstreamRef os, std::ostream& (*func)(std::ostream&) 
 
 using optout::operator<<;
 
-#endif // OPT_OSTREAM_REF_HPP
+//----------------------------------------------------------------------------//
+optout::OptOstreamRef get_out_stream(const std::string& arg);
+
+#endif // APPLIB_OPT_OSTREAM_REF_HPP

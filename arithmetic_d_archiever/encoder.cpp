@@ -6,7 +6,10 @@
 
 #include <ael/dictionary/adaptive_d_dictionary.hpp>
 #include <ael/arithmetic_coder.hpp>
-#include "../common.hpp"
+
+#include <applib/opt_ostream.hpp>
+#include <applib/ord_and_tail_splitter.hpp>
+#include <applib/file_opener.hpp>
 
 namespace bpo = boost::program_options;
 

@@ -7,7 +7,9 @@
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
-#include "../common.hpp"
+#include <applib/opt_ostream.hpp>
+#include <applib/ord_and_tail_splitter.hpp>
+#include <applib/file_opener.hpp>
 
 namespace bpo = boost::program_options;
 

@@ -1,5 +1,9 @@
 project(arithmetic-encoding-lib)
 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
 add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
@@ -10,8 +14,7 @@ target_sources(${PROJECT_NAME}
         src/byte_data_constructor.cpp
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
-        src/ppmd_dictionary.cpp
-        src/ppma_dictionary.cpp
+        src/ranges_calc.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp
@@ -22,11 +25,13 @@ target_include_directories(${PROJECT_NAME}
         # where the library itself will look for its internal headers
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${Boost_INCLUDE_DIRS}
     PUBLIC
         # where top-level project will look for the library's public headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         # where external projects will look for the library's public headers
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        ${Boost_INCLUDE_DIRS}
 )
 
 
@@ -37,15 +42,17 @@ set(public_headers
     include/ael/bits_iterator.hpp
     include/ael/byte_data_constructor.hpp
     include/ael/data_parser.hpp
-    include/ael/ranges_calc.hpp
+    include/ael/impl/ranges_calc.hpp
     include/ael/dictionary/impl/a_d_dictionary_base.hpp
     include/ael/dictionary/uniform_dictionary.hpp
     include/ael/dictionary/static_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp
+    include/ael/dictionary/adaptive_a_contextual_dictionary.hpp
+    include/ael/dictionary/adaptive_a_contextual_dictionary_improved.hpp
     include/ael/dictionary/adaptive_a_dictionary.hpp
+    include/ael/dictionary/adaptive_d_contextual_dictionary.hpp
+    include/ael/dictionary/adaptive_d_contextual_dictionary_improved.hpp
     include/ael/dictionary/adaptive_d_dictionary.hpp
-    include/ael/dictionary/ppmd_dictionary.hpp
-    include/ael/dictionary/ppmd_dictionary.hpp
     include/ael/dictionary/decreasing_counts_dictionary.hpp
     include/ael/dictionary/decreasing_on_update_dictionary.hpp
     include/ael/dictionary/word_probability_stats.hpp
@@ -62,3 +69,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 target_link_libraries(arithmetic-encoding-lib dynamic-segment-tree)
+
+if (BUILD_TEST)
+    add_subdirectory(test)
+endif (BUILD_TEST)

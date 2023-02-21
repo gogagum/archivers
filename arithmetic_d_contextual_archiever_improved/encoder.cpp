@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 
 #include <ael/arithmetic_coder.hpp>
-#include <ael/dictionary/adaptive_dictionary.hpp>
+#include <ael/dictionary/adaptive_d_contextual_dictionary_improved.hpp>
 
 #include <applib/opt_ostream.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
@@ -19,7 +19,8 @@ int main(int argc, char* argv[]) {
     std::string inFileName;
     std::string outFileName;
     std::uint16_t numBits;
-    std::uint64_t ratio;
+    std::uint16_t ctxCellsCnt;
+    std::uint16_t ctxCellLength;
     std::string logStreamParam;
 
     try {
@@ -36,9 +37,13 @@ int main(int argc, char* argv[]) {
                 bpo::value(&numBits)->default_value(16),
                 "Word bits count."
             ) (
-                "ratio,r",
-                bpo::value(&ratio)->default_value(2),
-                "Dictionary ratio."
+                "cells-cnt,c",
+                bpo::value(&ctxCellsCnt)->default_value(4),
+                "Contect cells count."
+            ) (
+                "cell-length,q",
+                bpo::value(&ctxCellLength)->default_value(8),
+                "Context length."
             ) (
                 "log-stream,l",
                 bpo::value(&logStreamParam)->default_value("stdout"),
@@ -52,14 +57,18 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ael::dict::AdaptiveDictionary(1ull << numBits, ratio);
+        auto dict = ael::dict::AdaptiveDContextualDictionaryImproved(
+            numBits, ctxCellsCnt, ctxCellLength);
 
-        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(
+            fileOpener.getInData(), numBits);
 
         auto coder = ael::ArithmeticCoder();
         auto encoded = ael::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
+        encoded.putT<std::uint8_t>(ctxCellsCnt);
+        encoded.putT<std::uint8_t>(ctxCellLength);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);
@@ -67,9 +76,9 @@ int main(int argc, char* argv[]) {
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
         fileOpener.getOutFileStream().write(encoded.data<char>(), encoded.size());
-    } catch (const std::runtime_error& error) {
+    } catch (const std::exception& error) {
         std::cerr << error.what() << std::endl;
-        return 2;
+        return 1;
     }
 
     return 0;

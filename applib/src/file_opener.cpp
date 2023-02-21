@@ -1,30 +1,6 @@
-#include "common.hpp"
-#include "opt_ostream_ref.hpp"
-#include <iostream>
+#include <applib/file_opener.hpp>
+
 #include <boost/format.hpp>
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-UnsupportedEncodeBitsMode::UnsupportedEncodeBitsMode(std::uint16_t numBits) :
-    std::invalid_argument((
-        boost::format("Encoding with %1% bit length is not supported.") % numBits
-    ).str()) {}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-UnsupportedDecodeBitsMode::UnsupportedDecodeBitsMode(std::uint16_t numBits) :
-    std::invalid_argument((
-        boost::format("Decodeing with %1% bits mode is not supported.") % numBits
-    ).str()) {}
-
-////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
-InvalidStreamParam::InvalidStreamParam(const std::string& streamParam) :
-    std::invalid_argument((
-        boost::format("\"%1%\" is an invalid -log-stream/-l argument."
-                      " Choose between \"stdout\", \"stderr\" "
-                      "and \"off\".") % streamParam
-    ).str()) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
@@ -67,20 +43,4 @@ FileOpener::_openInFile(const std::string& fileInName, optout::OptOstreamRef opt
     auto ret = std::vector<std::byte>(finSize);
     fin.read(reinterpret_cast<char*>(ret.data()), finSize);
     return ret;
-}
-
-//----------------------------------------------------------------------------//
-optout::OptOstreamRef get_out_stream(const std::string& arg) {
-    optout::OptOstreamRef outStream;
-
-    if (arg == "stdout") {
-        outStream = std::cout;
-    } else if (arg == "stderr") {
-        outStream = std::cerr;
-    } else if (arg == "off") {
-    } else {
-        throw InvalidStreamParam(arg);
-    }
-
-    return outStream;
 }
