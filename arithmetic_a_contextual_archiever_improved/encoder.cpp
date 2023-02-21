@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 
 #include <ael/arithmetic_coder.hpp>
-#include <ael/dictionary/ppmd_plus_dictionary.hpp>
+#include <ael/dictionary/adaptive_a_contextual_dictionary_improved.hpp>
 
 #include <applib/opt_ostream.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
@@ -57,9 +57,11 @@ int main(int argc, char* argv[]) {
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
         optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
-        auto dict = ael::dict::PPMDPlusDictionary(numBits, ctxCellsCnt, ctxCellLength);
+        auto dict = ael::dict::AdaptiveAContextualDictionaryImproved(
+            numBits, ctxCellsCnt, ctxCellLength);
 
-        auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
+        auto [wordsOrds, tail] = OrdAndTailSplitter::process(
+            fileOpener.getInData(), numBits);
 
         auto coder = ael::ArithmeticCoder();
         auto encoded = ael::ByteDataConstructor();

@@ -1,6 +1,7 @@
 #ifndef ADAPTIVE_A_DICTIONARY_HPP
 #define ADAPTIVE_A_DICTIONARY_HPP
 
+#include "ael/dictionary/impl/contectual_dictionary_base_improved.hpp"
 #include "word_probability_stats.hpp"
 #include "impl/a_d_dictionary_base.hpp"
 #include "impl/contextual_dictionary_base.hpp"
@@ -55,6 +56,7 @@ private:
 
 private:
     friend class impl::ContextualDictionaryBase<AdaptiveADictionary>;
+    friend class impl::ContextualDictionaryBaseImproved<AdaptiveADictionary>;
 };
 
 }

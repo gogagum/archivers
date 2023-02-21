@@ -14,7 +14,6 @@ target_sources(${PROJECT_NAME}
         src/byte_data_constructor.cpp
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
-        src/ppmd_plus_dictionary.cpp
         src/ranges_calc.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
@@ -49,10 +48,11 @@ set(public_headers
     include/ael/dictionary/static_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp
     include/ael/dictionary/adaptive_a_contextual_dictionary.hpp
+    include/ael/dictionary/adaptive_a_contextual_dictionary_improved.hpp
     include/ael/dictionary/adaptive_a_dictionary.hpp
     include/ael/dictionary/adaptive_d_contextual_dictionary.hpp
+    include/ael/dictionary/adaptive_d_contextual_dictionary_improved.hpp
     include/ael/dictionary/adaptive_d_dictionary.hpp
-    include/ael/dictionary/ppmd_plus_dictionary.hpp
     include/ael/dictionary/decreasing_counts_dictionary.hpp
     include/ael/dictionary/decreasing_on_update_dictionary.hpp
     include/ael/dictionary/word_probability_stats.hpp
