@@ -1,0 +1,2 @@
+add_executable(numerical_encoder1 numerical_encoder.cpp)
+target_link_libraries(numerical_encoder1 archievers-applib arithmetic-encoding-lib)
