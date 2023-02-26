@@ -1,2 +1,17 @@
 add_executable(numerical_encoder1 numerical_encoder.cpp)
 target_link_libraries(numerical_encoder1 archievers-applib arithmetic-encoding-lib)
+
+add_executable(numerical_decoder1 numerical_decoder.cpp)
+target_link_libraries(numerical_decoder1 archievers-applib arithmetic-encoding-lib)
+
+add_executable(contextual_d_encoder1 contextual_d_encoder.cpp)
+target_link_libraries(contextual_d_encoder1 archievers-applib arithmetic-encoding-lib)
+
+add_executable(contextual_d_decoder1 contextual_d_decoder.cpp)
+target_link_libraries(contextual_d_decoder1 archievers-applib arithmetic-encoding-lib)
+
+add_executable(contextual_d_encoder_improved1 contextual_d_encoder_improved.cpp)
+target_link_libraries(contextual_d_encoder_improved1 archievers-applib arithmetic-encoding-lib)
+
+add_executable(contextual_d_decoder_improved1 contextual_d_decoder_improved.cpp)
+target_link_libraries(contextual_d_decoder_improved1 archievers-applib arithmetic-encoding-lib)

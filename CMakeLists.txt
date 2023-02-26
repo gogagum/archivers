@@ -52,3 +52,5 @@ add_subdirectory(arithmetic_d_archiever)
 add_subdirectory(arithmetic_d_contextual_archiever)
 add_subdirectory(arithmetic_d_contextual_archiever_improved)
 add_subdirectory(numerical)
+
+add_subdirectory(handing_in)

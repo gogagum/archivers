@@ -81,3 +81,5 @@ testing/out/
 testing/dataset/
 testing/exe/
 compile_commands.json
+testing/exe-handing-in
+testing/correctness-out

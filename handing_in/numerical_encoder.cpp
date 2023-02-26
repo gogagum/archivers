@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
         std::string outFileName = (argc == 3) ? argv[2] : inFileName + "-encoded";
 
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
-        auto fileOpener = FileOpener(inFileName, outFileName, std::nullopt);
+        optout::OptOstreamRef outStream = std::nullopt;
+        auto fileOpener = FileOpener(inFileName, outFileName, outStream);
         auto inFileBytes = fileOpener.getInData();
         auto wordFlow = BytesWordFlow<1>(inFileBytes);
 
@@ -84,14 +85,14 @@ int main(int argc, char* argv[]) {
             auto countsDict = CountsDict(wordFlow.size());
             auto countsCoder = ArithmeticCoder();
             auto [_0, countsBits] =
-                    countsCoder.encode(counts, dataConstructor, countsDict, std::nullopt);
+                    countsCoder.encode(counts, dataConstructor, countsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
         }
 
         {
             auto wordsDict = DictWordsDict(256, 1);
             auto dictWordsCoder = ArithmeticCoder();
-            auto [_1, dictWordsBits] = dictWordsCoder.encode(dictWordsOrds, dataConstructor, wordsDict, std::nullopt);
+            auto [_1, dictWordsBits] = dictWordsCoder.encode(dictWordsOrds, dataConstructor, wordsDict, outStream);
             dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
         }
 
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
                            [](const auto& word) {
                                return BytesWord<1>::ord(word);
                            });
-            auto [_2, contentWordsBits] = contentCoder.encode(wordsOrds, dataConstructor, contentDict, std::nullopt);
+            auto [_2, contentWordsBits] = contentCoder.encode(wordsOrds, dataConstructor, contentDict, outStream);
             dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
         }
 

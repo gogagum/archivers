@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
         std::string inFileName = argv[1];
         std::string outFileName = (argc == 3) ? argv[2] : inFileName + "-decoded";
 
-        auto filesOpener = FileOpener(inFileName, outFileName, std::nullopt);
+        optout::OptOstreamRef outStream = std::nullopt;
+        auto filesOpener = FileOpener(inFileName, outFileName, outStream);
         auto decoded = ael::DataParser(filesOpener.getInData());
 
         const auto dictWordsCount = decoded.takeT<std::uint64_t>();
@@ -54,7 +55,7 @@ int main(int argc, char* argv[]) {
         countsDecoder.decode(
                     decoded, countsDictionary,
                     std::back_inserter(counts),
-                    dictWordsCount, wordsCountsBitsNumber, std::nullopt);
+                    dictWordsCount, wordsCountsBitsNumber, outStream);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {
         wordsDecoder.decode(
                     decoded, dictWordsDictionary,
                     std::back_inserter(wordsOrds),
-                    dictWordsCount, dictWordsBitsNumber, std::nullopt);
+                    dictWordsCount, dictWordsBitsNumber, outStream);
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +83,7 @@ int main(int argc, char* argv[]) {
         contentDecoder.decode(
                     decoded, contentDictionary,
                     std::back_inserter(contentWordsOrds),
-                    contentWordsNumber, contentBitsNumber, std::nullopt);
+                    contentWordsNumber, contentBitsNumber, outStream);
 
         ////////////////////////////////////////////////////////////////////////
 
