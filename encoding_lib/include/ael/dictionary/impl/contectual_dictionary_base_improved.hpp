@@ -18,11 +18,6 @@ public:
     using ProbabilityStats = WordProbabilityStats<Count>;
 private:
 
-    using _DST =
-        dst::DynamicSegmentTree<
-            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
-            std::plus<void>, std::int64_t>;
-
     using _Dict = InternalDictT;
 
     struct _SearchCtx {

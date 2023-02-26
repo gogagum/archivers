@@ -18,11 +18,6 @@ public:
     using ProbabilityStats = WordProbabilityStats<Count>;
 private:
 
-    using _DST =
-        dst::DynamicSegmentTree<
-            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
-            std::plus<void>, std::int64_t>;
-
     using _Dict = InternalDictT;
 
     struct _SearchCtx {
@@ -55,16 +50,16 @@ public:
                              std::uint16_t contextCellBitsLength);
 
     /**
-     * @brief getWord
-     * @param cumulativeNumFound
-     * @return
+     * @brief getWordOrd - ord getter. 
+     * @param cumulativeNumFound - search count.
+     * @return - found word order.
      */
     [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
     /**
-     * @brief getWordProbabilityStats
-     * @param word
-     * @return
+     * @brief getWordProbabilityStats - probability stats getter with update.
+     * @param ord order index of a word.
+     * @return probability stats.
      */
     [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
@@ -110,8 +105,9 @@ auto ContextualDictionaryBase<InternalDictT>::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
-            return _contextProbs.at({ctxLength, ctx}).getWordOrd(cumulativeNumFound);
+        const auto searchCtx = _SearchCtx{ctxLength, ctx};
+        if (_contextProbs.contains(searchCtx)) {
+            return _contextProbs.at(searchCtx).getWordOrd(cumulativeNumFound);
         }
     }
     return InternalDictT::getWordOrd(cumulativeNumFound);
@@ -125,14 +121,15 @@ auto ContextualDictionaryBase<InternalDictT>::getProbabilityStats(
 
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
+        const auto searchCtx = _SearchCtx{ctxLength, ctx};
+        if (_contextProbs.contains(searchCtx)) {
             if (!ret.has_value()) {
-                ret = _contextProbs.at({ctxLength, ctx})._getProbabilityStats(ord);
+                ret = _contextProbs.at(searchCtx)._getProbabilityStats(ord);
             }
         } else {
-            _contextProbs.emplace(_SearchCtx{ctxLength, ctx}, this->_maxOrd);
+            _contextProbs.emplace(searchCtx, this->_maxOrd);
         }
-        _contextProbs.at({ctxLength, ctx})._updateWordCnt(ord, 1);
+        _contextProbs.at(searchCtx)._updateWordCnt(ord, 1);
     }
     ret = ret.value_or(this->_getProbabilityStats(ord));
     this->_updateWordCnt(ord, 1);
@@ -146,8 +143,9 @@ auto ContextualDictionaryBase<InternalDictT>::getTotalWordsCnt(
         ) const -> Count {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
-            return _contextProbs.at({ctxLength, ctx}).getTotalWordsCnt();
+        const auto searchCtx = _SearchCtx{ctxLength, ctx};
+        if (_contextProbs.contains(searchCtx)) {
+            return _contextProbs.at(searchCtx).getTotalWordsCnt();
         }
     }
     return InternalDictT::getTotalWordsCnt();

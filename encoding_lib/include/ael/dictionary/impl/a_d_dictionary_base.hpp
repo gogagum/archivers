@@ -1,7 +1,8 @@
 #ifndef A_D_DICTIONARY_BASE_HPP
 #define A_D_DICTIONARY_BASE_HPP
 
-#include <dst/dynamic_segment_tree.hpp>
+#include <cstdint>
+
 #include "cumulative_count.hpp"
 #include "cumulative_unique_count.hpp"
 
@@ -12,6 +13,7 @@ namespace ael::dict::impl {
 ///
 class ADDictionaryBase {
 protected:
+
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
 
@@ -32,13 +34,6 @@ protected:
     Count _getWordUniqueCnt(Ord ord) const;
 
     void _updateWordCnt(Ord ord, Count cnt);
-
-protected:
-
-    using DST =
-        dst::DynamicSegmentTree<
-            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
-            std::plus<void>, std::int64_t>;
 
 protected:
     impl::CumulativeCount _cumulativeCnt;
