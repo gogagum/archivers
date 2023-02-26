@@ -8,7 +8,7 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 AdaptiveDDictionary::AdaptiveDDictionary(Ord maxOrd)
-    : impl::ADDictionaryBase<std::uint64_t>(maxOrd) {}
+    : impl::ADDictionaryBase(maxOrd) {}
 
 //----------------------------------------------------------------------------//
 auto AdaptiveDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
@@ -33,46 +33,45 @@ auto AdaptiveDDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
 
 //----------------------------------------------------------------------------//
 auto AdaptiveDDictionary::getTotalWordsCnt() const -> Count {
-    if (this->_totalFoundWordsCnt == 0) {
+    const auto totalWordsCnt = this->_cumulativeCnt.getTotalWordsCnt(); 
+    if (totalWordsCnt == 0) {
         return this->_maxOrd;
     }
-    if (this->_getTotalUniqueWordsCnt() == this->_maxOrd) {
-        return this->_totalFoundWordsCnt;
+    const auto totalWordsUniqueCnt = this->_getTotalWordsUniqueCnt();  
+    if (totalWordsUniqueCnt == this->_maxOrd) {
+        return totalWordsCnt;
     }
-    return 2 * (this->_maxOrd - this->_getTotalUniqueWordsCnt())
-            * this->_totalFoundWordsCnt;
+    return 2 * (this->_maxOrd - totalWordsUniqueCnt) * totalWordsCnt;
 }
 
 //----------------------------------------------------------------------------//
 auto AdaptiveDDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
-    if (this->_totalFoundWordsCnt == 0) {
+    if (this->_cumulativeCnt.getTotalWordsCnt() == 0) {
         return ord;
     }
-    const auto totalUniqueWordsCnt = this->_getTotalUniqueWordsCnt();
-    const auto cumulativeWordsCnt = this->_cumulativeFoundWordsCnt.get(ord - 1);
+    const auto totalUniqueWordsCnt = this->_getTotalWordsUniqueCnt();
+    const auto cumulativeWordsCnt = this->_getRealLowerCumulativeWordCnt(ord);
     if (totalUniqueWordsCnt == this->_maxOrd) {
         return cumulativeWordsCnt;
     }
-    const auto cumulativeUniqueWordsCnt
-        = this->_getLowerCumulativeUniqueNumFound(ord); 
     return (this->_maxOrd - totalUniqueWordsCnt) * 2 * cumulativeWordsCnt
             + ord * totalUniqueWordsCnt
-            - this->_maxOrd * cumulativeUniqueWordsCnt;
+            - this->_maxOrd * this->_getLowerCumulativeUniqueNumFound(ord);
 }
 
 //----------------------------------------------------------------------------//
 auto AdaptiveDDictionary::_getWordCnt(Ord ord) const -> Count {
-    if (this->_totalFoundWordsCnt == 0) {
+    if (this->_cumulativeCnt.getTotalWordsCnt() == 0) {
         return 1;
     }
-    const auto totalUniqueWordsCount = this->_getTotalUniqueWordsCnt();
+    const auto totalUniqueWordsCount = this->_getTotalWordsUniqueCnt();
+    const auto realWordCnt = this->_getRealWordCnt(ord); 
     if (totalUniqueWordsCount == this->_maxOrd) {
-        return this->_foundWordsCount.at(ord);
+        return realWordCnt;
     }
-    const auto realWordCount = this->_getRealWordCnt(ord);
-    return (this->_maxOrd - totalUniqueWordsCount) * 2 * realWordCount
+    return (this->_maxOrd - totalUniqueWordsCount) * 2 * realWordCnt
         + totalUniqueWordsCount
-        - this->_maxOrd * ((realWordCount > 0) ? 1 : 0);
+        - this->_maxOrd * _getWordUniqueCnt(ord);
 }
 
 //----------------------------------------------------------------------------//

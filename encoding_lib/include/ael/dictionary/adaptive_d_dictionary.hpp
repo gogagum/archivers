@@ -13,7 +13,7 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDDictionary class
 ///
-class AdaptiveDDictionary : protected impl::ADDictionaryBase<std::uint64_t> {
+class AdaptiveDDictionary : protected impl::ADDictionaryBase {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;

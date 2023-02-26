@@ -104,21 +104,21 @@ if (contextCellBitsLength * contextLength > 56) {
     }
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 auto ContextualDictionaryBaseImproved<InternalDictT>::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
         if (_contextProbs.contains({ctxLength, ctx})
-                && _contextProbs.at({ctxLength, ctx})._totalFoundWordsCnt >= ctxLength) {
+                && _contextProbs.at({ctxLength, ctx})._getRealTotalWordsCnt() >= ctxLength) {
             return _contextProbs.at({ctxLength, ctx}).getWordOrd(cumulativeNumFound);
         }
     }
     return InternalDictT::getWordOrd(cumulativeNumFound);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 auto ContextualDictionaryBaseImproved<InternalDictT>::getProbabilityStats(
         Ord ord) -> ProbabilityStats {
@@ -128,7 +128,7 @@ auto ContextualDictionaryBaseImproved<InternalDictT>::getProbabilityStats(
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
         if (_contextProbs.contains({ctxLength, ctx})) {
             if (!ret.has_value()
-                    && _contextProbs.at({ctxLength, ctx})._totalFoundWordsCnt >= ctxLength) {
+                    && _contextProbs.at({ctxLength, ctx})._getRealTotalWordsCnt() >= ctxLength) {
                 ret = _contextProbs.at({ctxLength, ctx})._getProbabilityStats(ord);
             }
         } else {
@@ -142,21 +142,21 @@ auto ContextualDictionaryBaseImproved<InternalDictT>::getProbabilityStats(
     return ret.value();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 auto ContextualDictionaryBaseImproved<InternalDictT>::getTotalWordsCnt(
         ) const -> Count {
     for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
         const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
         if (_contextProbs.contains({ctxLength, ctx})
-                && _contextProbs.at({ctxLength, ctx})._totalFoundWordsCnt >= ctxLength) {
+                && _contextProbs.at({ctxLength, ctx})._getRealTotalWordsCnt() >= ctxLength) {
             return _contextProbs.at({ctxLength, ctx}).getTotalWordsCnt();
         }
     }
     return InternalDictT::getTotalWordsCnt();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 void ContextualDictionaryBaseImproved<InternalDictT>::_updateCtx(Ord ord) {
     if (_currCtxLength < _ctxLength) {
