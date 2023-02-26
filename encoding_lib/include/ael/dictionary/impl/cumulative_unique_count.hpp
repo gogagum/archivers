@@ -8,7 +8,8 @@
 namespace ael::dict::impl {
 
 ////////////////////////////////////////////////////////////////////////////////
-// 
+/// \brief The CumulativeUniqueCount class.
+///
 class CumulativeUniqueCount {
 public:
     using Ord = std::uint64_t;

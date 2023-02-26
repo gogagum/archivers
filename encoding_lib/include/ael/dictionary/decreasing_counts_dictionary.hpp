@@ -15,7 +15,7 @@ class DecreasingCountDictionary {
 public:
     using Ord = CountT;
     using Count = CountT;
-    using ProbabilityStats = WordProbabilityStats<CountT>;
+    using ProbabilityStats = WordProbabilityStats;
 public:
 
     /**

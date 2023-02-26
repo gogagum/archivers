@@ -17,7 +17,7 @@ class AdaptiveDDictionary : protected impl::ADDictionaryBase {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
-    using ProbabilityStats = WordProbabilityStats<Count>;
+    using ProbabilityStats = WordProbabilityStats;
 public:
 
     /**
@@ -46,7 +46,7 @@ public:
      */
     [[nodiscard]] Count getTotalWordsCnt() const;
 
-private:
+protected:
 
     Count _getLowerCumulativeCnt(Ord ord) const;
 
@@ -55,6 +55,7 @@ private:
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
 private:
+    friend class impl::ContextualDictionaryStatsBase<AdaptiveDDictionary>;
     friend class impl::ContextualDictionaryBase<AdaptiveDDictionary>;
     friend class impl::ContextualDictionaryBaseImproved<AdaptiveDDictionary>;
 };
