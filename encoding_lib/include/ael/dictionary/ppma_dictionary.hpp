@@ -9,10 +9,12 @@
 #include <boost/container/static_vector.hpp>
 #include <boost/container_hash/hash.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <ranges>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace ael::dict {
@@ -24,12 +26,22 @@ public:
     using Ord = std::uint64_t;
     using Count = bpm::uint256_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
-    constexpr const static std::uint16_t countNumBits = 156;
+    constexpr const static std::uint16_t countNumBits = 240;
 public:
 
     PPMADictionary(Ord maxOrd, std::size_t ctxLength)
         : _ctxLength(ctxLength),
-          AdaptiveADictionary(maxOrd) {}
+          AdaptiveADictionary(maxOrd) {
+        /**
+         * \tau_{ctx}_{i} ~ M * 2^40
+         * Producxt of tau-s must be less than (M * 2^40) ^ "tau-s count"
+         * Estimation: (log_2(M) + 40) * l_{ctx} < maxCntBits.
+         */
+        const double maxOrdLog = std::log2(maxOrd);
+        if ((maxOrdLog + 40) * ctxLength > countNumBits) {
+            throw std::logic_error("Too big context.");
+        }
+    }
 
     Ord getWordOrd(Count cumulativeNumFound) const;
 

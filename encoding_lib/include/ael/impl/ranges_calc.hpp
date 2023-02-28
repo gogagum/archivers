@@ -4,11 +4,8 @@
 #include "ael/impl/multiply_and_divide.hpp"
 #include <cstdint>
 #include <iostream>
-#include <boost/multiprecision/cpp_int.hpp>
 
 namespace ael::impl {
-
-namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The RangesCalc class
