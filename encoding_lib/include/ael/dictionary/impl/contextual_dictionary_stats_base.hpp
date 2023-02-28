@@ -56,7 +56,7 @@ protected:
 
     void _updateContextualDictionary(const _SearchCtx& searchCtx, Ord ord);
 
-    WordProbabilityStats
+    WordProbabilityStats<Count>
     _getContextualProbStats(const _SearchCtx& searchCtx, Ord ord);
 
 protected:
@@ -143,9 +143,10 @@ ContextualDictionaryStatsBase<InternalDictT>::_updateContextualDictionary(
 
 ////////////////////////////////////////////////////////////////////////////////
 template <class InternalDictT>
-WordProbabilityStats
+auto
 ContextualDictionaryStatsBase<InternalDictT>::_getContextualProbStats(
-        const _SearchCtx& searchCtx, Ord ord) {
+        const _SearchCtx& searchCtx,
+        Ord ord) -> WordProbabilityStats<Count>{
     return this->_contextProbs.at(searchCtx).getProbabilityStats(ord);
 }
 

@@ -22,6 +22,7 @@ target_sources(${PROJECT_NAME}
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp
+        src/multiply_and_divide.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

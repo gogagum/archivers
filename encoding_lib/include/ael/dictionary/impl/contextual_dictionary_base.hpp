@@ -18,8 +18,8 @@ class ContextualDictionaryBase
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
-    using ProbabilityStats = WordProbabilityStats;
-
+    using ProbabilityStats = WordProbabilityStats<Count>;
+    constexpr const static std::uint16_t countNumBits = 62; 
 public:
 
     using ContextualDictionaryStatsBase<InternalDictT>::ContextualDictionaryStatsBase;

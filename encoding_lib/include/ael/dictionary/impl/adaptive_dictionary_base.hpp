@@ -16,6 +16,7 @@ protected:
 
     using Ord = std::uint64_t;
     using Count = CountT;
+    constexpr const static std::uint16_t countNumBits = 62; 
 
 protected:
 

@@ -16,7 +16,7 @@ namespace ael {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticCoder class
 ///
-class ArithmeticCoder : impl::RangesCalc {
+class ArithmeticCoder {
 public:
 
     struct EncodeRet {
@@ -24,9 +24,6 @@ public:
         std::size_t bitsEncoded;
     };
 
-private:
-    using RC = impl::RangesCalc;
-    using OrdRange = typename RC::Range;
 public:
 
     /**
@@ -49,7 +46,8 @@ auto ArithmeticCoder::encode(
         DictT& dict,
         auto os) -> EncodeRet {
     auto ret = EncodeRet();
-    auto currRange = OrdRange { 0, RC::total };
+    using RC = impl::RangesCalc<typename DictT::Count, DictT::countNumBits>;
+    auto currRange = typename RC::Range{ 0, RC::total };
 
     std::size_t btf = 0;
 
@@ -77,8 +75,6 @@ auto ArithmeticCoder::encode(
             } else {
                 break;
             }
-            auto lastRange = currRange;
-
             currRange = RC::recalcRange(currRange);
         }
         ++ret.wordsCount;

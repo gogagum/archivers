@@ -8,10 +8,11 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ProbabilityStats class
 ///
+template <class CountT>
 struct WordProbabilityStats {
-    std::uint64_t low;
-    std::uint64_t high;
-    std::uint64_t total;
+    CountT low;
+    CountT high;
+    CountT total;
 };
 
 }

@@ -8,6 +8,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/container/static_vector.hpp>
 #include <boost/container_hash/hash.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
@@ -16,11 +17,14 @@
 
 namespace ael::dict {
 
+namespace bpm = boost::multiprecision;
+
 class PPMADictionary : AdaptiveADictionary {
 public:
     using Ord = std::uint64_t;
-    using Count = std::uint64_t;
-    using ProbabilityStats = WordProbabilityStats;
+    using Count = bpm::uint256_t;
+    using ProbabilityStats = WordProbabilityStats<Count>;
+    constexpr const static std::uint16_t countNumBits = 156;
 public:
 
     PPMADictionary(Ord maxOrd, std::size_t ctxLength)
@@ -118,7 +122,7 @@ private:
         return {l, r, total};
     }
 
-    void _updateWordCnt(Ord ord, Count cnt) {
+    void _updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt) {
         for (auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
              !ctx.empty();
              ctx.pop_back()) {

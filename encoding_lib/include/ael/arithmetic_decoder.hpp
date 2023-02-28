@@ -1,10 +1,10 @@
 #pragma once
 
+#include "ael/impl/multiply_and_divide.hpp"
 #ifndef ARITHMETIC_DECODER_HPP
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/timer/progress_display.hpp>
 
 #include <iostream>
@@ -16,42 +16,31 @@
 
 namespace ael {
 
-namespace bm = boost::multiprecision;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ArithmeticDecoder class
 ///
-class ArithmeticDecoder : impl::RangesCalc {
+class ArithmeticDecoder {
 public:
 
-    ArithmeticDecoder() : _currRange{ 0, RC::total } {}
+    ArithmeticDecoder() {}
 
-    template <std::output_iterator<std::uint64_t> OutIter>
+    template <std::output_iterator<std::uint64_t> OutIter, class Dict>
     void decode(
             auto& source,
-            auto& dict,
+            Dict& dict,
             OutIter outIter,
             std::size_t wordsCount,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
             std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
             );
-
-private:
-
-    using RC = RangesCalc;
-    using OrdRange = typename RC::Range;
-
-private:
-
-    OrdRange _currRange;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
-template <std::output_iterator<std::uint64_t> OutIter>
+template <std::output_iterator<std::uint64_t> OutIter, class Dict>
 void ArithmeticDecoder::decode(
         auto& source,
-        auto& dict,
+        Dict& dict,
         OutIter outIter,
         std::size_t wordsCount,
         std::size_t bitsLimit,
@@ -64,9 +53,11 @@ void ArithmeticDecoder::decode(
         return source.takeBit();
     };
 
+    using RC = impl::RangesCalc<typename Dict::Count, Dict::countNumBits>;
+    typename RC::Range currRange;
     typename RC::Count value = 0;
 
-    for (auto _ : boost::irange<std::size_t>(0, RC::numBits)) {
+    for (auto _ : boost::irange<std::size_t>(0, Dict::countNumBits)) {
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
     }
 
@@ -76,34 +67,35 @@ void ArithmeticDecoder::decode(
     }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
-        const auto range128 = bm::uint128_t(_currRange.high - _currRange.low);
-        const auto dictTotalWords128 = bm::uint128_t(dict.getTotalWordsCnt());
-        const auto offset128 = bm::uint128_t(value - _currRange.low + 1);
+        const auto range =
+            typename Dict::Count{currRange.high - currRange.low};
+        const auto dictTotalWords = dict.getTotalWordsCnt();
+        const auto offset = value - currRange.low + 1;
 
-        const auto aux128 = (offset128 * dictTotalWords128 - 1) / range128;
-        const auto aux = aux128.convert_to<std::uint64_t>();
+        const auto aux =
+            impl::multiply_decrease_and_divide(offset, dictTotalWords, range);
         const auto ord = dict.getWordOrd(aux);
         *outIter = ord;
         ++outIter;
 
         auto [low, high, total] = dict.getProbabilityStats(ord);
-        _currRange = RC::rangeFromStatsAndPrev(_currRange, low, high, total);
+        currRange = RC::rangeFromStatsAndPrev(currRange, low, high, total);
 
         while (true) {
-            if (_currRange.high <= RC::half) {
+            if (currRange.high <= RC::half) {
                 bool bit = takeBitLimited();
                 value = value * 2 + (bit ? 1 : 0);
-            } else if (_currRange.low >= RC::half) {
+            } else if (currRange.low >= RC::half) {
                 bool bit = takeBitLimited();
                 value = value * 2 - RC::total + (bit ? 1 : 0);
-            } else if (_currRange.low >= RC::quater
-                       && _currRange.high <= RC::threeQuaters) {
+            } else if (currRange.low >= RC::quater
+                       && currRange.high <= RC::threeQuaters) {
                 bool bit = takeBitLimited();
                 value = value * 2 - RC::half + (bit ? 1 : 0);
             } else {
                 break;
             }
-            _currRange = RC::recalcRange(_currRange);
+            currRange = RC::recalcRange(currRange);
         }
         if (barOpt.has_value()) {
             ++barOpt.value();

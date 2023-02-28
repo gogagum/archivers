@@ -15,7 +15,7 @@ class StaticDictionary {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
-    using ProbabilityStats = WordProbabilityStats;
+    using ProbabilityStats = WordProbabilityStats<Count>;
 
 public:
 
