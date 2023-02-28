@@ -29,6 +29,14 @@ public:
     void update(Ord ord);
 
     /**
+     * @brief getLowerCumulativeCount - get lower cumulative count from zero
+     * to given ord not including it.
+     * @param ord - order index of a checked word.
+     * @return cumulative count.
+     */
+    Count getLowerCumulativeCount(Ord ord) const;
+
+    /**
      * @brief getCumulativeCount - get cumulative count from zero
      * to given ord including it.
      * @param ord - order index of a checked word.

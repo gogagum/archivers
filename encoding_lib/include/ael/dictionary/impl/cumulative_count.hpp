@@ -29,6 +29,13 @@ public:
     void increaseOrdCount(Ord ord, std::int64_t cntChange);
 
     /**
+     * @brief getLowerCumulativeCount - lower cumulative count getter.
+     * @param ord - order of a word.
+     * @return lower cumulative count. 
+     */
+    Count getLowerCumulativeCount(Ord ord) const;
+
+    /**
      * @brief getCumulativeCount - get cumulative count from zero
      * to given ord including it.
      * @param ord - order index of a checked word.

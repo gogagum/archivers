@@ -15,7 +15,7 @@ auto ADDictionaryBase::_getRealTotalWordsCnt() const -> Count {
 
 ////////////////////////////////////////////////////////////////////////////////
 auto ADDictionaryBase::_getRealLowerCumulativeWordCnt(Ord ord) const -> Count {
-    return _cumulativeCnt.getCumulativeCount(ord - 1);
+    return _cumulativeCnt.getLowerCumulativeCount(ord);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ auto ADDictionaryBase::_getTotalWordsUniqueCnt() const -> Count {
 ////////////////////////////////////////////////////////////////////////////////
 auto ADDictionaryBase::_getLowerCumulativeUniqueNumFound(
         Ord ord) const -> Count {
-    return _cumulativeUniqueCnt.getCumulativeCount(ord - 1);
+    return _cumulativeUniqueCnt.getLowerCumulativeCount(ord);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

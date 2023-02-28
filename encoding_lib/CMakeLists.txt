@@ -12,6 +12,7 @@ target_sources(${PROJECT_NAME}
         src/adaptive_a_dictionary.cpp
         src/adaptive_d_dictionary.cpp
         src/adaptive_dictionary.cpp
+        src/ppma_dictionary.cpp
         src/byte_data_constructor.cpp
         src/cumulative_count.cpp
         src/cumulative_unique_count.cpp
@@ -48,6 +49,7 @@ set(public_headers
     include/ael/dictionary/impl/a_d_dictionary_base.hpp
     include/ael/dictionary/uniform_dictionary.hpp
     include/ael/dictionary/static_dictionary.hpp
+    include/ael/dictionary/ppma_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp
     include/ael/dictionary/adaptive_a_contextual_dictionary.hpp
     include/ael/dictionary/adaptive_a_contextual_dictionary_improved.hpp

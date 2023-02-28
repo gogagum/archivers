@@ -16,6 +16,14 @@ void CumulativeCount::increaseOrdCount(Ord ord, std::int64_t cntChange) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+auto CumulativeCount::getLowerCumulativeCount(Ord ord) const -> Count {
+    if (ord == 0) {
+        return 0;
+    }
+    return getCumulativeCount(ord - 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 auto CumulativeCount::getCumulativeCount(Ord ord) const -> Count {
     return _cumulativeCnt.get(ord);
 }

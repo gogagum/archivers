@@ -16,6 +16,14 @@ void CumulativeUniqueCount::update(Ord ord) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+auto CumulativeUniqueCount::getLowerCumulativeCount(Ord ord) const -> Count {
+    if (ord == 0) {
+        return 0;
+    }
+    return _cumulativeUniqueCnt.get(ord - 1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 auto CumulativeUniqueCount::getCumulativeCount(Ord ord) const -> Count {
     return _cumulativeUniqueCnt.get(ord);
 }
