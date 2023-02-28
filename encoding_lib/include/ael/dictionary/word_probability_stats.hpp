@@ -1,6 +1,8 @@
 #ifndef WORD_PROBABILITY_STATS_HPP
 #define WORD_PROBABILITY_STATS_HPP
 
+#include <cstdint>
+
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////

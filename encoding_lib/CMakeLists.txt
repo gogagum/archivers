@@ -8,16 +8,21 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/a_d_dictionary_base.cpp
         src/adaptive_a_dictionary.cpp
         src/adaptive_d_dictionary.cpp
         src/adaptive_dictionary.cpp
+        src/ppma_dictionary.cpp
         src/byte_data_constructor.cpp
+        src/cumulative_count.cpp
+        src/cumulative_unique_count.cpp
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp        
         src/ranges_calc.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp
+        src/multiply_and_divide.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -42,10 +47,10 @@ set(public_headers
     include/ael/bits_iterator.hpp
     include/ael/byte_data_constructor.hpp
     include/ael/data_parser.hpp
-    include/ael/impl/ranges_calc.hpp
     include/ael/dictionary/impl/a_d_dictionary_base.hpp
     include/ael/dictionary/uniform_dictionary.hpp
     include/ael/dictionary/static_dictionary.hpp
+    include/ael/dictionary/ppma_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp
     include/ael/dictionary/adaptive_a_contextual_dictionary.hpp
     include/ael/dictionary/adaptive_a_contextual_dictionary_improved.hpp

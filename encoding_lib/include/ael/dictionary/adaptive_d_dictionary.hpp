@@ -13,11 +13,12 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The AdaptiveDDictionary class
 ///
-class AdaptiveDDictionary : protected impl::ADDictionaryBase<std::uint64_t> {
+class AdaptiveDDictionary : protected impl::ADDictionaryBase {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
+    constexpr const static std::uint16_t countNumBits = 62; 
 public:
 
     /**
@@ -46,7 +47,7 @@ public:
      */
     [[nodiscard]] Count getTotalWordsCnt() const;
 
-private:
+protected:
 
     Count _getLowerCumulativeCnt(Ord ord) const;
 
@@ -55,6 +56,7 @@ private:
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
 private:
+    friend class impl::ContextualDictionaryStatsBase<AdaptiveDDictionary>;
     friend class impl::ContextualDictionaryBase<AdaptiveDDictionary>;
     friend class impl::ContextualDictionaryBaseImproved<AdaptiveDDictionary>;
 };

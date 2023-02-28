@@ -16,6 +16,7 @@ protected:
 
     using Ord = std::uint64_t;
     using Count = CountT;
+    constexpr const static std::uint16_t countNumBits = 62; 
 
 protected:
 
@@ -24,14 +25,14 @@ protected:
           _totalWordsCnt(initialTotalWordsCount) {}
 
 protected:
-    using DST =
+    using _DST =
         dst::DynamicSegmentTree<
             Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
             std::plus<void>, std::int64_t>;
 
 
 protected:
-    DST _cumulativeWordCounts;
+    _DST _cumulativeWordCounts;
     std::unordered_map<Ord, Count> _wordCnts;
     Count _totalWordsCnt;
 };

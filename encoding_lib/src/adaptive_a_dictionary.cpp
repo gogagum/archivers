@@ -8,7 +8,7 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//
 AdaptiveADictionary::AdaptiveADictionary(Ord maxOrd)
-    : impl::ADDictionaryBase<std::uint64_t>(maxOrd) {}
+    : impl::ADDictionaryBase(maxOrd) {}
 
 //----------------------------------------------------------------------------//
 auto AdaptiveADictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
@@ -33,22 +33,22 @@ auto AdaptiveADictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
 
 //----------------------------------------------------------------------------//
 auto AdaptiveADictionary::getTotalWordsCnt() const -> Count {
-    const auto uniqueWordsCnt = this->_getTotalUniqueWordsCnt();
+    const auto uniqueWordsCnt = this->_getTotalWordsUniqueCnt();
+    const auto wordsCnt = this->_getRealTotalWordsCnt();
     if (this->_maxOrd == uniqueWordsCnt) {
-        return this->_totalFoundWordsCnt;
+        return wordsCnt;
     }
-    return (this->_maxOrd - uniqueWordsCnt)
-            * (this->_totalFoundWordsCnt + 1);
+    return (this->_maxOrd - uniqueWordsCnt) * (wordsCnt + 1);
 }
 
 //----------------------------------------------------------------------------//
 auto AdaptiveADictionary::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
-    const auto cumulativeNumFound = this->_cumulativeFoundWordsCnt.get(ord - 1);
-    if (this->_maxOrd == this->_foundWordsCount.size()) {
+    const auto cumulativeNumFound = this->_getRealLowerCumulativeWordCnt(ord);
+    if (this->_maxOrd == this->_getTotalWordsUniqueCnt()) {
         return cumulativeNumFound;
     }
-    const auto numUniqueWordsTotal = this->_getTotalUniqueWordsCnt();
+    const auto numUniqueWordsTotal = this->_getTotalWordsUniqueCnt();
     const auto cumulativeUniqueWordsNumFound =
         this->_getLowerCumulativeUniqueNumFound(ord);
     return (this->_maxOrd - numUniqueWordsTotal) * cumulativeNumFound
@@ -57,14 +57,13 @@ auto AdaptiveADictionary::_getLowerCumulativeCnt(
 
 //----------------------------------------------------------------------------//
 auto AdaptiveADictionary::_getWordCnt(Ord ord) const -> Count {
-    const auto totalUniqueWordsCnt = this->_getTotalUniqueWordsCnt();
+    const auto totalUniqueWordsCnt = this->_getTotalWordsUniqueCnt();
     if (this->_maxOrd == totalUniqueWordsCnt) {
-        return this->_foundWordsCount.at(ord);
+        return this->_cumulativeCnt.getCount(ord);
     }
-    return this->_foundWordsCount.contains(ord)
-            ? this->_foundWordsCount.at(ord)
-              * (this->_maxOrd - totalUniqueWordsCnt)
-            : 1;
+    return this->_cumulativeUniqueCnt.getCount(ord) == 1
+           ? this->_cumulativeCnt.getCount(ord) * (this->_maxOrd - totalUniqueWordsCnt)
+           : 1;
 }
 
 //----------------------------------------------------------------------------//
@@ -73,6 +72,8 @@ auto AdaptiveADictionary::_getProbabilityStats(
     const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + _getWordCnt(ord);
     const auto total = getTotalWordsCnt();
+    assert(high > low);
+    assert(total >= high);
     return { low, high, total };
 }
 

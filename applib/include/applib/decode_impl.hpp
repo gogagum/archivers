@@ -77,12 +77,12 @@ struct DecodeImpl {
                  std::ostream& bytesOutStream,
                  optout::OptOstreamRef optLogOutStream) {
     auto dataConstructor = ael::ByteDataConstructor();
-    auto decoder = ael::ArithmeticDecoder();
 
     std::vector<std::uint64_t> ords;
 
-    decoder.decode(decoded, dict, std::back_inserter(ords),
-                   wordsCount, bitsCount, optLogOutStream);
+    ael::ArithmeticDecoder::decode(
+        decoded, dict, std::back_inserter(ords),
+        wordsCount, bitsCount, optLogOutStream);
 
     WordPacker::process(ords, dataConstructor, symBitLen);
 

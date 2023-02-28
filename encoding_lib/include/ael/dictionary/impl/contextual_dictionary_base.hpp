@@ -2,69 +2,39 @@
 #define CONTEXTUAL_DICTIONARY_BASE_HPP
 
 #include <cstdint>
-#include <boost/multiprecision/cpp_int.hpp>
+#include <optional>
 #include <ael/dictionary/word_probability_stats.hpp>
-#include <dst/dynamic_segment_tree.hpp>
+
+#include "contextual_dictionary_stats_base.hpp"
 
 namespace ael::dict::impl {
 
-namespace bmp = boost::multiprecision;
-
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The ContextualDictionaryBase<InternalDictT> class
+///
 template<class InternalDictT>
-class ContextualDictionaryBase : protected InternalDictT {
+class ContextualDictionaryBase
+    : protected ContextualDictionaryStatsBase<InternalDictT> {
 public:
     using Ord = std::uint64_t;
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
-private:
-
-    using _DST =
-        dst::DynamicSegmentTree<
-            Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
-            std::plus<void>, std::int64_t>;
-
-    using _Dict = InternalDictT;
-
-    struct _SearchCtx {
-        std::uint16_t length;
-        Ord ctx;
-        friend bool operator==(_SearchCtx, _SearchCtx) = default;
-    };
-
-    struct _SearchCtxHash {
-        std::size_t operator()(_SearchCtx searchCtx) const {
-            return static_cast<std::size_t>(searchCtx.ctx)
-                ^ std::size_t{searchCtx.length};
-        }
-    };
-
-private:
-
-    constexpr static std::uint8_t maxContextLength = 8;
-
+    constexpr const static std::uint16_t countNumBits = 62; 
 public:
 
-    /**
-     * @brief base contextual dictionary constructor.
-     * @param wordNumBits - word bits length.
-     * @param contextLength - number of c protected:ontext cells.
-     * @param contextCellBitsLength - context cell bits length.
-     */
-    ContextualDictionaryBase(std::uint16_t wordNumBits,
-                             std::uint16_t contextLength,
-                             std::uint16_t contextCellBitsLength);
+    using ContextualDictionaryStatsBase<InternalDictT>::ContextualDictionaryStatsBase;
 
     /**
-     * @brief getWord
-     * @param cumulativeNumFound
-     * @return
+     * @brief getWordOrd - ord getter. 
+     * @param cumulativeNumFound - search count.
+     * @return - found word order.
      */
     [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
     /**
-     * @brief getWordProbabilityStats
-     * @param word
-     * @return
+     * @brief getWordProbabilityStats - probability stats getter with update.
+     * @param ord order index of a word.
+     * @return probability stats.
      */
     [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
@@ -73,97 +43,50 @@ public:
      * @return totalWordsCount according to dictionary model.
      */
     [[nodiscard]] Count getTotalWordsCnt() const;
-
-private:
-
-    void _updateCtx(Ord ord);
-
-private:
-    std::unordered_map<_SearchCtx, _Dict, _SearchCtxHash> _contextProbs;
-    Ord _ctx;
-    std::uint16_t _currCtxLength;
-    const std::uint16_t _numBits;
-    const std::uint16_t _ctxCellBitsLength;
-    const std::uint16_t _ctxLength;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
-ContextualDictionaryBase<InternalDictT>::ContextualDictionaryBase(
-    std::uint16_t wordNumBits,
-    std::uint16_t contextLength,
-    std::uint16_t contextCellBitsLength
-    ) : InternalDictT(1ull << wordNumBits),
-        _ctx(0),
-        _currCtxLength(0),
-        _numBits(wordNumBits),
-        _ctxCellBitsLength(contextCellBitsLength),
-        _ctxLength(contextLength) {
-if (contextCellBitsLength * contextLength > 56) {
-        throw std::invalid_argument("Too big context length.");
-    }
-}
-
-//----------------------------------------------------------------------------//
-template<class InternalDictT>
 auto ContextualDictionaryBase<InternalDictT>::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
-    for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
-        const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
-            return _contextProbs.at({ctxLength, ctx}).getWordOrd(cumulativeNumFound);
+    for (auto ctxLength = this->_currCtxLength; ctxLength != 0; --ctxLength) {
+        const auto searchCtx = this->_getSearchCtx(ctxLength);
+        if (this->_contextProbs.contains(searchCtx)) {
+            return this->_getContextualWordOrd(searchCtx, cumulativeNumFound);
         }
     }
     return InternalDictT::getWordOrd(cumulativeNumFound);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 auto ContextualDictionaryBase<InternalDictT>::getProbabilityStats(
         Ord ord) -> ProbabilityStats {
     std::optional<ProbabilityStats> ret;
-
-    for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
-        const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
-            if (!ret.has_value()) {
-                ret = _contextProbs.at({ctxLength, ctx})._getProbabilityStats(ord);
-            }
-        } else {
-            _contextProbs.emplace(_SearchCtx{ctxLength, ctx}, this->_maxOrd);
+    for (auto ctxLength = this->_currCtxLength; ctxLength != 0; --ctxLength) {
+        const auto searchCtx = this->_getSearchCtx(ctxLength);
+        if (this->_contextProbs.contains(searchCtx)) {
+            ret = ret.value_or(this->_getContextualProbStats(searchCtx, ord));
         }
-        _contextProbs.at({ctxLength, ctx})._updateWordCnt(ord, 1);
+        this->_updateContextualDictionary(searchCtx, ord);
     }
-    ret = ret.value_or(this->_getProbabilityStats(ord));
+    ret = ret.value_or(InternalDictT::_getProbabilityStats(ord));
     this->_updateWordCnt(ord, 1);
-    _updateCtx(ord);
+    this->_updateCtx(ord);
     return ret.value();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template<class InternalDictT>
 auto ContextualDictionaryBase<InternalDictT>::getTotalWordsCnt(
         ) const -> Count {
-    for (std::uint16_t ctxLength = _currCtxLength; ctxLength != 0; --ctxLength) {
-        const auto ctx = _ctx % (1ull << (_ctxCellBitsLength * ctxLength));
-        if (_contextProbs.contains({ctxLength, ctx})) {
-            return _contextProbs.at({ctxLength, ctx}).getTotalWordsCnt();
+    for (auto ctxLength = this->_currCtxLength; ctxLength != 0; --ctxLength) {
+        const auto searchCtx = this->_getSearchCtx(ctxLength);
+        if (this->_contextProbs.contains(searchCtx)) {
+            return this->_getContextualTotalWordCnt(searchCtx);
         }
     }
     return InternalDictT::getTotalWordsCnt();
-}
-
-//----------------------------------------------------------------------------//
-template<class InternalDictT>
-void ContextualDictionaryBase<InternalDictT>::_updateCtx(Ord ord) {
-    if (_currCtxLength < _ctxLength) {
-        ++_currCtxLength;
-    }
-    bmp::uint128_t newCtx128 = (_ctx != 0) ? _ctx - 1 : 0;
-    newCtx128 *= (1ull << _numBits);
-    newCtx128 += ord;
-    newCtx128 %= (1ull << (_ctxCellBitsLength * _ctxLength));
-    _ctx = newCtx128.convert_to<Ord>();
 }
 
 }
