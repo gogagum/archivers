@@ -53,8 +53,7 @@ int main(int argc, char* argv[]) {
 
         auto countsDictionary = CountsDictionary(contentWordsNumber);
         auto counts = std::vector<std::uint64_t>();
-        auto countsDecoder = ArithmeticDecoder();
-        countsDecoder.decode(
+        ArithmeticDecoder::decode(
                     decoded, countsDictionary,
                     std::back_inserter(counts),
                     dictWordsCount, wordsCountsBitsNumber, outStream);
@@ -63,8 +62,7 @@ int main(int argc, char* argv[]) {
 
         auto dictWordsDictionary = DictWordsDictionary(256, 1);
         auto wordsOrds = std::vector<std::uint64_t>();
-        auto wordsDecoder = ArithmeticDecoder();
-        wordsDecoder.decode(
+        ArithmeticDecoder::decode(
                     decoded, dictWordsDictionary,
                     std::back_inserter(wordsOrds),
                     dictWordsCount, dictWordsBitsNumber, outStream);
@@ -81,8 +79,7 @@ int main(int argc, char* argv[]) {
         auto contentDictionary = ContentDictionary(256, contentDictInitialCounts);
 
         auto contentWordsOrds = std::vector<std::uint64_t>();
-        auto contentDecoder = ArithmeticDecoder();
-        contentDecoder.decode(
+        ArithmeticDecoder::decode(
                     decoded, contentDictionary,
                     std::back_inserter(contentWordsOrds),
                     contentWordsNumber, contentBitsNumber, outStream);

@@ -21,18 +21,15 @@ namespace ael {
 ///
 class ArithmeticDecoder {
 public:
-
-    ArithmeticDecoder() {}
-
     template <std::output_iterator<std::uint64_t> OutIter, class Dict>
-    void decode(
+    static void decode(
             auto& source,
             Dict& dict,
             OutIter outIter,
             std::size_t wordsCount,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
             std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
-            );
+        );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
