@@ -28,22 +28,22 @@ public:
     AdaptiveADictionary(Ord maxOrd);
 
     /**
-     * @brief getWord - get word by cumulative num found.
-     * @param cumulativeNumFound - search key.
+     * @brief getWordOrd - get word order index by cumulative count.
+     * @param cumulativeNumFound search key.
      * @return word with exact cumulative number found.
      */
-    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
+    [[nodiscard]] Ord getWordOrd(Count cumulativeCnt) const;
 
     /**
-     * @brief getWordProbabilityStats
-     * @param word
-     * @return
+     * @brief getWordProbabilityStats - get probability stats and update.
+     * @param word - order of a word.
+     * @return [low, high, total]
      */
     [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
     /**
-     * @brief totalWordsCount
-     * @return
+     * @brief totalWordsCount - get total words count estimation.
+     * @return total words count estimation
      */
     [[nodiscard]] Count getTotalWordsCnt() const;
 

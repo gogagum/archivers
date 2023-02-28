@@ -21,138 +21,66 @@ namespace ael::dict {
 
 namespace bpm = boost::multiprecision;
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief PPMADictionary - ppma probability model.
+///
 class PPMADictionary : AdaptiveADictionary {
 public:
     using Ord = std::uint64_t;
     using Count = bpm::uint256_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
     constexpr const static std::uint16_t countNumBits = 240;
+private:
+    constexpr const static std::uint16_t _maxSeqLenLog2 = 40;
 public:
 
-    PPMADictionary(Ord maxOrd, std::size_t ctxLength)
-        : _ctxLength(ctxLength),
-          AdaptiveADictionary(maxOrd) {
-        /**
-         * \tau_{ctx}_{i} ~ M * 2^40
-         * Producxt of tau-s must be less than (M * 2^40) ^ "tau-s count"
-         * Estimation: (log_2(M) + 40) * l_{ctx} < maxCntBits.
-         */
-        const double maxOrdLog = std::log2(maxOrd);
-        if ((maxOrdLog + 40) * ctxLength > countNumBits) {
-            throw std::logic_error("Too big context.");
-        }
-    }
+    /**
+     * PPMA dictionary constructor.
+     * @param maxOrd - maximal order. 
+     */
+    PPMADictionary(Ord maxOrd, std::size_t ctxLength);
 
-    Ord getWordOrd(Count cumulativeNumFound) const;
+    /**
+     * @brief getWordOrd - get word order index by cumulative count.
+     * @param cumulativeNumFound search key.
+     * @return word with exact cumulative number found.
+     */
+    [[nodiscard]] Ord getWordOrd(Count cumulativeNumFound) const;
 
-    ProbabilityStats getProbabilityStats(Ord ord) {
-        assert(ord < this->_maxOrd);
-        const auto ret = _getProbabilityStats(ord);
-        _updateWordCnt(ord, 1);
-        return ret;
-    }
+    /**
+     * @brief getWordProbabilityStats - get probability stats and update.
+     * @param ord - order of a word.
+     * @return [low, high, total]
+     */
+    [[nodiscard]] ProbabilityStats getProbabilityStats(Ord ord);
 
-    Count getTotalWordsCnt() const {
-        auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
-        for (;
-             !ctx.empty() && !_ctxInfo.contains(ctx);
-             ctx.pop_back()) {
-            // Skip contexts which were not found yet.
-        }
-        Count total = 0;
-        for (;
-             !ctx.empty();
-             ctx.pop_back()) {
-            const auto totalCnt = _ctxInfo.at(ctx).getTotalWordsCnt();  
-            total = (total + 1) * totalCnt;
-        }
-        const auto totalCnt = AdaptiveADictionary::getTotalWordsCnt(); 
-        total = (total + 1) * totalCnt;
-        return total;
-    }
+    /**
+     * @brief getTotalWordsCount - get total words count estimation.
+     * @return total words count estimation
+     */
+    [[nodiscard]] Count getTotalWordsCnt() const;
 
 private:
     using _SearchCtx = boost::container::static_vector<Ord, 16>;
     using _SearchCtxHash = boost::hash<_SearchCtx>;
+    using _CtxCountMapping = std::unordered_map<
+        _SearchCtx,
+        impl::CumulativeCount,
+        _SearchCtxHash
+    >;
 private:
 
-    Count _getLowerCumulativeCnt(Ord ord) const {
-        if (ord >= this->_maxOrd) {
-            return this->getTotalWordsCnt();
-        }
-        auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
-        for (;
-             !ctx.empty() && !_ctxInfo.contains(ctx);
-             ctx.pop_back()) {
-            // Skip contexts which were not found yet.
-        }
-        Count l = 0;
-        for (;
-             !ctx.empty();
-             ctx.pop_back()) {
-            l *= _ctxInfo.at(ctx).getTotalWordsCnt();
-            l += _ctxInfo.at(ctx).getLowerCumulativeCount(ord);
-        }
-        l *= AdaptiveADictionary::getTotalWordsCnt();
-        l += AdaptiveADictionary::_getLowerCumulativeCnt(ord);
-        return l;
-    }
+    Count _getLowerCumulativeCnt(Ord ord) const;
 
-    ProbabilityStats _getProbabilityStats(Ord ord) const {
-        auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
-        for (;
-             !ctx.empty() && !_ctxInfo.contains(ctx);
-             ctx.pop_back()) {
-            // Skip contexts which were not found yet.
-        }
-        Count l = 0;
-        Count r = 0;
-        Count total = 0;
-        for (;
-             !ctx.empty();
-             ctx.pop_back()) {
-            const auto totalCnt = _ctxInfo.at(ctx).getTotalWordsCnt();  
-            l *= totalCnt;
-            r *= totalCnt;
-            total = (total + 1) * totalCnt;
-            const auto ctxL = _ctxInfo.at(ctx).getLowerCumulativeCount(ord);
-            const auto ctxR = ctxL + _ctxInfo.at(ctx).getCount(ord);
-            l += ctxL;
-            r += ctxR;
-        }
-        const auto totalCnt = AdaptiveADictionary::getTotalWordsCnt(); 
-        l *= totalCnt;
-        r *= totalCnt;
-        total = (total + 1) * totalCnt;
-        const auto aDictL = AdaptiveADictionary::_getLowerCumulativeCnt(ord); 
-        const auto aDictR = aDictL + AdaptiveADictionary::_getWordCnt(ord); 
-        assert(aDictR > aDictL);
-        l += aDictL;
-        r += aDictR;
-        assert(r > l);
-        assert(total >= r);
-        return {l, r, total};
-    }
+    ProbabilityStats _getProbabilityStats(Ord ord) const;
 
-    void _updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt) {
-        for (auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
-             !ctx.empty();
-             ctx.pop_back()) {
-            if (!_ctxInfo.contains(ctx)) {
-                _ctxInfo.emplace(ctx, impl::CumulativeCount(_maxOrd));
-            }
-            _ctxInfo.at(ctx).increaseOrdCount(ord, cnt);
-        }
-        AdaptiveADictionary::_updateWordCnt(ord, cnt);
-        _ctx.push_back(ord);
-        if (_ctx.size() > _ctxLength) {
-            _ctx.pop_front();
-        }
-    }
+    void _updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt);
+
+    _SearchCtx _getSearchCtxEmptySkipped() const;
 
 private:
     std::deque<Ord> _ctx;
-    std::unordered_map<_SearchCtx, impl::CumulativeCount, _SearchCtxHash> _ctxInfo;
+    _CtxCountMapping _ctxInfo;
     const std::size_t _ctxLength;
 };
 

@@ -72,6 +72,8 @@ auto AdaptiveADictionary::_getProbabilityStats(
     const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + _getWordCnt(ord);
     const auto total = getTotalWordsCnt();
+    assert(high > low);
+    assert(total >= high);
     return { low, high, total };
 }
 
