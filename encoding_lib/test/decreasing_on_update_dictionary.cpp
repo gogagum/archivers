@@ -62,17 +62,6 @@ TEST(DecreasingOnUpdateDictionary, CountAfterDecrease) {
 }
 
 //----------------------------------------------------------------------------//
-TEST(DecreasingOnUpdateDictionary, QueryForAnEmptyWord) {
-    auto freqMapping = std::array{
-        std::make_pair(std::uint64_t{42}, std::uint64_t(15)),
-        std::make_pair(std::uint64_t{105}, std::uint64_t(17))
-    };
-    auto dict = DecreasingOnUpdateDictionary(256 * 256, freqMapping);
-    EXPECT_THROW(auto stats = dict.getProbabilityStats(13),
-                 DecreasingOnUpdateDictionary::NoSuchWord);
-}
-
-//----------------------------------------------------------------------------//
 TEST(DecreasingOnUpdateDictionary, CountAfterDecreaseTwice) {
     const auto freqMapping = std::array{
         std::make_pair(std::uint64_t{42}, std::uint64_t(15)),

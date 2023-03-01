@@ -1,8 +1,9 @@
 #ifndef PPMA_DICTIONARY_HPP
 #define PPMA_DICTIONARY_HPP
 
-#include "ael/dictionary/adaptive_a_dictionary.hpp"
+#include "ael/dictionary/decreasing_on_update_dictionary.hpp"
 #include "ael/dictionary/impl/cumulative_count.hpp"
+#include "ael/dictionary/impl/cumulative_unique_count.hpp"
 #include "word_probability_stats.hpp"
 
 #include <boost/range/iterator_range.hpp>
@@ -24,7 +25,7 @@ namespace bpm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief PPMADictionary - ppma probability model.
 ///
-class PPMADictionary : AdaptiveADictionary {
+class PPMADictionary {
 public:
     using Ord = std::uint64_t;
     using Count = bpm::uint256_t;
@@ -74,11 +75,14 @@ private:
 
     ProbabilityStats _getProbabilityStats(Ord ord) const;
 
-    void _updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt);
+    void _updateWordCnt(Ord ord, DecreasingOnUpdateDictionary::Count cnt);
 
     _SearchCtx _getSearchCtxEmptySkipped() const;
 
 private:
+    std::size_t _maxOrd;
+    impl::CumulativeCount _zeroCtxCnt;
+    impl::CumulativeUniqueCount _zeroCtxUniqueCnt;
     std::deque<Ord> _ctx;
     _CtxCountMapping _ctxInfo;
     const std::size_t _ctxLength;

@@ -68,7 +68,7 @@ void ArithmeticDecoder::decode(
             typename Dict::Count{currRange.high - currRange.low};
         const auto dictTotalWords = dict.getTotalWordsCnt();
         const auto offset = value - currRange.low + 1;
-
+        assert(offset < range);
         const auto aux =
             impl::multiply_decrease_and_divide(offset, dictTotalWords, range);
         const auto ord = dict.getWordOrd(aux);
