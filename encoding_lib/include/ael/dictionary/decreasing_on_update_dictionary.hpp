@@ -23,22 +23,6 @@ public:
     using Count = std::uint64_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
     constexpr const static std::uint16_t countNumBits = 62; 
-
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief The NoSuchWord class
-    ///
-    class NoSuchWord : public std::runtime_error {
-    public:
-        NoSuchWord(Ord ord) :
-            std::runtime_error(_formWord(ord)) {}
-    private:
-        std::string _formWord(Ord ord) {
-            auto retStream = std::ostringstream();
-            retStream << "No such word: " << ord;
-            return retStream.str();
-        }
-    };
-
 public:    
 
     /**
@@ -76,13 +60,15 @@ public:
     [[nodiscard]] Count
     getTotalWordsCnt() const { return this->_totalWordsCnt; }
 
-private:
+protected:
 
-    Count _getLowerCumulativeNumFound(Ord ord) const;
+    Count _getLowerCumulativeCnt(Ord ord) const;
 
-    void _updateWordCnt(Ord ord);
+    void _updateWordCnt(Ord ord, Count cnt);
 
-private:
+    ProbabilityStats _getProbabilityStats(Ord ord) const;
+
+protected:
     const Ord _maxOrd;
 };
 

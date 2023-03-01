@@ -1,5 +1,7 @@
 #include <ael/dictionary/ppma_dictionary.hpp>
 #include <stdexcept>
+//#include "ael/dictionary/decreasing_counts_dictionary.hpp"
+#include "ael/dictionary/decreasing_on_update_dictionary.hpp"
 #include "integer_random_access_iterator.hpp"
 
 namespace ael::dict {
@@ -7,7 +9,8 @@ namespace ael::dict {
 ////////////////////////////////////////////////////////////////////////////////
 PPMADictionary::PPMADictionary(Ord maxOrd, std::size_t ctxLength)
     : _ctxLength(ctxLength),
-      AdaptiveADictionary(maxOrd) {
+      _zeroCtxCnt(maxOrd),
+      DecreasingOnUpdateDictionary(maxOrd, 1) {
     /**
      * \tau_{ctx}_{i} < sequenceLength
      * Product of tau-s must be less than sequenceLength ^ "tau-s count"
@@ -53,7 +56,8 @@ auto PPMADictionary::getTotalWordsCnt() const -> Count {
         const auto totalCnt = _ctxInfo.at(ctx).getTotalWordsCnt();  
         total = (total + 1) * totalCnt;
     }
-    const auto totalCnt = AdaptiveADictionary::getTotalWordsCnt(); 
+    total = (total + 1) * _zeroCtxCnt.getTotalWordsCnt();
+    const auto totalCnt = DecreasingOnUpdateDictionary::getTotalWordsCnt(); 
     total = (total + 1) * totalCnt;
     return total;
 }
@@ -68,8 +72,10 @@ auto PPMADictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
         l *= _ctxInfo.at(ctx).getTotalWordsCnt();
         l += _ctxInfo.at(ctx).getLowerCumulativeCount(ord);
     }
-    l *= AdaptiveADictionary::getTotalWordsCnt();
-    l += AdaptiveADictionary::_getLowerCumulativeCnt(ord);
+    l *= _zeroCtxCnt.getTotalWordsCnt();
+    l += _zeroCtxCnt.getLowerCumulativeCount(ord);
+    l *= DecreasingOnUpdateDictionary::getTotalWordsCnt();
+    l += DecreasingOnUpdateDictionary::_getLowerCumulativeCnt(ord);
     return l;
 }
 
@@ -90,8 +96,15 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         l += ctxL;
         r += ctxR;
     }
+    l *= _zeroCtxCnt.getTotalWordsCnt();
+    r *= _zeroCtxCnt.getTotalWordsCnt();
+    total = (total + 1) * _zeroCtxCnt.getTotalWordsCnt();
+    const auto lCnt = _zeroCtxCnt.getLowerCumulativeCount(ord);
+    const auto rCnt = lCnt + _zeroCtxCnt.getCount(ord);
+    l += lCnt;
+    r += rCnt;
     const auto [aDictL, aDictR, aDictTotal] =
-        AdaptiveADictionary::_getProbabilityStats(ord);
+        DecreasingOnUpdateDictionary::_getProbabilityStats(ord);
     l *= aDictTotal;
     r *= aDictTotal;
     total = (total + 1) * aDictTotal;
@@ -103,7 +116,8 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void PPMADictionary::_updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt) {
+void PPMADictionary::_updateWordCnt(Ord ord,
+                                    DecreasingOnUpdateDictionary::Count cnt) {
     for (auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
          !ctx.empty();
          ctx.pop_back()) {
@@ -112,7 +126,8 @@ void PPMADictionary::_updateWordCnt(Ord ord, AdaptiveADictionary::Count cnt) {
         }
         _ctxInfo.at(ctx).increaseOrdCount(ord, cnt);
     }
-    AdaptiveADictionary::_updateWordCnt(ord, cnt);
+    _zeroCtxCnt.increaseOrdCount(ord, cnt);
+    DecreasingOnUpdateDictionary::_updateWordCnt(ord, cnt);
     _ctx.push_back(ord);
     if (_ctx.size() > _ctxLength) {
         _ctx.pop_front();

@@ -27,7 +27,7 @@ auto DecreasingOnUpdateDictionary::getWordOrd(
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
     const auto getLowerCumulNumFound_ = [this](Ord ord) {
-        return this->_getLowerCumulativeNumFound(ord + 1);
+        return this->_getLowerCumulativeCnt(ord + 1);
     };
     const auto it = std::ranges::upper_bound(idxs, cumulativeNumFound, {},
                                              getLowerCumulNumFound_);
@@ -37,19 +37,13 @@ auto DecreasingOnUpdateDictionary::getWordOrd(
 //----------------------------------------------------------------------------//
 auto DecreasingOnUpdateDictionary::getProbabilityStats(
         Ord ord) -> ProbabilityStats {
-    if (!this->_wordCnts.contains(ord)
-            || this->_wordCnts.at(ord) == Count(0)) {
-        throw NoSuchWord(ord);
-    }
-    const auto low = _getLowerCumulativeNumFound(ord);
-    const auto high = low + this->_wordCnts[ord];
-    const auto total = getTotalWordsCnt();
-    _updateWordCnt(ord);
-    return { low, high, total };
+    auto ret = _getProbabilityStats(ord);
+    _updateWordCnt(ord, 1);
+    return ret;
 }
 
 //----------------------------------------------------------------------------//
-auto DecreasingOnUpdateDictionary::_getLowerCumulativeNumFound(
+auto DecreasingOnUpdateDictionary::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
     if (ord == 0) {
         return Count{0};
@@ -58,10 +52,21 @@ auto DecreasingOnUpdateDictionary::_getLowerCumulativeNumFound(
 }
 
 //----------------------------------------------------------------------------//
-void DecreasingOnUpdateDictionary::_updateWordCnt(Ord ord) {
+void DecreasingOnUpdateDictionary::_updateWordCnt(Ord ord, Count cnt) {
     this->_totalWordsCnt -= 1;
-    this->_cumulativeWordCounts.update(ord, _maxOrd, - 1);;
+    this->_cumulativeWordCounts.update(
+        ord, _maxOrd, -static_cast<std::int64_t>(cnt));
     --this->_wordCnts[ord];
+}
+
+//----------------------------------------------------------------------------//
+auto DecreasingOnUpdateDictionary::_getProbabilityStats(
+        Ord ord) const -> ProbabilityStats {
+    assert(this->_wordCnts.contains(ord));
+    const auto low = _getLowerCumulativeCnt(ord);
+    const auto high = low + this->_wordCnts.at(ord);
+    const auto total = getTotalWordsCnt();
+    return {low, high, total};
 }
 
 }  // namespace ga::dict
