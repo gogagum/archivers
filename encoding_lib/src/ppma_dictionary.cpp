@@ -97,20 +97,14 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         lower *= ctxTotalCnt + 1;
         total *= ctxTotalCnt + 1;
         lower += ctxInfo.getLowerCumulativeCount(ord);
-        if (count == 0) {
-            count = ctxInfo.getCount(ord);
-        } else {
-            count *= ctxTotalCnt + 1;
-        }
+        count *= ctxTotalCnt + 1;
+        count += ctxInfo.getCount(ord);
     }
     lower *= _zeroCtxCnt.getTotalWordsCnt() + 1;
     total *= _zeroCtxCnt.getTotalWordsCnt() + 1;
     lower += _zeroCtxCnt.getLowerCumulativeCount(ord);
-    if (count == 0) {
-        count = _zeroCtxCnt.getCount(ord);
-    } else {
-        count *= _zeroCtxCnt.getTotalWordsCnt() + 1;
-    }
+    count *= _zeroCtxCnt.getTotalWordsCnt() + 1;
+    count += _zeroCtxCnt.getCount(ord);
     if (const auto zeroUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
             zeroUniqueCnt < this->_maxOrd) {
         total *= this->_maxOrd - zeroUniqueCnt;
