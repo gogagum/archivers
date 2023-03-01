@@ -96,8 +96,8 @@ TEST(PPMADictionary, Example) {
     EXPECT_EQ(total5, 251 * 6);
     const auto [low6, high6, total6] = dict.getProbabilityStats('C');
     EXPECT_EQ(high6 - low6, 1);
-    EXPECT_EQ(total6, 250 * 2 * 7);
+    EXPECT_EQ(total6, 251 * 2 * 7);
     const auto [low7, high7, total7] = dict.getProbabilityStats('A');
     EXPECT_EQ(high7 - low7, 1);
-    EXPECT_EQ(total7, 249 * 8);
+    EXPECT_EQ(total7, 250 * 8);
 }

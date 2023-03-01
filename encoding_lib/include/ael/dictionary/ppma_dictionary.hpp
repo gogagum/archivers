@@ -25,7 +25,7 @@ namespace bpm = boost::multiprecision;
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief PPMADictionary - ppma probability model.
 ///
-class PPMADictionary : DecreasingOnUpdateDictionary {
+class PPMADictionary {
 public:
     using Ord = std::uint64_t;
     using Count = bpm::uint256_t;
@@ -80,7 +80,9 @@ private:
     _SearchCtx _getSearchCtxEmptySkipped() const;
 
 private:
+    std::size_t _maxOrd;
     impl::CumulativeCount _zeroCtxCnt;
+    impl::CumulativeUniqueCount _zeroCtxUniqueCnt;
     std::deque<Ord> _ctx;
     _CtxCountMapping _ctxInfo;
     const std::size_t _ctxLength;

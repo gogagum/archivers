@@ -78,7 +78,7 @@ struct DecodeImpl {
                  optout::OptOstreamRef optLogOutStream) {
     auto dataConstructor = ael::ByteDataConstructor();
 
-    std::deque<std::uint64_t> ords;
+    std::vector<std::uint64_t> ords;
 
     ael::ArithmeticDecoder::decode(
         decoded, dict, std::back_inserter(ords),
