@@ -42,8 +42,6 @@ set(public_headers
     include/ael/bits_iterator.hpp
     include/ael/byte_data_constructor.hpp
     include/ael/data_parser.hpp
-    include/ael/impl/ranges_calc.hpp
-    include/ael/dictionary/impl/a_d_dictionary_base.hpp
     include/ael/dictionary/uniform_dictionary.hpp
     include/ael/dictionary/static_dictionary.hpp
     include/ael/dictionary/adaptive_dictionary.hpp

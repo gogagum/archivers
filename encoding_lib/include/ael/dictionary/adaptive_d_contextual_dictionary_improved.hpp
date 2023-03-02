@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <cstdint>
 
-#include "impl/contectual_dictionary_base_improved.hpp"
+#include "impl/contextual_dictionary_base_improved.hpp"
 #include "adaptive_d_dictionary.hpp"
 
 #include <stdexcept>
