@@ -146,7 +146,7 @@ auto PPMADictionary::_getSearchCtxEmptySkipped() const -> _SearchCtx {
     for (;
          !ctx.empty() && !_ctxInfo.contains(ctx);
          ctx.pop_back()) {
-    // Skip contexts which were not found yet.
+        // Skip contexts which were not found yet.
     }
     return ctx;
 }

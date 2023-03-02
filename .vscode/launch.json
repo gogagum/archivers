@@ -16,7 +16,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/build/ppma_archiever/ppma_encoder",
-            "args": ["-i", "${workspaceRoot}/testing/dataset/pic", "-b", "8", "-c", "2"],
+            "args": ["-i", "${workspaceRoot}/testing/dataset/pic", "-b", "8", "-c", "4"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
