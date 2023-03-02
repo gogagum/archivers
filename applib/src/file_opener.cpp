@@ -7,7 +7,8 @@
 FileOpener::FileOpener(const std::string& inFileName,
                        const std::string& outFileName,
                        optout::OptOstreamRef optOs)
-        : _finData(_openInFile(inFileName, optOs)), _fout(outFileName) {
+        : _finData(_openInFile(inFileName, optOs)),
+         _fout(outFileName, std::ios::binary) {
     if (!_fout.is_open()) {
         throw std::runtime_error(
             (boost::format("Could not open file: \"%1%\"") % outFileName).str());
