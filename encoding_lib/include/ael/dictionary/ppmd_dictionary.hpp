@@ -1,5 +1,5 @@
-#ifndef PPMA_DICTIONARY_HPP
-#define PPMA_DICTIONARY_HPP
+#ifndef PPMD_DICTIONARY_HPP
+#define PPMD_DICTIONARY_HPP
 
 #include "ael/dictionary/impl/cumulative_count.hpp"
 #include "ael/dictionary/impl/cumulative_unique_count.hpp"
@@ -16,10 +16,7 @@ namespace ael::dict {
 
 namespace bm = boost::multiprecision;
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief PPMADictionary - ppma probability model.
-///
-class PPMADictionary {
+class PPMDDictionary {
 public:
     using Ord = std::uint64_t;
     using Count = bm::uint256_t;
@@ -33,8 +30,8 @@ public:
      * PPMA dictionary constructor.
      * @param maxOrd - maximal order. 
      */
-    PPMADictionary(Ord maxOrd, std::size_t ctxLength);
-
+    PPMDDictionary(Ord maxOrd, std::size_t ctxLength);
+    
     /**
      * @brief getWordOrd - get word order index by cumulative count.
      * @param cumulativeNumFound search key.
@@ -63,6 +60,11 @@ private:
         impl::CumulativeCount,
         _SearchCtxHash
     >;
+    using _CtxUniqueCountMapping = std::unordered_map<
+        _SearchCtx,
+        impl::CumulativeUniqueCount,
+        _SearchCtxHash
+    >;
 private:
 
     Count _getLowerCumulativeCnt(Ord ord) const;
@@ -79,9 +81,11 @@ private:
     impl::CumulativeUniqueCount _zeroCtxUniqueCnt;
     std::deque<Ord> _ctx;
     _CtxCountMapping _ctxInfo;
+    _CtxUniqueCountMapping _ctxUniqueInfo;
     const std::size_t _ctxLength;
 };
 
+
 }  // namespace ael::dict
 
-#endif  // PPMA_DICTIONARY_HPP
+#endif  // PPMD_DICTIONARY_HPP
