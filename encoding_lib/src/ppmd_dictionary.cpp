@@ -60,12 +60,11 @@ auto PPMDDictionary::getTotalWordsCnt() const -> Count {
          !ctx.empty();
          ctx.pop_back()) {
         const auto totalCnt = _ctxInfo.at(ctx).getTotalWordsCnt();
-        assert(totalCnt != 0);  
         total *= totalCnt * 2;
     }
     if (const auto totalZeroCtxCnt = _zeroCtxCnt.getTotalWordsCnt();
             totalZeroCtxCnt != 0) {
-        total *= _zeroCtxCnt.getTotalWordsCnt() * 2;
+        total *= totalZeroCtxCnt * 2;
     }
     if (const auto zeroUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
             zeroUniqueCnt < this->_maxOrd) {
@@ -76,7 +75,7 @@ auto PPMDDictionary::getTotalWordsCnt() const -> Count {
 
 ////////////////////////////////////////////////////////////////////////////////
 auto PPMDDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
-    // TODO
+    assert(ord <= this->_maxOrd);
     Count lower = 0;
     Count uniqueCountsProd = 1;
     for (auto ctx = _getSearchCtxEmptySkipped();
@@ -86,28 +85,35 @@ auto PPMDDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
         const auto& ctxUniqueInfo = _ctxUniqueInfo.at(ctx);
         const auto ctxTotalCnt = ctxInfo.getTotalWordsCnt();
         lower *= ctxTotalCnt * 2;
+        assert(ctxInfo.getLowerCumulativeCount(ord) >= ctxUniqueInfo.getLowerCumulativeCount(ord));
         lower += (
-            ctxInfo.getLowerCumulativeCount(ord)
-            - ctxUniqueInfo.getLowerCumulativeCount(ord)
+                ctxInfo.getLowerCumulativeCount(ord) * 2
+                - ctxUniqueInfo.getLowerCumulativeCount(ord)
             ) * uniqueCountsProd;
         uniqueCountsProd *= ctxUniqueInfo.getTotalWordsCnt();
     }
-    lower *= _zeroCtxCnt.getTotalWordsCnt() * 2;
-    lower += (
-        _zeroCtxCnt.getLowerCumulativeCount(ord) * 2
-        - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord)
-    ) * uniqueCountsProd;
+    const auto zeroCtxTotalCnt = _zeroCtxCnt.getTotalWordsCnt();
+    const auto zeroCtxTotalUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
+    if (zeroCtxTotalCnt != 0) {
+        lower *= zeroCtxTotalCnt * 2;
+        lower += (
+                _zeroCtxCnt.getLowerCumulativeCount(ord) * 2
+                - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord)
+            ) * uniqueCountsProd;
+        uniqueCountsProd *= zeroCtxTotalUniqueCnt;
+    }
     if (const auto zeroUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
             zeroUniqueCnt < this->_maxOrd) {
         lower *= this->_maxOrd - zeroUniqueCnt;
-        lower += ord - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord);
+        lower += (ord - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord)) 
+            * uniqueCountsProd;
     }
     return {lower};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 auto PPMDDictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
-    // TODO
+    assert(ord < _maxOrd);
     Count lower = 0;
     Count count = 0;
     Count total = 1;
@@ -116,14 +122,14 @@ auto PPMDDictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
          !ctx.empty();
          ctx.pop_back()) {
         const auto& ctxInfo = _ctxInfo.at(ctx);
-        const auto& ctxUniqueInfo = _ctxInfo.at(ctx);
+        const auto& ctxUniqueInfo = _ctxUniqueInfo.at(ctx);
         const auto ctxTotalCnt = ctxInfo.getTotalWordsCnt();
         lower *= ctxTotalCnt * 2;
-        total *= ctxTotalCnt * 2;
         lower += (
                 ctxInfo.getLowerCumulativeCount(ord) * 2
                 - ctxUniqueInfo.getLowerCumulativeCount(ord)
             ) * uniqueCountsProd;
+        total *= ctxTotalCnt * 2;
         count *= ctxTotalCnt * 2;
         count += (
             ctxInfo.getCount(ord) * 2
@@ -132,27 +138,29 @@ auto PPMDDictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         uniqueCountsProd *= ctxUniqueInfo.getTotalWordsCnt();
     }
     const auto zeroCtxTotal = _zeroCtxCnt.getTotalWordsCnt();
+    const auto zeroCtxUniqueTotal = _zeroCtxUniqueCnt.getTotalWordsCnt();
     if (zeroCtxTotal != 0) {
         lower *= zeroCtxTotal * 2;
-        total *= zeroCtxTotal * 2;
         lower += (
             _zeroCtxCnt.getLowerCumulativeCount(ord) * 2
             - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord)
         ) * uniqueCountsProd;
+        total *= zeroCtxTotal * 2;
         count *= zeroCtxTotal * 2;
         count += (
             _zeroCtxCnt.getCount(ord) * 2
             - _zeroCtxUniqueCnt.getCount(ord)
         ) * uniqueCountsProd;
-        uniqueCountsProd *= _zeroCtxUniqueCnt.getTotalWordsCnt();
+        uniqueCountsProd *= zeroCtxUniqueTotal;
     }
     if (const auto zeroUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
             zeroUniqueCnt < this->_maxOrd) {
         total *= this->_maxOrd - zeroUniqueCnt;
         lower *= this->_maxOrd - zeroUniqueCnt;
-        lower += ord - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord);
+        lower += (ord - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord))
+            * uniqueCountsProd;
         if (count == 0) {
-            count = 1;
+            count = uniqueCountsProd;
         } else {
             count *= this->_maxOrd - zeroUniqueCnt;
         }

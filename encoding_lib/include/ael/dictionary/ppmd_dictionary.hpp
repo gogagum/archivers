@@ -66,6 +66,7 @@ private:
         _SearchCtxHash
     >;
 private:
+public:
 
     Count _getLowerCumulativeCnt(Ord ord) const;
 
