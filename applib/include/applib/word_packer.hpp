@@ -80,6 +80,6 @@ private:
     }
 };
 
-}
+}  // namespace
 
-#endif
+#endif  // APPLIB_WORD_PACKER_HPP

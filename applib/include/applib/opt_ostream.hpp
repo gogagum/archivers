@@ -27,11 +27,11 @@ OptOstreamRef operator<<(OptOstreamRef os, T printed) {
 
 OptOstreamRef operator<<(OptOstreamRef os, std::ostream& (*func)(std::ostream&));
 
-}
+}  // namespace optout
 
 using optout::operator<<;
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 optout::OptOstreamRef get_out_stream(const std::string& arg);
 
 #endif // APPLIB_OPT_OSTREAM_REF_HPP

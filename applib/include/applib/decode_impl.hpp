@@ -59,4 +59,4 @@ void DecodeImpl::process(ael::DataParser &decoded,
     bytesOutStream.write(dataConstructor.data<char>(), dataConstructor.size());
 }
 
-#endif
+#endif  // APPLIB_DECODE_IMPL_HPP

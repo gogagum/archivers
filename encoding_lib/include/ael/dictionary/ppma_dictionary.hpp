@@ -85,4 +85,4 @@ private:
 
 }  // namespace ael::dict
 
-#endif
+#endif  // PPMA_DICTIONARY_HPP
