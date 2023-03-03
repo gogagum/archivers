@@ -25,7 +25,7 @@ OptOstreamRef operator<<(OptOstreamRef os, T printed) {
     return os;
 }
 
-OptOstreamRef operator<<(OptOstreamRef os, std::ostream& (*func)(std::ostream&) );
+OptOstreamRef operator<<(OptOstreamRef os, std::ostream& (*func)(std::ostream&));
 
 }
 

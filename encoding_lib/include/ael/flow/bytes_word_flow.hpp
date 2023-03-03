@@ -83,7 +83,8 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
+/// \brief The BytesWordFlow<numBytes> class. 
+///
 template <std::uint8_t numBytes>
 class BytesWordFlow<numBytes>::_Iterator : public boost::iterator_facade<
     _Iterator,
@@ -111,6 +112,6 @@ private:
     friend class BytesWordFlow<numBytes>;
 };
 
-}  // namespace ga
+}  // namespace ael::fl
 
 #endif // BIT_FLOW_HPP

@@ -38,4 +38,4 @@ auto CumulativeUniqueCount::getTotalWordsCnt() const -> Count {
     return _ords.size();
 }
 
-}
+}  // namespace ael::dict::impl

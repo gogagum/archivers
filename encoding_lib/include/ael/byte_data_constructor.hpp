@@ -169,13 +169,12 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 void ByteDataConstructor::putT(auto s) {
     auto& bytes = reinterpret_cast<TBytes<decltype(s)>&>(s);
     std::copy(bytes.begin(), bytes.end(), getByteBackInserter());
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 void ByteDataConstructor::putTToPosition(auto s, std::size_t position) {
     if (position + sizeof(s) >= _data.size()) {
         throw std::out_of_range("Can not write to position this count of bytes.");
@@ -184,13 +183,13 @@ void ByteDataConstructor::putTToPosition(auto s, std::size_t position) {
     std::copy(bytes.begin(), bytes.end(), _data.begin() + position);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template <class T>
 const T* ByteDataConstructor::data() const {
     return reinterpret_cast<const T*>(_data.data());
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template <class T>
 std::size_t ByteDataConstructor::saveSpaceForT() {
     if (_currBitFlag != std::byte{0b10000000}) {
@@ -201,6 +200,6 @@ std::size_t ByteDataConstructor::saveSpaceForT() {
     return ret;
 }
 
-} // namespace ga
+} // namespace ael
 
 #endif // ARITHMETIC_CODER_ENCODED_HPP

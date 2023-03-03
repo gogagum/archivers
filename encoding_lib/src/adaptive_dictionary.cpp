@@ -6,15 +6,14 @@
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 AdaptiveDictionary::AdaptiveDictionary(Ord maxOrd, std::uint64_t ratio)
     : impl::AdaptiveDictionaryBase<Count>(maxOrd, maxOrd),
       _ratio(ratio),
       _maxOrder(maxOrd) {}
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
-    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    using UintIt = ael::impl::IntegerRandomAccessIterator<std::uint64_t>;
     const auto idxs = boost::make_iterator_range<UintIt>(0, _maxOrder);
 
     // TODO: replace
@@ -27,7 +26,7 @@ auto AdaptiveDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     return it - idxs.begin();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
     const auto low = _getLowerCumulativeCnt(ord);
     const auto high = low + this->_wordCnts[ord] * _ratio + 1;
@@ -36,16 +35,16 @@ auto AdaptiveDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
     return { low, high, total };
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 void AdaptiveDictionary::_updateWordCnt(Ord ord) {
     this->_cumulativeWordCounts.update(ord, _maxOrder, 1);
     ++this->_wordCnts[ord];
     this->_totalWordsCnt += _ratio;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
     return ord + this->_cumulativeWordCounts.get(ord - 1) * _ratio;
 }
 
-}
+}  // namespace ael::dict

@@ -7,9 +7,9 @@
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
-// \brief The adaptive contextual dictionary class
+// \brief The adaptive contextual D dictionary class
 using AdaptiveDContextualDictionary = impl::ContextualDictionaryBase<AdaptiveDDictionary>;
 
-}
+}  // namespace ael::dict
 
 #endif // ADAPTIVE_D_CONTECTUAL_DICTIONARY_HPP

@@ -61,7 +61,6 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <class RangeT>
 StaticDictionary::StaticDictionary(Ord maxOrd, const RangeT& countMap) {
     _cumulativeNumFound.resize(maxOrd);
@@ -78,6 +77,6 @@ StaticDictionary::StaticDictionary(Ord maxOrd, const RangeT& countMap) {
     }
 }
 
-}  // namespace ga::dict
+}  // namespace ael::dict
 
 #endif // STATIC_DICTIONARY_HPP

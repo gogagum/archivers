@@ -61,6 +61,6 @@ private:
     friend class impl::ContextualDictionaryBaseImproved<AdaptiveADictionary>;
 };
 
-}
+}  // ael::dict
 
 #endif // ADAPTIVE_A_DICTIONARY_HPP

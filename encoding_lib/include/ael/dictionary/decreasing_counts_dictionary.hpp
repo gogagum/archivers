@@ -50,12 +50,11 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <typename CountT>
 DecreasingCountDictionary<CountT>::DecreasingCountDictionary(Count initialCount)
     : _currentCount(initialCount) {}
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template <typename CountT>
 auto DecreasingCountDictionary<CountT>::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
@@ -63,7 +62,7 @@ auto DecreasingCountDictionary<CountT>::getWordOrd(
     return cumulativeNumFound + 1;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 template <typename CountT>
 auto DecreasingCountDictionary<CountT>::getProbabilityStats(
         Ord ord) -> ProbabilityStats {
@@ -73,7 +72,7 @@ auto DecreasingCountDictionary<CountT>::getProbabilityStats(
     return ret;
 }
 
-}
+}  // namespace ael::dict
 
 #endif // DECREASING_COUNTS_DICTIONARY_HPP
 

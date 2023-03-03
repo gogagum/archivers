@@ -11,9 +11,11 @@
 
 namespace ael::dict {
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The adaptive contextual A improved dictionary class
 using AdaptiveAContextualDictionaryImproved =
     impl::ContextualDictionaryBaseImproved<AdaptiveADictionary>;
 
-}
+}  // namespace ael::dict
 
 #endif  // ADAPTIVE_A_CONTEXTUAL_DICTIONARY_IMPROVED_HPP

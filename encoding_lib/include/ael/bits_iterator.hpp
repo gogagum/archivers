@@ -70,6 +70,6 @@ public:
               BitsIterator<T>(iterated, sizeof(T) * 8 - offset)) {}
 };
 
-}  // namespace ga::impl
+}  // namespace ael::impl
 
 #endif // BITS_ITERATOR_HPP

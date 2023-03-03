@@ -6,6 +6,7 @@
 #include <applib/exceptions.hpp>
 #include <applib/words_and_flow.hpp>
 
+namespace {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The WordPacker class
 ///
@@ -78,5 +79,7 @@ private:
         word.bitsOut(cntr.getBitBackInserter());
     }
 };
+
+}
 
 #endif

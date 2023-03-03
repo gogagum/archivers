@@ -17,8 +17,7 @@ target_sources(${PROJECT_NAME}
         src/cumulative_count.cpp
         src/cumulative_unique_count.cpp
         src/data_parser.cpp
-        src/decreasing_on_update_dictionary.cpp        
-        src/ranges_calc.cpp
+        src/decreasing_on_update_dictionary.cpp
         src/static_dictionary.cpp
         src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp

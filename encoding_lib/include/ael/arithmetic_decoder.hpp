@@ -33,7 +33,6 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::output_iterator<std::uint64_t> OutIter, class Dict>
 void ArithmeticDecoder::decode(
         auto& source,
@@ -100,7 +99,7 @@ void ArithmeticDecoder::decode(
     }
 }
 
-}  // namespace ga
+}  // namespace ael
 
 #endif // ARITHMETIC_DECODER_HPP
 

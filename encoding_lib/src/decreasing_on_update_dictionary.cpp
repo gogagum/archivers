@@ -2,12 +2,12 @@
 #include <ranges>
 
 #include "integer_random_access_iterator.hpp"
+#include <boost/range/irange.hpp>
 #include <boost/range/iterator_range.hpp>
 
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
         Ord maxOrd,
         Count count
@@ -19,10 +19,10 @@ DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
     }
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto DecreasingOnUpdateDictionary::getWordOrd(
         Count cumulativeNumFound) const -> Ord {
-    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    using UintIt = ael::impl::IntegerRandomAccessIterator<std::uint64_t>;
     const auto idxs = boost::make_iterator_range<UintIt>(0, _maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
@@ -34,7 +34,7 @@ auto DecreasingOnUpdateDictionary::getWordOrd(
     return it - idxs.begin();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto DecreasingOnUpdateDictionary::getProbabilityStats(
         Ord ord) -> ProbabilityStats {
     auto ret = _getProbabilityStats(ord);
@@ -42,7 +42,7 @@ auto DecreasingOnUpdateDictionary::getProbabilityStats(
     return ret;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto DecreasingOnUpdateDictionary::_getLowerCumulativeCnt(
         Ord ord) const -> Count {
     if (ord == 0) {
@@ -51,7 +51,7 @@ auto DecreasingOnUpdateDictionary::_getLowerCumulativeCnt(
     return this->_cumulativeWordCounts.get(ord - 1);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 void DecreasingOnUpdateDictionary::_updateWordCnt(Ord ord, Count cnt) {
     this->_totalWordsCnt -= 1;
     this->_cumulativeWordCounts.update(
@@ -59,7 +59,7 @@ void DecreasingOnUpdateDictionary::_updateWordCnt(Ord ord, Count cnt) {
     --this->_wordCnts[ord];
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto DecreasingOnUpdateDictionary::_getProbabilityStats(
         Ord ord) const -> ProbabilityStats {
     assert(this->_wordCnts.contains(ord));
@@ -69,4 +69,4 @@ auto DecreasingOnUpdateDictionary::_getProbabilityStats(
     return {low, high, total};
 }
 
-}  // namespace ga::dict
+}  // namespace ael::dict

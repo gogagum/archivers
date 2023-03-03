@@ -2,6 +2,7 @@ add_library(archievers-applib STATIC)
 
 target_sources(archievers-applib
     PRIVATE
+        src/decode_impl.cpp
         src/exceptions.cpp
         src/file_opener.cpp
         src/opt_ostream.cpp

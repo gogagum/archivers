@@ -3,7 +3,7 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace ael::dict::misc {
+namespace ael::impl {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The IntegerRandomAccessIterator class
@@ -47,10 +47,10 @@ private:
     friend class boost::iterators::iterator_core_access;
 };
 
-}  // namespace ga::dict::misc
+}  // namespace ael::impl
 
 template <std::integral T>
-struct std::iterator_traits<ael::dict::misc::IntegerRandomAccessIterator<T>> {
+struct std::iterator_traits<ael::impl::IntegerRandomAccessIterator<T>> {
     using iterator_category = std::random_access_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;

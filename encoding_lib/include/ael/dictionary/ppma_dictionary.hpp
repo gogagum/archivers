@@ -6,21 +6,16 @@
 #include "ael/dictionary/impl/cumulative_unique_count.hpp"
 #include "word_probability_stats.hpp"
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/container/static_vector.hpp>
 #include <boost/container_hash/hash.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <deque>
-#include <ranges>
-#include <stdexcept>
 #include <unordered_map>
 
 namespace ael::dict {
 
-namespace bpm = boost::multiprecision;
+namespace bm = boost::multiprecision;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief PPMADictionary - ppma probability model.
@@ -28,7 +23,7 @@ namespace bpm = boost::multiprecision;
 class PPMADictionary {
 public:
     using Ord = std::uint64_t;
-    using Count = bpm::uint256_t;
+    using Count = bm::uint256_t;
     using ProbabilityStats = WordProbabilityStats<Count>;
     constexpr const static std::uint16_t countNumBits = 240;
 private:
@@ -88,6 +83,6 @@ private:
     const std::size_t _ctxLength;
 };
 
-}
+}  // namespace ael::dict
 
 #endif

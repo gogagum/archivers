@@ -16,7 +16,7 @@ OptOstreamRef operator<<(OptOstreamRef os,
 
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 optout::OptOstreamRef get_out_stream(const std::string& arg) {
     optout::OptOstreamRef outStream;
 

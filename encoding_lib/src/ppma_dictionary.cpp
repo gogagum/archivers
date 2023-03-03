@@ -1,5 +1,10 @@
 #include <ael/dictionary/ppma_dictionary.hpp>
+
+#include <algorithm>
+#include <ranges>
 #include <stdexcept>
+#include <boost/range/iterator_range.hpp>
+
 #include "integer_random_access_iterator.hpp"
 
 namespace ael::dict {
@@ -22,7 +27,7 @@ PPMADictionary::PPMADictionary(Ord maxOrd, std::size_t ctxLength)
 
 ////////////////////////////////////////////////////////////////////////////////
 auto PPMADictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
-    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    using UintIt = ael::impl::IntegerRandomAccessIterator<std::uint64_t>;
     const auto idxs = boost::make_iterator_range<UintIt>(0, this->_maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
@@ -151,5 +156,4 @@ auto PPMADictionary::_getSearchCtxEmptySkipped() const -> _SearchCtx {
     return ctx;
 }
 
-
-}
+}  // namespace ael::dict

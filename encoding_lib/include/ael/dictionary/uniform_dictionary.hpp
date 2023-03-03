@@ -49,7 +49,6 @@ private:
     const Ord _maxOrd;
 };
 
-
-}  // namespace ga::dict
+}  // namespace ael::dict
 
 #endif // UNIFORM_DICTIONARY_HPP

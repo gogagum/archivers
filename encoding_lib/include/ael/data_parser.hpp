@@ -141,11 +141,9 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 bool operator==(const DataParser& dp1, const DataParser& dp2);
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <class T>
 T DataParser::takeT() {
     using TBytes = std::array<std::byte, sizeof(T)>;
@@ -159,6 +157,6 @@ T DataParser::takeT() {
 }
 
 
-}  // namespace ga
+}  // namespace ael
 
 #endif  // ARITHMETIC_DECODER_DECODED_HPP

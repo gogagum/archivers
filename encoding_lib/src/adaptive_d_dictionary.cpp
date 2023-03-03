@@ -6,13 +6,12 @@
 namespace ael::dict {
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 AdaptiveDDictionary::AdaptiveDDictionary(Ord maxOrd)
     : impl::ADDictionaryBase(maxOrd) {}
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
-    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    using UintIt = ael::impl::IntegerRandomAccessIterator<std::uint64_t>;
     auto idxs = boost::make_iterator_range<UintIt>(0, this->_maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
@@ -24,14 +23,14 @@ auto AdaptiveDDictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
     return it - idxs.begin();
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::getProbabilityStats(Ord ord) -> ProbabilityStats {
     const auto ret = _getProbabilityStats(ord);
     this->_updateWordCnt(ord, 1);
     return ret;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::getTotalWordsCnt() const -> Count {
     const auto totalWordsCnt = this->_cumulativeCnt.getTotalWordsCnt(); 
     if (totalWordsCnt == 0) {
@@ -44,7 +43,7 @@ auto AdaptiveDDictionary::getTotalWordsCnt() const -> Count {
     return 2 * (this->_maxOrd - totalWordsUniqueCnt) * totalWordsCnt;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
     if (this->_cumulativeCnt.getTotalWordsCnt() == 0) {
         return ord;
@@ -59,7 +58,7 @@ auto AdaptiveDDictionary::_getLowerCumulativeCnt(Ord ord) const -> Count {
             - this->_maxOrd * this->_getLowerCumulativeUniqueNumFound(ord);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::_getWordCnt(Ord ord) const -> Count {
     if (this->_cumulativeCnt.getTotalWordsCnt() == 0) {
         return 1;
@@ -74,7 +73,7 @@ auto AdaptiveDDictionary::_getWordCnt(Ord ord) const -> Count {
         - this->_maxOrd * _getWordUniqueCnt(ord);
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 auto AdaptiveDDictionary::_getProbabilityStats(
         Ord ord) const -> ProbabilityStats {
     const auto low = _getLowerCumulativeCnt(ord);
@@ -83,4 +82,4 @@ auto AdaptiveDDictionary::_getProbabilityStats(
     return { low, high, total };
 }
 
-}  // namespace ga::dict
+}  // namespace ael::dict
