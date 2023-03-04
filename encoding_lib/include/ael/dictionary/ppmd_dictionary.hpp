@@ -16,6 +16,9 @@ namespace ael::dict {
 
 namespace bm = boost::multiprecision;
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief PPMDDictionary - ppmd probability model.
+///
 class PPMDDictionary {
 public:
     using Ord = std::uint64_t;
@@ -27,7 +30,7 @@ private:
 public:
 
     /**
-     * PPMA dictionary constructor.
+     * PPMD dictionary constructor.
      * @param maxOrd - maximal order. 
      */
     PPMDDictionary(Ord maxOrd, std::size_t ctxLength);
@@ -81,7 +84,6 @@ private:
     _CtxCountMapping _ctxInfo;
     const std::size_t _ctxLength;
 };
-
 
 }  // namespace ael::dict
 
