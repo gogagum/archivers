@@ -55,18 +55,16 @@ public:
 private:
     using _SearchCtx = boost::container::static_vector<Ord, 16>;
     using _SearchCtxHash = boost::hash<_SearchCtx>;
+    struct _CtxCell {
+        impl::CumulativeCount cnt;
+        impl::CumulativeUniqueCount uniqueCnt;
+    };
     using _CtxCountMapping = std::unordered_map<
         _SearchCtx,
-        impl::CumulativeCount,
-        _SearchCtxHash
-    >;
-    using _CtxUniqueCountMapping = std::unordered_map<
-        _SearchCtx,
-        impl::CumulativeUniqueCount,
+        _CtxCell,
         _SearchCtxHash
     >;
 private:
-public:
 
     Count _getLowerCumulativeCnt(Ord ord) const;
 
@@ -78,11 +76,9 @@ public:
 
 private:
     std::size_t _maxOrd;
-    impl::CumulativeCount _zeroCtxCnt;
-    impl::CumulativeUniqueCount _zeroCtxUniqueCnt;
+    _CtxCell _zeroCtxCell;
     std::deque<Ord> _ctx;
     _CtxCountMapping _ctxInfo;
-    _CtxUniqueCountMapping _ctxUniqueInfo;
     const std::size_t _ctxLength;
 };
 

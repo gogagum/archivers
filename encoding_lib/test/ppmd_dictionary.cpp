@@ -100,16 +100,6 @@ TEST(PPMDDictionary, Example) {
     const auto [low7, high7, total7] = dict.getProbabilityStats('A');
     EXPECT_EQ(high7 - low7, 6);
     EXPECT_EQ(total7, 250 * 14);
-    /**
-    std::vector<int> lCounts;
-    for (int i = 0; i < 257; ++i) {
-        lCounts.push_back(static_cast<int>(dict._getLowerCumulativeCnt(i)));
-    }
-    for (auto num : lCounts) {
-        std::cout << num << " ";
-    }
-    std::cout << std::endl;
-    */
 }
 
 TEST(PPMDDictionary, Example2) {
