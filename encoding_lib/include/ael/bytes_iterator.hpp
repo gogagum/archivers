@@ -62,6 +62,6 @@ public:
               BytesIterator<T>(iterated, sizeof(T) - offset)) {}
 };
 
-}
+}  // namespace ael::impl
 
 #endif // BYTES_ITERATOR_HPP

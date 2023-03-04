@@ -5,11 +5,6 @@
 #include "impl/adaptive_dictionary_base.hpp"
 
 #include <cstdint>
-#include <string>
-#include <sstream>
-
-#include <boost/range/iterator_range.hpp>
-#include <boost/range/irange.hpp>
 
 namespace ael::dict {
 
@@ -73,7 +68,6 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <std::ranges::input_range RangeT>
 DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
         Ord maxOrd,
@@ -87,6 +81,6 @@ DecreasingOnUpdateDictionary::DecreasingOnUpdateDictionary(
     }
 }
 
-}
+}  // namespace ael::dict
 
 #endif // DECREASING_TOTAL_COUNT_DICTIONARY_HPP

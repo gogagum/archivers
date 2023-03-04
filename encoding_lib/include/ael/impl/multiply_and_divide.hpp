@@ -8,7 +8,7 @@
 
 namespace ael::impl {
 
-namespace bmp = boost::multiprecision;
+namespace bm = boost::multiprecision;
 
 /**
  * @brief multiply_and_divide calculate (l * r) / d assuming that result is
@@ -36,11 +36,11 @@ std::uint64_t multiply_decrease_and_divide(std::uint64_t l,
 
 
 template<std::size_t numBits>
-using WideNum = bmp::number<bmp::cpp_int_backend<
+using WideNum = bm::number<bm::cpp_int_backend<
     numBits,
     numBits,
-    bmp::unsigned_magnitude,
-    bmp::unchecked, void>>;
+    bm::unsigned_magnitude,
+    bm::unchecked, void>>;
 
 /**
  * @brief multiply_and_divide calculate (l * r) / d assuming that result is
@@ -80,6 +80,6 @@ WideNum<numBits> multiply_decrease_and_divide(const WideNum<numBits>& l,
         ).template convert_to<WideNum<numBits>>(); 
 }
 
-}
+}  // namespace ael::impl
 
 #endif

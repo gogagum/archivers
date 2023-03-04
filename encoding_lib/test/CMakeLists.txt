@@ -23,6 +23,7 @@ add_executable(archiever_tests
     adaptive_a_dictionary.cpp
     adaptive_d_dictionary.cpp
     ppma_dictionary.cpp
+    ppmd_dictionary.cpp
     adaptive_a_contextual_dictionary.cpp
     adaptive_d_contextual_dictionary.cpp
     decreasing_counts_dictionary.cpp

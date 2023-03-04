@@ -1,10 +1,13 @@
 #ifndef APPLIB_FILE_OPENER_HPP
 #define APPLIB_FILE_OPENER_HPP
 
+#include <cstddef>
+#include <vector>
 #include <string>
 #include <span>
 #include <fstream>
-#include <applib/opt_ostream.hpp>
+
+#include "opt_ostream.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The FilesOpener class
@@ -40,8 +43,9 @@ public:
     std::ofstream& getOutFileStream();
 
 private:
-    std::vector<std::byte>
-    _openInFile(const std::string& fileInName, optout::OptOstreamRef optOs);
+
+    std::vector<std::byte> _openInFile(const std::string& fileInName,
+                                       optout::OptOstreamRef optOs);
 
 private:
     std::vector<std::byte> _finData;

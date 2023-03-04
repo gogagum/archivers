@@ -45,4 +45,4 @@ void ADDictionaryBase::_updateWordCnt(Ord ord, Count cnt) {
     _cumulativeUniqueCnt.update(ord);
 }
 
-}
+}  // namespace ael::dict::impl

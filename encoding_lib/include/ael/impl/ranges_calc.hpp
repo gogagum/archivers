@@ -66,6 +66,6 @@ auto RangesCalc<CountT, numBits>::rangeFromStatsAndPrev(
     return { r.low + lowScaled, r.low + highScaled };
 }
 
-}
+}  // namespace ael::impl
 
 #endif // RANGES_CALC_HPP

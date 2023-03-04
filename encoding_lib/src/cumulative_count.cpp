@@ -38,4 +38,4 @@ auto CumulativeCount::getTotalWordsCnt() const -> Count {
     return _totalWordsCnt;
 }
 
-}
+}  // namespace ael::dict::impl

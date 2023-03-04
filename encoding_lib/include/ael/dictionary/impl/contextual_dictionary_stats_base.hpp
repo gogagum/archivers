@@ -8,8 +8,10 @@
 
 namespace ael::dict::impl {
 
-namespace bmp = boost::multiprecision;
+namespace bm = boost::multiprecision;
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The ContextualDictionaryStatsBase<InternalDict> class
 template <class InternalDict>
 class ContextualDictionaryStatsBase : protected InternalDict {
 protected:
@@ -105,7 +107,7 @@ void ContextualDictionaryStatsBase<InternalDictT>::_updateCtx(Ord ord) {
     if (_currCtxLength < _ctxLength) {
         ++_currCtxLength;
     }
-    bmp::uint128_t newCtx128 = (_ctx != 0) ? _ctx - 1 : 0;
+    bm::uint128_t newCtx128 = (_ctx != 0) ? _ctx - 1 : 0;
     newCtx128 *= (1ull << _numBits);
     newCtx128 += ord;
     newCtx128 %= (1ull << (_ctxCellBitsLength * _ctxLength));
@@ -150,6 +152,6 @@ ContextualDictionaryStatsBase<InternalDictT>::_getContextualProbStats(
     return this->_contextProbs.at(searchCtx).getProbabilityStats(ord);
 }
 
-}
+}  // ael::dict::impl
 
 #endif  // CONTEXTUAL_DICTIONARY_STATS_BASE_HPP

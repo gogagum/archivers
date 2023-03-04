@@ -90,6 +90,6 @@ auto ContextualDictionaryBaseImproved<InternalDictT>::getTotalWordsCnt(
     return InternalDictT::getTotalWordsCnt();
 }
 
-}
+}  // namespace ael::dict::impl
 
 #endif  // CONTEXTUAL_DICTIONARY_BASE_IMPROVED_HPP

@@ -41,6 +41,6 @@ protected:
     const std::uint64_t _maxOrd;
 };
 
-}
+}  // namespace ael::dict::impl
 
 #endif // A_D_DICTIONARY_BASE_HPP

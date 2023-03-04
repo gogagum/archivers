@@ -20,7 +20,7 @@ auto CumulativeUniqueCount::getLowerCumulativeCount(Ord ord) const -> Count {
     if (ord == 0) {
         return 0;
     }
-    return _cumulativeUniqueCnt.get(ord - 1);
+    return getCumulativeCount(ord - 1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,4 +38,4 @@ auto CumulativeUniqueCount::getTotalWordsCnt() const -> Count {
     return _ords.size();
 }
 
-}
+}  // namespace ael::dict::impl

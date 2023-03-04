@@ -38,7 +38,6 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 template <class DictT>
 auto ArithmeticCoder::encode(
         auto ordFlow,
@@ -95,7 +94,7 @@ auto ArithmeticCoder::encode(
     return ret;
 }
 
-}  // namespace ga
+}  // namespace ael
 
 #endif // ARITHMETIC_CODER_HPP
 

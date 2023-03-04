@@ -96,6 +96,6 @@ private:
     friend class boost::iterators::iterator_core_access;
 };
 
-}
+}  // namespace ael::fl
 
 #endif // BIT_WORD_FLOW_HPP

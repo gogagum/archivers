@@ -1,5 +1,11 @@
 #include <ael/dictionary/ppma_dictionary.hpp>
+
+#include <algorithm>
+#include <ranges>
 #include <stdexcept>
+#include <boost/range/iterator_range.hpp>
+
+#include "ael/dictionary/impl/cumulative_count.hpp"
 #include "integer_random_access_iterator.hpp"
 
 namespace ael::dict {
@@ -22,7 +28,7 @@ PPMADictionary::PPMADictionary(Ord maxOrd, std::size_t ctxLength)
 
 ////////////////////////////////////////////////////////////////////////////////
 auto PPMADictionary::getWordOrd(Count cumulativeNumFound) const -> Ord {
-    using UintIt = misc::IntegerRandomAccessIterator<std::uint64_t>;
+    using UintIt = ael::impl::IntegerRandomAccessIterator<std::uint64_t>;
     const auto idxs = boost::make_iterator_range<UintIt>(0, this->_maxOrd);
     // TODO: replace
     //auto idxs = std::ranges::iota_view(std::uint64_t{0}, WordT::wordsCount);
@@ -97,20 +103,14 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         lower *= ctxTotalCnt + 1;
         total *= ctxTotalCnt + 1;
         lower += ctxInfo.getLowerCumulativeCount(ord);
-        if (count == 0) {
-            count = ctxInfo.getCount(ord);
-        } else {
-            count *= ctxTotalCnt + 1;
-        }
+        count *= ctxTotalCnt + 1;
+        count += ctxInfo.getCount(ord);
     }
     lower *= _zeroCtxCnt.getTotalWordsCnt() + 1;
     total *= _zeroCtxCnt.getTotalWordsCnt() + 1;
     lower += _zeroCtxCnt.getLowerCumulativeCount(ord);
-    if (count == 0) {
-        count = _zeroCtxCnt.getCount(ord);
-    } else {
-        count *= _zeroCtxCnt.getTotalWordsCnt() + 1;
-    }
+    count *= _zeroCtxCnt.getTotalWordsCnt() + 1;
+    count += _zeroCtxCnt.getCount(ord);
     if (const auto zeroUniqueCnt = _zeroCtxUniqueCnt.getTotalWordsCnt();
             zeroUniqueCnt < this->_maxOrd) {
         total *= this->_maxOrd - zeroUniqueCnt;
@@ -129,12 +129,12 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
 
 ////////////////////////////////////////////////////////////////////////////////
 void PPMADictionary::_updateWordCnt(Ord ord,
-                                    DecreasingOnUpdateDictionary::Count cnt) {
+                                    impl::CumulativeCount::Count cnt) {
     for (auto ctx = _SearchCtx(_ctx.rbegin(), _ctx.rend());
          !ctx.empty();
          ctx.pop_back()) {
         if (!_ctxInfo.contains(ctx)) {
-            _ctxInfo.emplace(ctx, impl::CumulativeCount(_maxOrd));
+            _ctxInfo.emplace(ctx, _maxOrd);
         }
         _ctxInfo.at(ctx).increaseOrdCount(ord, cnt);
     }
@@ -152,10 +152,9 @@ auto PPMADictionary::_getSearchCtxEmptySkipped() const -> _SearchCtx {
     for (;
          !ctx.empty() && !_ctxInfo.contains(ctx);
          ctx.pop_back()) {
-    // Skip contexts which were not found yet.
+        // Skip contexts which were not found yet.
     }
     return ctx;
 }
 
-
-}
+}  // namespace ael::dict

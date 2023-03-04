@@ -31,4 +31,4 @@ using Flow = typename TypeChoise<numBits>::Flow;
 template <std::uint16_t numBits>
 using Word = typename TypeChoise<numBits>::Word;
 
-#endif
+#endif  // APPLIB_WORDS_AND_FLOW_HPP

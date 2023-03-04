@@ -60,6 +60,6 @@ private:
     Ord _maxOrder;
 };
 
-}  // namecpace ga::dict
+}  // namecpace ael::dict
 
 #endif // ADAPTIVE_DICTIONARY_HPP

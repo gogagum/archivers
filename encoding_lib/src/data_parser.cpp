@@ -2,14 +2,14 @@
 #include <ael/data_parser.hpp>
 
 namespace ael {
+
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 DataParser::DataParser(std::span<const std::byte> data)
     : _data(data),
       _dataIter{_data.begin()},
       _inByteOffset(0) { }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 std::byte DataParser::takeByte() {
     if (_inByteOffset == 0) {
         std::byte ret = *_dataIter;
@@ -24,7 +24,7 @@ std::byte DataParser::takeByte() {
     return ret;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 bool DataParser::takeBit() {
     if (_dataIter >= _data.end()) {
         return false;
@@ -34,7 +34,7 @@ bool DataParser::takeBit() {
     return ret;
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 void DataParser::_moveInByteOffset() {
     ++_inByteOffset;
     if (_inByteOffset == 8) {
@@ -43,7 +43,7 @@ void DataParser::_moveInByteOffset() {
     }
 }
 
-//----------------------------------------------------------------------------//
+////////////////////////////////////////////////////////////////////////////////
 DataParser& DataParser::seek(std::size_t bitsOffset) {
     _dataIter = _data.begin() + bitsOffset / 8;
     _inByteOffset = bitsOffset % 8;
@@ -51,11 +51,10 @@ DataParser& DataParser::seek(std::size_t bitsOffset) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//----------------------------------------------------------------------------//
 bool operator==(const DataParser& dp1, const DataParser& dp2) {
     return dp1._data.data() == dp2._data.data()
             && dp1._data.size() == dp2._data.size()
             && dp1._dataIter == dp2._dataIter;
 }
 
-}  // namespace ga
+}  // namespace ael

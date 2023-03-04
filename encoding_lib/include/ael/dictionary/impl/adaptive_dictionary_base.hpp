@@ -30,15 +30,12 @@ protected:
             Ord, Count, void, dst::NoRangeGetOp, dst::NoRangeGetOp,
             std::plus<void>, std::int64_t>;
 
-
 protected:
     _DST _cumulativeWordCounts;
     std::unordered_map<Ord, Count> _wordCnts;
     Count _totalWordsCnt;
 };
 
-
-
-}
+}  // namespace ael::dict::impl
 
 #endif // ADAPTIVE_DICTIONARY_BASE_HPP

@@ -143,6 +143,6 @@ std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> word) {
         [](auto* os, const bool bit) { return &(*os << bit); });
 }
 
-}  // namespace ga::w
+}  // namespace ael::w
 
 #endif // BYTES_SYMBOL_HPP

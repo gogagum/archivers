@@ -6,6 +6,7 @@
 #include <applib/exceptions.hpp>
 #include <applib/words_and_flow.hpp>
 
+namespace {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The WordPacker class
 ///
@@ -79,4 +80,6 @@ private:
     }
 };
 
-#endif
+}  // namespace
+
+#endif  // APPLIB_WORD_PACKER_HPP

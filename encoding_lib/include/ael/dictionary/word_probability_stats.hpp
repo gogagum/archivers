@@ -15,6 +15,6 @@ struct WordProbabilityStats {
     CountT total;
 };
 
-}
+}  // namespace ael::dict
 
 #endif // WORD_PROBABILITY_STATS_HPP
