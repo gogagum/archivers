@@ -83,3 +83,4 @@ testing/exe/
 compile_commands.json
 testing/correctness-out
 testing/exe-handing-in
+testing/debug-out
