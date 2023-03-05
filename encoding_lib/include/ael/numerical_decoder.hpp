@@ -6,12 +6,15 @@
 #include <cstdint>
 #include <vector>
 
-#include "ael/dictionary/decreasing_on_update_dictionary.hpp"
+#include "dictionary/decreasing_on_update_dictionary.hpp"
 #include "arithmetic_decoder.hpp"
 #include "dictionary/decreasing_counts_dictionary.hpp"
 
 namespace ael {
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The NumericalDecoder class.
+///
 class NumericalDecoder {
 private:
     struct _CountEntry {

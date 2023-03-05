@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <boost/program_options.hpp>
 
 #include <ael/numerical_decoder.hpp>
@@ -10,7 +11,6 @@
 #include <applib/opt_ostream.hpp>
 #include <applib/file_opener.hpp>
 #include <applib/decode_impl.hpp>
-#include <iterator>
 
 using ael::w::BytesWord;
 
