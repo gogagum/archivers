@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         encoded.putT<std::uint16_t>(tail.size());
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);
+        auto [wordsCount, bitsCount] = ael::ArithmeticCoder::encode(wordsOrds, encoded, dict, outStream);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());

@@ -61,7 +61,6 @@ int main(int argc, char* argv[]) {
 
         auto [wordsOrds, tail] = OrdAndTailSplitter::process(fileOpener.getInData(), numBits);
 
-        auto coder = ael::ArithmeticCoder();
         auto encoded = ael::ByteDataConstructor();
         encoded.putT<std::uint16_t>(numBits);
         encoded.putT<std::uint16_t>(tail.size());
@@ -69,7 +68,7 @@ int main(int argc, char* argv[]) {
         encoded.putT<std::uint8_t>(ctxCellLength);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = coder.encode(wordsOrds, encoded, dict, outStream);
+        auto [wordsCount, bitsCount] = ael::ArithmeticCoder::encode(wordsOrds, encoded, dict, outStream);
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());

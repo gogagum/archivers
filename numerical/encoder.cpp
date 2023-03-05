@@ -1,8 +1,10 @@
 #include <iostream>
+#include <iterator>
 #include <ranges>
 #include <boost/program_options.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
-#include <ael/arithmetic_coder.hpp>
+#include <ael/numerical_coder.hpp>
 #include <ael/flow/bytes_word_flow.hpp>
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
@@ -21,8 +23,6 @@ using DictWordsDict = ael::dict::DecreasingOnUpdateDictionary;
 using ContentDict = ael::dict::DecreasingOnUpdateDictionary;
 
 using DictWordsFlow = std::vector<BytesWord<1>>;
-
-using ael::ArithmeticCoder;
 
 int main(int argc, char* argv[]) {
     bpo::options_description appOptionsDescr("Console options.");
@@ -56,73 +56,36 @@ int main(int argc, char* argv[]) {
         auto inFileBytes = fileOpener.getInData();
         auto wordFlow = BytesWordFlow<1>(inFileBytes);
 
-        auto countsMap = std::map<BytesWord<1>::Ord, std::uint64_t>();
+        auto ordFlow = std::vector<std::uint64_t>();
 
-        for (auto word : wordFlow) {
-            ++countsMap[BytesWord<1>::ord(word)];
-        }
+        std::transform(wordFlow.begin(), wordFlow.end(), 
+                       std::back_inserter(ordFlow),
+                       [](const auto& word) {
+                           return BytesWord<1>::ord(word);
+                       });
 
-        std::vector<std::pair<std::uint64_t, std::uint64_t>> countsMapping;
+        auto dataConstructor = ael::ByteDataConstructor();        
 
-        for (auto [ord, count] : countsMap) {
-            countsMapping.emplace_back(ord, count);
-        }
+        const auto dictSizePos = dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto wordsBitsCntPos = dataConstructor.saveSpaceForT<std::uint64_t>();
+        const auto wordsCountsBitsCntPos = dataConstructor.saveSpaceForT<std::uint64_t>();
+        dataConstructor.putT<std::uint64_t>(ordFlow.size());
+        const auto contentBitsCntPos = dataConstructor.saveSpaceForT<std::uint64_t>();
 
-        std::sort(countsMapping.begin(), countsMapping.end(),
-                  [](const auto& c0, const auto& c1){
-                      return c0.second > c1.second;
-                  });
+        auto layoutInfo =
+             ael::NumericalCoder::encode(ordFlow, dataConstructor, outStream);
 
-        auto dataConstructor = ael::ByteDataConstructor();
+        dataConstructor.putTToPosition(layoutInfo.dictSize,
+                                       dictSizePos);
+        dataConstructor.putTToPosition(layoutInfo.wordsBitsCnt,
+                                       wordsBitsCntPos);                               
+        dataConstructor.putTToPosition(layoutInfo.wordsCountsBitsCnt,
+                                       wordsCountsBitsCntPos);
+        dataConstructor.putTToPosition(layoutInfo.contentBitsCnt,
+                                       contentBitsCntPos);
 
-        std::vector<std::uint64_t> counts;
-        std::vector<std::uint64_t> dictWordsOrds;
-
-        for (auto [ord, count] : countsMapping) {
-            counts.push_back(count);
-            dictWordsOrds.push_back(ord);
-        }
-
-        dataConstructor.putT<std::uint64_t>(counts.size());
-
-        const auto dictWordsCountsBitsPos =
-                dataConstructor.saveSpaceForT<std::uint64_t>();
-        const auto dictWordsBitsPos =
-                dataConstructor.saveSpaceForT<std::uint64_t>();
-        const auto contentWordsBitsCountPos =
-                dataConstructor.saveSpaceForT<std::uint64_t>();
-
-        dataConstructor.putT<std::uint64_t>(wordFlow.size());
-
-        {
-            auto countsDict = CountsDict(wordFlow.size());
-            auto countsCoder = ArithmeticCoder();
-            auto [_0, countsBits] =
-                    countsCoder.encode(counts, dataConstructor, countsDict, outStream);
-            dataConstructor.putTToPosition<std::uint64_t>(countsBits, dictWordsCountsBitsPos);
-        }
-
-        {
-            auto wordsDict = DictWordsDict(256, 1);
-            auto dictWordsCoder = ArithmeticCoder();
-            auto [_1, dictWordsBits] = dictWordsCoder.encode(dictWordsOrds, dataConstructor, wordsDict, outStream);
-            dataConstructor.putTToPosition<std::uint64_t>(dictWordsBits, dictWordsBitsPos);
-        }
-
-        {
-            auto contentDict = ContentDict(256, countsMapping);
-            auto contentCoder = ArithmeticCoder();
-            std::vector<std::uint64_t> wordsOrds;
-            std::transform(wordFlow.begin(), wordFlow.end(),
-                           std::back_inserter(wordsOrds),
-                           [](const auto& word) {
-                               return BytesWord<1>::ord(word);
-                           });
-            auto [_2, contentWordsBits] = contentCoder.encode(wordsOrds, dataConstructor, contentDict, outStream);
-            dataConstructor.putTToPosition(contentWordsBits, contentWordsBitsCountPos);
-        }
-
-        fileOpener.getOutFileStream().write(dataConstructor.data<char>(), dataConstructor.size());
+        fileOpener.getOutFileStream().write(dataConstructor.data<char>(),
+                                            dataConstructor.size());
 
     } catch (const std::runtime_error& error) {
         std::cerr << error.what() << std::endl;

@@ -12,17 +12,17 @@ target_sources(${PROJECT_NAME}
         src/adaptive_a_dictionary.cpp
         src/adaptive_d_dictionary.cpp
         src/adaptive_dictionary.cpp
-        src/ppma_dictionary.cpp
-        src/ppmd_dictionary.cpp
         src/byte_data_constructor.cpp
         src/cumulative_count.cpp
         src/cumulative_unique_count.cpp
         src/data_parser.cpp
         src/decreasing_on_update_dictionary.cpp
-        src/static_dictionary.cpp
-        src/uniform_dictionary.cpp
         src/integer_random_access_iterator.hpp
         src/multiply_and_divide.cpp
+        src/ppma_dictionary.cpp
+        src/ppmd_dictionary.cpp
+        src/static_dictionary.cpp
+        src/uniform_dictionary.cpp  
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -38,7 +38,6 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         ${Boost_INCLUDE_DIRS}
 )
-
 
 # without it public headers won't get installed
 set(public_headers

@@ -31,10 +31,10 @@ public:
      * @param bitFlow - byte
      */
     template <class DictT>
-    EncodeRet encode(auto ordFlow,
-                     ByteDataConstructor& dataConstructor,
-                     DictT& dict,
-                     auto os = std::nullopt);
+    static EncodeRet encode(auto ordFlow,
+                            ByteDataConstructor& dataConstructor,
+                            DictT& dict,
+                            auto os = std::nullopt);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
