@@ -8,8 +8,8 @@
 #include <optional>
 #include <boost/timer/progress_display.hpp>
 
-#include <ael/byte_data_constructor.hpp>
-#include <ael/impl/ranges_calc.hpp>
+#include "byte_data_constructor.hpp"
+#include "impl/ranges_calc.hpp"
 
 namespace ael {
 

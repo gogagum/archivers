@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ael/impl/multiply_and_divide.hpp"
 #ifndef ARITHMETIC_DECODER_HPP
 #define ARITHMETIC_DECODER_HPP
 
@@ -12,7 +11,8 @@
 #include <limits>
 #include <optional>
 
-#include <ael/impl/ranges_calc.hpp>
+#include "impl/ranges_calc.hpp"
+#include "impl/multiply_and_divide.hpp"
 
 namespace ael {
 
