@@ -1,11 +1,12 @@
 #ifndef NUMERICAL_CODER_HPP
-#define NUMWEICAL_CODER_HPP
+#define NUMERICAL_CODER_HPP
 
 #include <algorithm>
 #include <cstddef>
 #include <ranges>
 #include <map>
 #include <cstdint>
+
 #include "dictionary/decreasing_on_update_dictionary.hpp"
 #include "dictionary/decreasing_counts_dictionary.hpp"
 #include "byte_data_constructor.hpp"
