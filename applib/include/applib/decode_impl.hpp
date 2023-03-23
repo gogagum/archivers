@@ -11,7 +11,6 @@
 #include <ael/data_parser.hpp>
 
 #include "file_opener.hpp"
-#include "indicators/setting.hpp"
 #include "word_packer.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
