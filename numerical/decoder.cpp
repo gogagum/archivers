@@ -1,3 +1,4 @@
+#include <boost/timer/progress_display.hpp>
 #include <cstdint>
 #include <iostream>
 #include <iterator>
@@ -37,12 +38,19 @@ int main(int argc, char* argv[]) {
             takeWithLog("Bits for content decoding: ", std::uint64_t{});
 
         auto contentWordsOrds = std::vector<std::uint64_t>();
-        const auto lauoutInfo = ael::NumericalDecoder::LayoutInfo {
+        const auto layoutInfo = ael::NumericalDecoder::LayoutInfo {
             dictSize, wordsCountsBitsCnt, wordsBitsCnt, contentWordsCnt, contentBitsCnt
         };
+        auto wordsProgressBar = boost::timer::progress_display(layoutInfo.dictWordsCount);
+        auto countsProgressBar = boost::timer::progress_display(layoutInfo.dictWordsCount);
+        auto contentProgressBar = boost::timer::progress_display(layoutInfo.contentWordsCount);
+
         ael::NumericalDecoder::decode(
             cfg.decoded, std::back_inserter(contentWordsOrds), 256,
-            lauoutInfo, cfg.outStream);
+            layoutInfo,
+            [&wordsProgressBar]{ ++wordsProgressBar; },
+            [&countsProgressBar]{ ++countsProgressBar; },
+            [&contentProgressBar]{ ++contentProgressBar; });
 
         auto dataConstructor = ael::ByteDataConstructor();
 

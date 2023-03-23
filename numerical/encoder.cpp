@@ -72,8 +72,19 @@ int main(int argc, char* argv[]) {
         dataConstructor.putT<std::uint64_t>(ordFlow.size());
         const auto contentBitsCntPos = dataConstructor.saveSpaceForT<std::uint64_t>();
 
+        auto countsMapping = ael::NumericalCoder::countWords(ordFlow); 
+
+        auto wordsProgressBar = boost::timer::progress_display(countsMapping.size());
+        auto countsProgressBar = boost::timer::progress_display(countsMapping.size());
+        auto contentProgressBar = boost::timer::progress_display(ordFlow.size());
+
         auto layoutInfo =
-             ael::NumericalCoder::encode(ordFlow, dataConstructor, outStream);
+            ael::NumericalCoder::encode(
+                ordFlow, countsMapping, dataConstructor, 
+                [&wordsProgressBar]{ ++wordsProgressBar; },
+                [&countsProgressBar]{ ++countsProgressBar; },
+                [&contentProgressBar]{ ++contentProgressBar; }
+            );
 
         dataConstructor.putTToPosition(layoutInfo.dictSize,
                                        dictSizePos);
