@@ -3,14 +3,15 @@
 #include <cstdint>
 
 #include <boost/program_options.hpp>
-#include <boost/timer/progress_display.hpp>
+
+#include <indicators/progress_bar.hpp>
 
 #include <ael/arithmetic_coder.hpp>
 #include <ael/dictionary/ppma_dictionary.hpp>
 
-#include <applib/opt_ostream.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
 #include <applib/file_opener.hpp>
+#include <applib/log_stream_get.hpp>
 
 namespace bpo = boost::program_options;
 
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
         bpo::notify(vm);
 
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
-        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
+        auto& outStream = LogStreamGet::getLogStream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
         auto dict = ael::dict::PPMADictionary(1ull << numBits, ctxLen);
 
@@ -63,9 +64,15 @@ int main(int argc, char* argv[]) {
         encoded.putT<std::uint8_t>(ctxLen);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto progressBar = boost::timer::progress_display(wordsOrds.size());
+        auto progressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{wordsOrds.size()},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Encoding words"},
+            indicators::option::Stream{outStream}
+        );
         auto [wordsCount, bitsCount] = ael::ArithmeticCoder::encode(
-            wordsOrds, encoded, dict, [&progressBar](){ ++progressBar; });
+            wordsOrds, encoded, dict, [&progressBar](){ progressBar.tick(); });
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());

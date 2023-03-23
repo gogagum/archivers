@@ -9,8 +9,8 @@ target_sources(archievers-applib
         src/decode_impl.cpp
         src/exceptions.cpp
         src/file_opener.cpp
-        src/opt_ostream.cpp
         src/ord_and_tail_splitter.cpp
+        src/log_stream_get.cpp
 )
 
 target_include_directories(archievers-applib
@@ -27,5 +27,5 @@ target_include_directories(archievers-applib
         ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(archievers-applib boost_program_options fmt::fmt)
+target_link_libraries(archievers-applib boost_program_options fmt::fmt indicators::indicators)
 

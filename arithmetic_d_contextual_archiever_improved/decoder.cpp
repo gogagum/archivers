@@ -5,7 +5,6 @@
 
 #include <ael/dictionary/adaptive_d_contextual_dictionary_improved.hpp>
 
-#include <applib/opt_ostream.hpp>
 #include <applib/file_opener.hpp>
 #include <applib/decode_impl.hpp>
 

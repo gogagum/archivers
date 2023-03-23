@@ -1,18 +1,7 @@
 #include <applib/file_opener.hpp>
 
 #include <fmt/format.h>
-
-////////////////////////////////////////////////////////////////////////////////
-FileOpener::FileOpener(const std::string& inFileName,
-                       const std::string& outFileName,
-                       optout::OptOstreamRef optOs)
-        : _finData(_openInFile(inFileName, optOs)),
-          _fout(outFileName, std::ios::binary) {
-    if (!_fout.is_open()) {
-        throw std::runtime_error(
-            fmt::format("Could not open file: \"{}\"", outFileName));
-    }
-}
+#include <ostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 std::span<const std::byte> FileOpener::getInData() const {
@@ -27,7 +16,7 @@ std::ofstream& FileOpener::getOutFileStream() {
 ////////////////////////////////////////////////////////////////////////////////
 std::vector<std::byte>
 FileOpener::_openInFile(const std::string& fileInName,
-                        optout::OptOstreamRef optOs) {
+                        std::ostream& optOs) {
     std::ifstream fin{fileInName, std::ifstream::ate | std::ifstream::binary};
     if (!fin.is_open()) {
         throw std::runtime_error(
@@ -44,4 +33,17 @@ FileOpener::_openInFile(const std::string& fileInName,
     auto ret = std::vector<std::byte>(finSize);
     fin.read(reinterpret_cast<char*>(ret.data()), finSize);
     return ret;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+FileOpener::FileOpener(const std::string& inFileName,
+                       const std::string& outFileName,
+                       std::ostream& optOs)
+        : _finData(_openInFile(inFileName, optOs)),
+          _fout(outFileName, std::ios::binary) {
+    if (!_fout.is_open()) {
+        throw std::runtime_error(
+            fmt::format("Could not open file: \"{}\"", outFileName));
+    }
 }

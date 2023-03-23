@@ -252,6 +252,7 @@
             "args": [
                 "-i", "${workspaceRoot}/testing/debug-out/obj1-numerical",
                 "-o", "${workspaceRoot}/testing/debug-out/obj1-numerical-decoded",
+                "-l", "off"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

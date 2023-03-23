@@ -4,14 +4,16 @@
 #include <boost/program_options.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
+#include <indicators/progress_bar.hpp>
+
 #include <ael/numerical_coder.hpp>
 #include <ael/flow/bytes_word_flow.hpp>
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
-#include <applib/opt_ostream.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
 #include <applib/file_opener.hpp>
+#include <applib/log_stream_get.hpp>
 
 namespace bpo = boost::program_options;
 
@@ -51,7 +53,7 @@ int main(int argc, char* argv[]) {
         bpo::notify(vm);
 
         outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
-        optout::OptOstreamRef outStream = get_out_stream(logStreamParam);
+        auto& outStream = LogStreamGet::getLogStream(logStreamParam);
         auto fileOpener = FileOpener(inFileName, outFileName, outStream);
         auto inFileBytes = fileOpener.getInData();
         auto wordFlow = BytesWordFlow<1>(inFileBytes);
@@ -74,16 +76,34 @@ int main(int argc, char* argv[]) {
 
         auto countsMapping = ael::NumericalCoder::countWords(ordFlow); 
 
-        auto wordsProgressBar = boost::timer::progress_display(countsMapping.size());
-        auto countsProgressBar = boost::timer::progress_display(countsMapping.size());
-        auto contentProgressBar = boost::timer::progress_display(ordFlow.size());
+        auto wordsProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{countsMapping.size()},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Encoding words"},
+            indicators::option::Stream{outStream}
+        );
+        auto countsProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{countsMapping.size()},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Encoding counts"},
+            indicators::option::Stream{outStream}
+        );
+        auto contentProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{ordFlow.size()},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Encoding content"},
+            indicators::option::Stream{outStream}
+        );
 
         auto layoutInfo =
             ael::NumericalCoder::encode(
                 ordFlow, countsMapping, dataConstructor, 
-                [&wordsProgressBar]{ ++wordsProgressBar; },
-                [&countsProgressBar]{ ++countsProgressBar; },
-                [&contentProgressBar]{ ++contentProgressBar; }
+                [&wordsProgressBar]{ wordsProgressBar.tick(); },
+                [&countsProgressBar]{ countsProgressBar.tick(); },
+                [&contentProgressBar]{ contentProgressBar.tick(); }
             );
 
         dataConstructor.putTToPosition(layoutInfo.dictSize,

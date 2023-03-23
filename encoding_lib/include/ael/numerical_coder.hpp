@@ -2,7 +2,6 @@
 #define NUMERICAL_CODER_HPP
 
 #include <algorithm>
-#include <boost/timer/progress_display.hpp>
 #include <cstddef>
 #include <ranges>
 #include <map>
@@ -113,7 +112,7 @@ auto NumericalCoder::countWords(
     std::vector<CountEntry> ret;
     std::transform(countsMap.begin(), countsMap.end(), std::back_inserter(ret),
                    [](auto entry) {
-                       return CountEntry(entry.first, entry.second);
+                       return CountEntry{entry.first, entry.second};
                    });
     std::sort(ret.begin(), ret.end(),
               [](const auto& c0, const auto& c1){

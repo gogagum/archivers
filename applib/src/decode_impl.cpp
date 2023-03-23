@@ -3,8 +3,15 @@
 #include <ael/byte_data_constructor.hpp>
 #include <ael/data_parser.hpp>
 #include <boost/program_options.hpp>
+#include <optional>
+#include <ostream>
+#include <stdexcept>
+
+#include <applib/log_stream_get.hpp>
 
 namespace bpo = boost::program_options;
+
+std::ostream DecodeImpl::nullOut{nullptr};
 
 ////////////////////////////////////////////////////////////////////////////////
 auto DecodeImpl::configure(int argc, char* argv[]) -> ConfigureRet {
@@ -35,13 +42,13 @@ auto DecodeImpl::configure(int argc, char* argv[]) -> ConfigureRet {
         outFileName = outFileName.empty()
             ? inFileName + "-decoded"
             : outFileName;
-
-        auto outStream = get_out_stream(logStreamParam);
-        auto filesOpener = FileOpener(inFileName, outFileName, outStream);
+        
+        auto& outStrem = LogStreamGet::getLogStream(logStreamParam);
+        auto filesOpener = FileOpener(inFileName, outFileName, outStrem);
         auto decoded = ael::DataParser(filesOpener.getInData());
 
         return {
-            outStream,
+            outStrem,
             std::move(filesOpener),
             std::move(decoded)
         };
