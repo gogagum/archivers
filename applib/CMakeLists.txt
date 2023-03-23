@@ -1,5 +1,7 @@
 add_library(archievers-applib STATIC)
 
+add_subdirectory(thirdparty)
+
 target_sources(archievers-applib
     PRIVATE
         src/decode_impl.cpp

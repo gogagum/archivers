@@ -1,6 +1,6 @@
 #include <applib/file_opener.hpp>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 FileOpener::FileOpener(const std::string& inFileName,
@@ -10,7 +10,7 @@ FileOpener::FileOpener(const std::string& inFileName,
           _fout(outFileName, std::ios::binary) {
     if (!_fout.is_open()) {
         throw std::runtime_error(
-            (boost::format("Could not open file: \"%1%\"") % outFileName).str());
+            fmt::format("Could not open file: \"{}\"", outFileName));
     }
 }
 
