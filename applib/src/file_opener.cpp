@@ -31,14 +31,14 @@ FileOpener::_openInFile(const std::string& fileInName,
     std::ifstream fin{fileInName, std::ifstream::ate | std::ifstream::binary};
     if (!fin.is_open()) {
         throw std::runtime_error(
-            (boost::format("Could not open file: \"%1%\"") % fileInName).str());
+            fmt::format("Could not open file: \"{}\"", fileInName));
     }
 
     fin.unsetf(std::ios::skipws);  // Not to eat newlines.
     std::streampos finSize;
     fin.seekg(0, std::ios::end);
     finSize = fin.tellg();
-    optOs << "File size: " << static_cast<std::size_t>(finSize) << "." << std::endl;
+    optOs << fmt::format("File size: {}.", finSize) << std::endl;
     fin.seekg(0, std::ios::beg);
 
     auto ret = std::vector<std::byte>(finSize);

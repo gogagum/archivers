@@ -2,6 +2,7 @@
 #define NUMERICAL_CODER_HPP
 
 #include <algorithm>
+#include <boost/timer/progress_display.hpp>
 #include <cstddef>
 #include <ranges>
 #include <map>
@@ -66,22 +67,28 @@ auto NumericalCoder::encode(auto& ordFlow,
 
     // Encode words
     auto wordsDict = dict::DecreasingOnUpdateDictionary(maxOrd, 1);
-    auto [dictWordsEncoded, wordsBitsCnt] =
-        ArithmeticCoder::encode(dictWordsOrds, dataConstructor, wordsDict, os);
+    auto wordsProgressBar = boost::timer::progress_display(dictWordsOrds.size());
+    auto [dictWordsEncoded, wordsBitsCnt] = ArithmeticCoder::encode(
+        dictWordsOrds, dataConstructor, wordsDict,
+        [&wordsProgressBar](){ ++wordsProgressBar; });
     assert(dictWordsEncoded == countsMapping.size());
 
     // Encode counts
     auto countsDict =
         dict::DecreasingCountDictionary<std::uint64_t>(ordFlow.size());
-    auto [dictWordsCountsEncoded, countsBitsCnt] =
-        ArithmeticCoder::encode(counts, dataConstructor, countsDict, os); 
+    auto countsProgressBar = boost::timer::progress_display(counts.size());
+    auto [dictWordsCountsEncoded, countsBitsCnt] = ArithmeticCoder::encode(
+        counts, dataConstructor, countsDict,
+        [&countsProgressBar](){ ++countsProgressBar; }); 
     assert(dictWordsCountsEncoded == countsMapping.size());
     
     // Encode content
     auto contentDict =
         dict::DecreasingOnUpdateDictionary(maxOrd, countsMapping);
-    auto [contentWordsEncoded, contentBitsCnt] =
-        ArithmeticCoder::encode(ordFlow, dataConstructor, contentDict, os);
+    auto contentProgressBar = boost::timer::progress_display(ordFlow.size());
+    auto [contentWordsEncoded, contentBitsCnt] = ArithmeticCoder::encode(
+        ordFlow, dataConstructor, contentDict, 
+        [&contentProgressBar](){ ++contentProgressBar; });
     assert(contentWordsEncoded == ordFlow.size());
 
     return {

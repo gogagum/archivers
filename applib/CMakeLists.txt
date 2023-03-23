@@ -2,6 +2,8 @@ add_library(archievers-applib STATIC)
 
 add_subdirectory(thirdparty)
 
+find_package(fmt)
+
 target_sources(archievers-applib
     PRIVATE
         src/decode_impl.cpp
@@ -25,5 +27,5 @@ target_include_directories(archievers-applib
         ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(archievers-applib boost_program_options)
+target_link_libraries(archievers-applib boost_program_options fmt::fmt)
 

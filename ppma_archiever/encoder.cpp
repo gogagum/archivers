@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <boost/program_options.hpp>
+#include <boost/timer/progress_display.hpp>
 
 #include <ael/arithmetic_coder.hpp>
 #include <ael/dictionary/ppma_dictionary.hpp>
@@ -62,7 +63,9 @@ int main(int argc, char* argv[]) {
         encoded.putT<std::uint8_t>(ctxLen);
         const auto wordsCountPos = encoded.saveSpaceForT<std::uint64_t>();
         const auto bitsCountPos = encoded.saveSpaceForT<std::uint64_t>();
-        auto [wordsCount, bitsCount] = ael::ArithmeticCoder::encode(wordsOrds, encoded, dict, outStream);
+        auto progressBar = boost::timer::progress_display(wordsOrds.size());
+        auto [wordsCount, bitsCount] = ael::ArithmeticCoder::encode(
+            wordsOrds, encoded, dict, [&progressBar](){ ++progressBar; });
         encoded.putTToPosition(wordsCount, wordsCountPos);
         encoded.putTToPosition(bitsCount, bitsCountPos);
         std::copy(tail.begin(), tail.end(), encoded.getBitBackInserter());
