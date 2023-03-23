@@ -28,7 +28,7 @@ public:
             OutIter outIter,
             std::size_t wordsCount,
             std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
-            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
+            auto&& tick = [](){}
         );
 };
 
@@ -40,7 +40,7 @@ void ArithmeticDecoder::decode(
         OutIter outIter,
         std::size_t wordsCount,
         std::size_t bitsLimit,
-        std::optional<std::reference_wrapper<std::ostream>> os) {
+        auto&& tick) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -58,9 +58,6 @@ void ArithmeticDecoder::decode(
     }
 
     auto barOpt = std::optional<boost::timer::progress_display>();
-    if (os.has_value()) {
-        barOpt.emplace(wordsCount, os.value(), "");
-    }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
         const auto range =
@@ -96,6 +93,7 @@ void ArithmeticDecoder::decode(
         if (barOpt.has_value()) {
             ++barOpt.value();
         }
+        tick();
     }
 }
 

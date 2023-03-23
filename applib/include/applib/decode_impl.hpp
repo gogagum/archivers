@@ -1,6 +1,7 @@
 #ifndef APPLIB_DECODE_IMPL_HPP
 #define APPLIB_DECODE_IMPL_HPP
 
+#include <boost/timer/progress_display.hpp>
 #include <cstdint>
 #include <ostream>
 #include <vector>
@@ -47,9 +48,10 @@ void DecodeImpl::process(ael::DataParser &decoded,
     
     std::vector<std::uint64_t> ords;
     
+    auto progressBar = boost::timer::progress_display(wordsCount);
     ael::ArithmeticDecoder::decode(
         decoded, dict, std::back_inserter(ords),
-        wordsCount, bitsCount, optLogOutStream);
+        wordsCount, bitsCount, [&progressBar](){ ++progressBar; });
     
     WordPacker::process(ords, dataConstructor, symBitLen);
     

@@ -33,7 +33,7 @@ public:
     static EncodeRet encode(auto ordFlow,
                             ByteDataConstructor& dataConstructor,
                             DictT& dict,
-                            auto tick = [](){});
+                            auto&& tick = [](){});
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ auto ArithmeticCoder::encode(
         auto ordFlow,
         ByteDataConstructor& dataConstructor, 
         DictT& dict,
-        auto tick) -> EncodeRet {
+        auto&& tick) -> EncodeRet {
     auto ret = EncodeRet();
     using RC = impl::RangesCalc<typename DictT::Count, DictT::countNumBits>;
     auto currRange = typename RC::Range{ 0, RC::total };

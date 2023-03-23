@@ -1,6 +1,7 @@
 #ifndef NUMERICAL_DECODER_HPP
 #define NUMERICAL_DECODER_HPP
 
+#include <boost/timer/progress_display.hpp>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -87,11 +88,14 @@ std::vector<std::uint64_t> NumericalDecoder::_decodeOrds(
         const LayoutInfo& layoutInfo,
         OptOs os) {
     auto dictWordsDictionary = dict::DecreasingOnUpdateDictionary(maxOrd, 1);
+    auto progressBar = boost::timer::progress_display(layoutInfo.dictWordsCount);
     auto ords = std::vector<std::uint64_t>();
         ArithmeticDecoder::decode(
             source, dictWordsDictionary,
             std::back_inserter(ords),
-            layoutInfo.dictWordsCount, layoutInfo.dictWordsBitsCount, os);
+            layoutInfo.dictWordsCount,
+            layoutInfo.dictWordsBitsCount, 
+            [&progressBar](){ ++progressBar; });
     return ords;
 }
 
@@ -102,11 +106,14 @@ std::vector<std::uint64_t> NumericalDecoder::_decodeCounts(
         OptOs os) {
     auto countsDictionary = dict::DecreasingCountDictionary<std::uint64_t>(
         layoutInfo.contentWordsCount);
+    auto progresBar = boost::timer::progress_display(layoutInfo.dictWordsCount);
     auto counts = std::vector<std::uint64_t>();
     ArithmeticDecoder::decode(
                 source, countsDictionary,
                 std::back_inserter(counts),
-                layoutInfo.dictWordsCount, layoutInfo.wordsCntBitsCount, os);
+                layoutInfo.dictWordsCount,
+                layoutInfo.wordsCntBitsCount,
+                [&progresBar](){ ++progresBar; });
     return counts;
 }
 
@@ -122,17 +129,19 @@ void NumericalDecoder::_decodeContent(
         OptOs os) {
     assert(ords.size() == counts.size());
     auto contentDictInitialCounts = std::vector<_CountEntry>();
-        std::transform(ords.begin(), ords.end(), counts.begin(),
-                       std::back_inserter(contentDictInitialCounts),
-                       [](std::uint64_t wordOrd,
-                          std::uint64_t count) -> _CountEntry {
-                           return { wordOrd, count };
-                       });
+    std::transform(ords.begin(), ords.end(), counts.begin(),
+                   std::back_inserter(contentDictInitialCounts),
+                   [](std::uint64_t wordOrd,
+                      std::uint64_t count) -> _CountEntry {
+                       return { wordOrd, count };
+                   });
+    auto progressBar = boost::timer::progress_display(layoutInfo.contentWordsCount);
     auto contentDictionary =
         dict::DecreasingOnUpdateDictionary(maxOrd, contentDictInitialCounts);
     ArithmeticDecoder::decode(source, contentDictionary, outIter,
                               layoutInfo.contentWordsCount,
-                              layoutInfo.contentWordsBitsCount, os);
+                              layoutInfo.contentWordsBitsCount,
+                              [&progressBar](){ ++progressBar; });
 }
 
 }  // ael
