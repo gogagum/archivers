@@ -37,7 +37,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 include_directories(thirdparty/dynamic-segment-tree/include/)
 
-add_subdirectory(thirdparty/dynamic-segment-tree)
+add_subdirectory(thirdparty)
 
 include_directories(thirdparty/dynamic-segment-tree/include/)
 add_subdirectory(encoding_lib)
