@@ -5,11 +5,12 @@
 #include <ostream>
 #include <vector>
 
+#include <indicators/progress_bar.hpp>
+
 #include <ael/arithmetic_decoder.hpp>
 #include <ael/data_parser.hpp>
 
 #include "file_opener.hpp"
-#include "opt_ostream.hpp"
 #include "word_packer.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -17,10 +18,12 @@
 ///
 struct DecodeImpl {
     struct ConfigureRet {
-        optout::OptOstreamRef outStream;
+        std::ostream& outStream;
         FileOpener fileOpener;
         ael::DataParser decoded;
     };
+
+    static std::ostream nullOut;
 
     static ConfigureRet configure(int argc, char* argv[]);
 
@@ -31,7 +34,7 @@ struct DecodeImpl {
                         std::uint16_t symBitLen,
                         std::uint16_t tailSize,
                         std::ostream& bytesOutStream,
-                        optout::OptOstreamRef optLogOutStream);
+                        std::ostream& optLogOutStream);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,15 +44,21 @@ void DecodeImpl::process(ael::DataParser &decoded,
                          std::size_t bitsCount,
                          std::uint16_t symBitLen,
                          std::uint16_t tailSize,
-                         std::ostream &bytesOutStream,
-                         optout::OptOstreamRef optLogOutStream) {
+                         std::ostream& bytesOutStream,
+                         std::ostream& optLogOutStream) {
     auto dataConstructor = ael::ByteDataConstructor();
     
     std::vector<std::uint64_t> ords;
     
+    auto progressBar = indicators::ProgressBar(
+        indicators::option::BarWidth{50},
+        indicators::option::MaxProgress{wordsCount},
+        indicators::option::ShowPercentage{true},
+        indicators::option::PostfixText{"Decoding"},
+        indicators::option::Stream{optLogOutStream});
     ael::ArithmeticDecoder::decode(
         decoded, dict, std::back_inserter(ords),
-        wordsCount, bitsCount, optLogOutStream);
+        wordsCount, bitsCount, [&progressBar](){ progressBar.tick(); });
     
     WordPacker::process(ords, dataConstructor, symBitLen);
     

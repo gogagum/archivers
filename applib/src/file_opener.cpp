@@ -1,18 +1,7 @@
 #include <applib/file_opener.hpp>
 
-#include <boost/format.hpp>
-
-////////////////////////////////////////////////////////////////////////////////
-FileOpener::FileOpener(const std::string& inFileName,
-                       const std::string& outFileName,
-                       optout::OptOstreamRef optOs)
-        : _finData(_openInFile(inFileName, optOs)),
-          _fout(outFileName, std::ios::binary) {
-    if (!_fout.is_open()) {
-        throw std::runtime_error(
-            (boost::format("Could not open file: \"%1%\"") % outFileName).str());
-    }
-}
+#include <fmt/format.h>
+#include <ostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 std::span<const std::byte> FileOpener::getInData() const {
@@ -27,21 +16,34 @@ std::ofstream& FileOpener::getOutFileStream() {
 ////////////////////////////////////////////////////////////////////////////////
 std::vector<std::byte>
 FileOpener::_openInFile(const std::string& fileInName,
-                        optout::OptOstreamRef optOs) {
+                        std::ostream& optOs) {
     std::ifstream fin{fileInName, std::ifstream::ate | std::ifstream::binary};
     if (!fin.is_open()) {
         throw std::runtime_error(
-            (boost::format("Could not open file: \"%1%\"") % fileInName).str());
+            fmt::format("Could not open file: \"{}\"", fileInName));
     }
 
     fin.unsetf(std::ios::skipws);  // Not to eat newlines.
     std::streampos finSize;
     fin.seekg(0, std::ios::end);
     finSize = fin.tellg();
-    optOs << "File size: " << static_cast<std::size_t>(finSize) << "." << std::endl;
+    optOs << fmt::format("File size: {}.", finSize) << std::endl;
     fin.seekg(0, std::ios::beg);
 
     auto ret = std::vector<std::byte>(finSize);
     fin.read(reinterpret_cast<char*>(ret.data()), finSize);
     return ret;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+FileOpener::FileOpener(const std::string& inFileName,
+                       const std::string& outFileName,
+                       std::ostream& optOs)
+        : _finData(_openInFile(inFileName, optOs)),
+          _fout(outFileName, std::ios::binary) {
+    if (!_fout.is_open()) {
+        throw std::runtime_error(
+            fmt::format("Could not open file: \"{}\"", outFileName));
+    }
 }

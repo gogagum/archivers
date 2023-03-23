@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cstdint>
 #include <optional>
-#include <boost/timer/progress_display.hpp>
 
 #include "byte_data_constructor.hpp"
 #include "impl/ranges_calc.hpp"
@@ -34,7 +33,7 @@ public:
     static EncodeRet encode(auto ordFlow,
                             ByteDataConstructor& dataConstructor,
                             DictT& dict,
-                            auto os = std::nullopt);
+                            auto&& tick = [](){});
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,17 +42,12 @@ auto ArithmeticCoder::encode(
         auto ordFlow,
         ByteDataConstructor& dataConstructor, 
         DictT& dict,
-        auto os) -> EncodeRet {
+        auto&& tick) -> EncodeRet {
     auto ret = EncodeRet();
     using RC = impl::RangesCalc<typename DictT::Count, DictT::countNumBits>;
     auto currRange = typename RC::Range{ 0, RC::total };
 
     std::size_t btf = 0;
-
-    auto barOpt = std::optional<boost::timer::progress_display>();
-    if (os.has_value()) {
-        barOpt.emplace(ordFlow.size(), os.value(), "");
-    }
 
     for (auto ord : ordFlow) {
         const auto [low, high, total] = dict.getProbabilityStats(ord);
@@ -77,9 +71,7 @@ auto ArithmeticCoder::encode(
             currRange = RC::recalcRange(currRange);
         }
         ++ret.wordsCount;
-        if (barOpt.has_value()) {
-            ++barOpt.value();
-        }
+        tick();
     }
 
     ret.bitsEncoded += btf + 2;

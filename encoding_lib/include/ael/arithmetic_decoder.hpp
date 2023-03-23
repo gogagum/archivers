@@ -4,7 +4,6 @@
 #define ARITHMETIC_DECODER_HPP
 
 #include <boost/range/irange.hpp>
-#include <boost/timer/progress_display.hpp>
 
 #include <iostream>
 #include <cstdint>
@@ -27,20 +26,59 @@ public:
             Dict& dict,
             OutIter outIter,
             std::size_t wordsCount,
-            std::size_t bitsLimit = std::numeric_limits<std::size_t>::max(),
-            std::optional<std::reference_wrapper<std::ostream>> os = std::nullopt
+            std::size_t bitsLimit
+        );
+    template <std::output_iterator<std::uint64_t> OutIter, class Dict>
+    static void decode(
+            auto& source,
+            Dict& dict,
+            OutIter outIter,
+            std::size_t wordsCount,
+            std::size_t bitsLimit,
+            auto tick
+        );
+public:
+    template <class Dict>
+    static void _decode(
+            auto& source,
+            Dict& dict,
+            auto outIter,
+            std::size_t wordsCount,
+            std::size_t bitsLimit,
+            auto tick
         );
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 template <std::output_iterator<std::uint64_t> OutIter, class Dict>
-void ArithmeticDecoder::decode(
+void ArithmeticDecoder::decode(auto& source,
+                               Dict& dict,
+                               OutIter outIter,
+                               std::size_t wordsCount,
+                               std::size_t bitsLimit) {
+    return _decode(source, dict, outIter, wordsCount, bitsLimit, []{});
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <std::output_iterator<std::uint64_t> OutIter, class Dict>
+void ArithmeticDecoder::decode(auto& source,
+                               Dict& dict,
+                               OutIter outIter,
+                               std::size_t wordsCount,
+                               std::size_t bitsLimit,
+                               auto tick) {
+    return _decode(source, dict, outIter, wordsCount, bitsLimit, tick);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+template <class Dict>
+void ArithmeticDecoder::_decode(
         auto& source,
         Dict& dict,
-        OutIter outIter,
+        auto outIter,
         std::size_t wordsCount,
         std::size_t bitsLimit,
-        std::optional<std::reference_wrapper<std::ostream>> os) {
+        auto tick) {
     const auto takeBitLimited = [&source, &bitsLimit]() -> bool {
         if (bitsLimit == 0) {
             return false;
@@ -55,11 +93,6 @@ void ArithmeticDecoder::decode(
 
     for (auto _ : boost::irange<std::size_t>(0, Dict::countNumBits)) {
         value = (value << 1) + (takeBitLimited() ? 1 : 0);
-    }
-
-    auto barOpt = std::optional<boost::timer::progress_display>();
-    if (os.has_value()) {
-        barOpt.emplace(wordsCount, os.value(), "");
     }
 
     for (auto i : boost::irange<std::size_t>(0, wordsCount)) {
@@ -93,9 +126,7 @@ void ArithmeticDecoder::decode(
             }
             currRange = RC::recalcRange(currRange);
         }
-        if (barOpt.has_value()) {
-            ++barOpt.value();
-        }
+        tick();
     }
 }
 

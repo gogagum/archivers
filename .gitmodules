@@ -1,3 +1,0 @@
-[submodule "thirdparty/dynamic-segment-tree"]
-	path = thirdparty/dynamic-segment-tree
-	url = https://github.com/gogagum/dynamic-segment-tree

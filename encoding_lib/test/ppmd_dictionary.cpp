@@ -120,12 +120,12 @@ TEST(PPMDDictionary, Example2) {
     EXPECT_EQ(high4 - low4, 2783);
     EXPECT_EQ(total4, 4048);
     const auto [low5, high5, total5] = dict.getProbabilityStats(64);
-    EXPECT_EQ(high5 - low5, 6);
+    EXPECT_EQ(high5 - low5, 3);
     EXPECT_EQ(total5, 10120);
     const auto [low6, high6, total6] = dict.getProbabilityStats(0);
     EXPECT_EQ(high6 - low6, 1260);
     EXPECT_EQ(total6, 3024);
     const auto [low7, high7, total7] = dict.getProbabilityStats(0);
-    EXPECT_EQ(high7 - low7, 12348);
+    EXPECT_EQ(high7 - low7, 14112);
     EXPECT_EQ(total7, 21168);
 }

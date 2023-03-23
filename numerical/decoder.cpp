@@ -1,14 +1,16 @@
 #include <cstdint>
 #include <iostream>
 #include <iterator>
+
 #include <boost/program_options.hpp>
+
+#include <indicators/progress_bar.hpp>
 
 #include <ael/numerical_decoder.hpp>
 #include <ael/data_parser.hpp>
 #include <ael/byte_data_constructor.hpp>
 #include <ael/word/bytes_word.hpp>
 
-#include <applib/opt_ostream.hpp>
 #include <applib/file_opener.hpp>
 #include <applib/decode_impl.hpp>
 
@@ -37,12 +39,36 @@ int main(int argc, char* argv[]) {
             takeWithLog("Bits for content decoding: ", std::uint64_t{});
 
         auto contentWordsOrds = std::vector<std::uint64_t>();
-        const auto lauoutInfo = ael::NumericalDecoder::LayoutInfo {
+        const auto layoutInfo = ael::NumericalDecoder::LayoutInfo {
             dictSize, wordsCountsBitsCnt, wordsBitsCnt, contentWordsCnt, contentBitsCnt
         };
+        auto wordsProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{layoutInfo.dictWordsCount},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Decoding words"},
+            indicators::option::Stream{cfg.outStream}
+        );
+        auto countsProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{layoutInfo.dictWordsCount},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Decoding counts"},
+            indicators::option::Stream{cfg.outStream}
+        );
+        auto contentProgressBar = indicators::ProgressBar(
+            indicators::option::BarWidth{50},
+            indicators::option::MaxProgress{layoutInfo.contentWordsCount},
+            indicators::option::ShowPercentage{true},
+            indicators::option::PostfixText{"Decoding content"},
+            indicators::option::Stream{cfg.outStream}
+        );
         ael::NumericalDecoder::decode(
             cfg.decoded, std::back_inserter(contentWordsOrds), 256,
-            lauoutInfo, cfg.outStream);
+            layoutInfo,
+            [&wordsProgressBar]{ wordsProgressBar.tick(); },
+            [&countsProgressBar]{ countsProgressBar.tick(); },
+            [&contentProgressBar]{ contentProgressBar.tick(); });
 
         auto dataConstructor = ael::ByteDataConstructor();
 

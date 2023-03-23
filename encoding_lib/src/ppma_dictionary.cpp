@@ -116,11 +116,8 @@ auto PPMADictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         total *= this->_maxOrd - zeroUniqueCnt;
         lower *= this->_maxOrd - zeroUniqueCnt;
         lower += ord - _zeroCtxUniqueCnt.getLowerCumulativeCount(ord);
-        if (count == 0) {
-            count = 1;
-        } else {
-            count *= this->_maxOrd - zeroUniqueCnt;
-        }
+        count *= this->_maxOrd - zeroUniqueCnt;
+        count += 1 - _zeroCtxUniqueCnt.getCount(ord);
     }
     assert(count > 0);
     assert(lower + count <= total);

@@ -5,6 +5,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 add_library(${PROJECT_NAME} STATIC)
+add_subdirectory(thirdparty)
 
 target_sources(${PROJECT_NAME}
     PRIVATE

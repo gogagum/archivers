@@ -135,18 +135,18 @@ auto PPMDDictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         uniqueCountsProd *= ctxUniqueInfo.getTotalWordsCnt();
     }
     const auto zeroCtxUniqueTotal = _zeroCtxCell.uniqueCnt.getTotalWordsCnt();
-    if (const auto zeroCtxTotal = _zeroCtxCell.cnt.getTotalWordsCnt();
-            zeroCtxTotal != 0) {
-        lower *= zeroCtxTotal * 2;
-        const auto lowerCnt = _zeroCtxCell.cnt.getLowerCumulativeCount(ord);
-        const auto lowerUniqueCnt =
-            _zeroCtxCell.uniqueCnt.getLowerCumulativeCount(ord);
-        lower += (lowerCnt * 2 - lowerUniqueCnt) * uniqueCountsProd;
+    const auto zeroCtxTotal = _zeroCtxCell.cnt.getTotalWordsCnt();
+    lower *= zeroCtxTotal * 2;
+    const auto lowerCnt = _zeroCtxCell.cnt.getLowerCumulativeCount(ord);
+    const auto lowerUniqueCnt =
+        _zeroCtxCell.uniqueCnt.getLowerCumulativeCount(ord);
+    lower += (lowerCnt * 2 - lowerUniqueCnt) * uniqueCountsProd;
+    count *= zeroCtxTotal * 2;
+    const auto cnt = _zeroCtxCell.cnt.getCount(ord);
+    const auto uniqueCnt = _zeroCtxCell.uniqueCnt.getCount(ord);
+    count += (cnt * 2 - uniqueCnt) * uniqueCountsProd;
+    if (zeroCtxTotal != 0) {
         total *= zeroCtxTotal * 2;
-        count *= zeroCtxTotal * 2;
-        const auto cnt = _zeroCtxCell.cnt.getCount(ord);
-        const auto uniqueCnt = _zeroCtxCell.uniqueCnt.getCount(ord);
-        count += (cnt * 2 - uniqueCnt) * uniqueCountsProd;
         uniqueCountsProd *= zeroCtxUniqueTotal;
     }
     if (zeroCtxUniqueTotal < this->_maxOrd) {
@@ -154,11 +154,8 @@ auto PPMDDictionary::_getProbabilityStats(Ord ord) const -> ProbabilityStats {
         lower *= this->_maxOrd - zeroCtxUniqueTotal;
         lower += (ord - _zeroCtxCell.uniqueCnt.getLowerCumulativeCount(ord))
             * uniqueCountsProd;
-        if (count == 0) {
-            count = uniqueCountsProd;
-        } else {
-            count *= this->_maxOrd - zeroCtxUniqueTotal;
-        }
+        count *= this->_maxOrd - zeroCtxUniqueTotal;
+        count += uniqueCountsProd * (1 - _zeroCtxCell.uniqueCnt.getCount(ord));
     }
     assert(count > 0);
     assert(lower + count <= total);
