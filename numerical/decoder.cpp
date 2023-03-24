@@ -9,12 +9,10 @@
 #include <ael/numerical_decoder.hpp>
 #include <ael/data_parser.hpp>
 #include <ael/byte_data_constructor.hpp>
-#include <ael/word/bytes_word.hpp>
 
 #include <applib/file_opener.hpp>
 #include <applib/decode_impl.hpp>
-
-using ael::w::BytesWord;
+#include <applib/word/bytes_word.hpp>
 
 int main(int argc, char* argv[]) {
     try {

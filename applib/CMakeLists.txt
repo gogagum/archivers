@@ -27,5 +27,8 @@ target_include_directories(archievers-applib
         ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(archievers-applib boost_program_options fmt::fmt indicators::indicators)
+target_link_libraries(archievers-applib arithmetic-encoding-lib boost_program_options fmt::fmt indicators::indicators)
 
+if (BUILD_TEST)
+    add_subdirectory(test)
+endif (BUILD_TEST)

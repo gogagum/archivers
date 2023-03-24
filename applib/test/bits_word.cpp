@@ -3,10 +3,8 @@
 #include <cstdint>
 #include <boost/range/combine.hpp>
 
-#include <ael/word/bits_word.hpp>
+#include <applib/word/bits_word.hpp>
 #include <ael/bits_iterator.hpp>
-
-using ael::w::BitsWord;
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

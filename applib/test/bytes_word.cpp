@@ -5,9 +5,7 @@
 #include <vector>
 #include <boost/range/combine.hpp>
 
-#include <ael/word/bytes_word.hpp>
-
-using ael::w::BytesWord;
+#include <applib/word/bytes_word.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

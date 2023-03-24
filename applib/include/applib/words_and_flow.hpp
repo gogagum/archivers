@@ -3,24 +3,24 @@
 
 #include <cstdint>
 
-#include <ael/word/bytes_word.hpp>
-#include <ael/word/bits_word.hpp>
-#include <ael/flow/bits_word_flow.hpp>
-#include <ael/flow/bytes_word_flow.hpp>
+#include <applib/word/bytes_word.hpp>
+#include <applib/word/bits_word.hpp>
+#include <applib/flow/bits_word_flow.hpp>
+#include <applib/flow/bytes_word_flow.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits>
 struct TypeChoise {
-    using Flow = ael::fl::BitsWordFlow<numBits>;
-    using Word = ael::w::BitsWord<numBits>;
+    using Flow = BitsWordFlow<numBits>;
+    using Word = BitsWord<numBits>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 template <std::uint16_t numBits> requires (numBits % 8 == 0)
 struct TypeChoise<numBits>{
-    using Flow = ael::fl::BytesWordFlow<numBits/8>;
-    using Word = ael::w::BytesWord<numBits/8>;
+    using Flow = BytesWordFlow<numBits/8>;
+    using Word = BytesWord<numBits/8>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//

@@ -7,18 +7,15 @@
 #include <indicators/progress_bar.hpp>
 
 #include <ael/numerical_coder.hpp>
-#include <ael/flow/bytes_word_flow.hpp>
 #include <ael/dictionary/decreasing_counts_dictionary.hpp>
 #include <ael/dictionary/decreasing_on_update_dictionary.hpp>
 
+#include <applib/flow/bytes_word_flow.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
 #include <applib/file_opener.hpp>
 #include <applib/log_stream_get.hpp>
 
 namespace bpo = boost::program_options;
-
-using ael::fl::BytesWordFlow;
-using ael::w::BytesWord;
 
 using CountsDict = ael::dict::DecreasingCountDictionary<std::uint64_t>;
 using DictWordsDict = ael::dict::DecreasingOnUpdateDictionary;

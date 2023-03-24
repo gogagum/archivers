@@ -10,11 +10,7 @@ enable_testing()
 add_executable(archiever_tests
     bits_iterator.cpp
     bytes_iterator.cpp
-    bits_word.cpp
-    bits_word_flow.cpp
     byte_data_constructor.cpp
-    bytes_word.cpp
-    bytes_word_flow.cpp
     data_parser.cpp
     adaptive_dictionary.cpp
     static_dictionary.cpp
