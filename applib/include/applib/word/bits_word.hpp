@@ -14,8 +14,6 @@
 
 #include <ael/bits_iterator.hpp>
 
-namespace ael::w{
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWord class
 ///
@@ -135,7 +133,5 @@ std::ostream& operator<<(std::ostream& os, BitsWord<numBits> bw) {
     return *boost::accumulate(bw._getBits(), &os,
                 [](auto* os, bool bit) { return &(*os << bit); });
 }
-
-}  // namespace ael::w
 
 #endif // BITS_SYMBOL_HPP

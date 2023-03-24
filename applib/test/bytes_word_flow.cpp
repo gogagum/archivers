@@ -4,9 +4,7 @@
 #include <cstddef>
 #include <boost/range/combine.hpp>
 
-#include <ael/flow/bytes_word_flow.hpp>
-
-using ael::fl::BytesWordFlow;
+#include <applib/flow/bytes_word_flow.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 //----------------------------------------------------------------------------//

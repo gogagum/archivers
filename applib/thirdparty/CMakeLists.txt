@@ -17,3 +17,12 @@ FetchContent_Declare(indicators
 )
 
 FetchContent_MakeAvailable(indicators)
+
+message(STATUS "FetchContent: arithmetic-encoding-lib")
+
+FetchContent_Declare(arithmetic-encoding-lib
+    GIT_REPOSITORY https://github.com/gogagum/arithmetic-encoding-lib.git
+    GIT_TAG 74455369baf4105a179fa9044c9e69468b9c2d8e
+)
+
+FetchContent_MakeAvailable(arithmetic-encoding-lib)

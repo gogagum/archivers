@@ -18,8 +18,6 @@
 #include <ael/bits_iterator.hpp>
 #include <ael/bytes_iterator.hpp>
 
-namespace ael::w {
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BytesSymbol class
 ///
@@ -80,8 +78,8 @@ private:
 
 private:
 
-    using BitsIter = impl::BitsIterator<std::uint64_t>;
-    using BytesIter = impl::BytesIterator<std::uint64_t>;
+    using BitsIter = ael::impl::BitsIterator<std::uint64_t>;
+    using BytesIter = ael::impl::BytesIterator<std::uint64_t>;
 
 private:
 
@@ -142,7 +140,5 @@ std::ostream& operator<<(std::ostream& os, BytesWord<numBytes> word) {
     return *boost::accumulate(word._getBits(), &os,
         [](auto* os, const bool bit) { return &(*os << bit); });
 }
-
-}  // namespace ael::w
 
 #endif // BYTES_SYMBOL_HPP

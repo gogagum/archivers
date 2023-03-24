@@ -5,6 +5,8 @@
 #include <ael/byte_data_constructor.hpp>
 #include <applib/exceptions.hpp>
 #include <applib/words_and_flow.hpp>
+#include <applib/word/bits_word.hpp>
+#include <applib/word/bytes_word.hpp>
 
 namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,14 +69,14 @@ private:
 
     ////////////////////////////////////////////////////////////////////////////
     template <std::uint8_t _numBytes>
-    static void _packWordIntoData(const ael::w::BytesWord<_numBytes> word,
+    static void _packWordIntoData(const BytesWord<_numBytes> word,
                                   auto& cntr) {
         word.bytesOut(cntr.getByteBackInserter());
     }
 
     ////////////////////////////////////////////////////////////////////////////
     template <std::uint16_t _numBits>
-    static void _packWordIntoData(const ael::w::BitsWord<_numBits> word,
+    static void _packWordIntoData(const BitsWord<_numBits> word,
                                   auto& cntr) {
         word.bitsOut(cntr.getBitBackInserter());
     }

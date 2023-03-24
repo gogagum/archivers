@@ -1,15 +1,13 @@
 #ifndef BIT_WORD_FLOW_HPP
 #define BIT_WORD_FLOW_HPP
 
-#include <ael/word/bits_word.hpp>
+#include <applib/word/bits_word.hpp>
 #include <ael/data_parser.hpp>
 
 #include <span>
 #include <cstdint>
 #include <cstddef>
 #include <boost/container/static_vector.hpp>
-
-namespace ael::fl {
 
 namespace bi = boost::iterators;
 
@@ -19,9 +17,9 @@ namespace bi = boost::iterators;
 template <std::uint16_t _numBits>
 class BitsWordFlow {
 private:
-    using _Word = ael::w::BitsWord<_numBits>;
+    using _Word = BitsWord<_numBits>;
 public:
-    constexpr static std::uint16_t numBits = w::BitsWord<_numBits>::numBits;
+    constexpr static std::uint16_t numBits = BitsWord<_numBits>::numBits;
     using Tail = boost::container::static_vector<bool, numBits>;
 private:
     class Iterator;
@@ -59,7 +57,7 @@ public:
     { return Tail(_data.getBeginBitsIter() + size() * _numBits, _data.getEndBitsIter()); }
 
 private:
-    mutable DataParser _data;
+    mutable ael::DataParser _data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +73,7 @@ class BitsWordFlow<_numBits>::Iterator : public bi::iterator_facade<
 public:
     using type = Iterator;
 private:
-    using BitsIterator = DataParser::BitsIterator;
+    using BitsIterator = ael::DataParser::BitsIterator;
 public:
     Iterator(BitsIterator bitsIterator) : _bitsIter(bitsIterator) {}
 protected:
@@ -95,7 +93,5 @@ private:
 private:
     friend class boost::iterators::iterator_core_access;
 };
-
-}  // namespace ael::fl
 
 #endif // BIT_WORD_FLOW_HPP

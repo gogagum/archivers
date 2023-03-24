@@ -1,7 +1,7 @@
 #ifndef BIT_FLOW_HPP
 #define BIT_FLOW_HPP
 
-#include <ael/word/bytes_word.hpp>
+#include <applib/word/bytes_word.hpp>
 
 #include <span>
 #include <cstddef>
@@ -11,15 +11,13 @@
 #include <boost/container/static_vector.hpp>
 #include <boost/range/algorithm_ext.hpp>
 
-namespace ael::fl {
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The ByteFlow class
 ///
 template <std::uint8_t numBytes>
 class BytesWordFlow {
 private:
-    using _Word = w::BytesWord<numBytes>;
+    using _Word = BytesWord<numBytes>;
 public:
     using Tail = boost::container::static_vector<bool, 32>;
 private:
@@ -72,8 +70,8 @@ private:
 
     constexpr static Tail (*tailAccOp)(Tail&&, std::byte) =
         +[](Tail&& currTail, std::byte b) {
-            auto bitRng = boost::make_iterator_range(impl::BitsIterator(b, 0),
-                                                     impl::BitsIterator(b));
+            auto bitRng = boost::make_iterator_range(ael::impl::BitsIterator(b, 0),
+                                                     ael::impl::BitsIterator(b));
             return boost::range::push_back(currTail, bitRng);
         };
 
@@ -111,7 +109,5 @@ private:
     friend class boost::iterators::iterator_core_access;
     friend class BytesWordFlow<numBytes>;
 };
-
-}  // namespace ael::fl
 
 #endif // BIT_FLOW_HPP
