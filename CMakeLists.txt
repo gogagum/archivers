@@ -25,19 +25,18 @@ else()
     message("Compile target: ${CMAKE_CXX_COMPILER_TARGET}")
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 message("BOOST_ROOT:${BOOST_ROOT}")
-find_package(Boost 1.81.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.83.0 REQUIRED COMPONENTS program_options)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 include_directories(thirdparty/dynamic-segment-tree/include/)
 
-include_directories(thirdparty/dynamic-segment-tree/include/)
 include_directories(encoding_lib/include/)
 add_subdirectory(applib)
 include_directories(applib/include)

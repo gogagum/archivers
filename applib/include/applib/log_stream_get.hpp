@@ -3,5 +3,5 @@ class LogStreamGet {
 public:
     static std::ostream& getLogStream(const std::string& strParam);
 private:
-    static std::ostream _nullStream;
+    static std::ostream nullStream_;  // NOLINT
 };

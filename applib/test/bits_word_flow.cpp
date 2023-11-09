@@ -16,7 +16,7 @@ TEST(BitsWordFlow, Iterate) {
     const auto data = std::array{std::byte{23}};
     auto wf = BitsWordFlow<3>(data);
 
-    for ([[maybe_unused]] auto word: wf) {}
+    for ([[maybe_unused]] auto word: wf.rng()) {}
 }
 
 //----------------------------------------------------------------------------//
@@ -25,7 +25,7 @@ TEST(BitsWordFlow, IterateConting0) {
     auto wf = BitsWordFlow<3>(data);
     auto n = std::size_t{0};
 
-    for ([[maybe_unused]] auto word: wf) {
+    for ([[maybe_unused]] auto word: wf.rng()) {
         ++n;
     }
 
@@ -38,7 +38,7 @@ TEST(BitsWordFlow, IterateConting1) {
     auto wf = BitsWordFlow<3>(data);
     auto n = std::size_t{0};
 
-    for ([[maybe_unused]] auto word: wf) {
+    for ([[maybe_unused]] auto word: wf.rng()) {
         ++n;
     }
 

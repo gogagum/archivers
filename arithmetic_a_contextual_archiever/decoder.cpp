@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
         const auto wordsCount = takeWithLog("Words count: ", std::uint64_t{});
         const auto bitsCount = takeWithLog("Bits count: ", std::uint64_t{});
 
-        auto dict = ael::dict::AdaptiveAContextualDictionary(symBitLen, ctxCellsCnt, ctxCellLength);
+        auto dict = ael::dict::AdaptiveAContextualDictionary({symBitLen, ctxCellsCnt, ctxCellLength});
 
         DecodeImpl::process(cfg.decoded, dict, wordsCount, bitsCount, symBitLen, tailSize,
                             cfg.fileOpener.getOutFileStream(), cfg.outStream);

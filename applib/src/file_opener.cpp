@@ -1,49 +1,47 @@
-#include <applib/file_opener.hpp>
-
 #include <fmt/format.h>
+
+#include <applib/file_opener.hpp>
 #include <ostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 std::span<const std::byte> FileOpener::getInData() const {
-       return std::span<const std::byte>(_finData.cbegin(), _finData.cend());
+  return {finData_.cbegin(), finData_.cend()};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 std::ofstream& FileOpener::getOutFileStream() {
-    return _fout;
+  return fout_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::vector<std::byte>
-FileOpener::_openInFile(const std::string& fileInName,
-                        std::ostream& optOs) {
-    std::ifstream fin{fileInName, std::ifstream::ate | std::ifstream::binary};
-    if (!fin.is_open()) {
-        throw std::runtime_error(
-            fmt::format("Could not open file: \"{}\"", fileInName));
-    }
+std::vector<std::byte> FileOpener::openInFile_(const std::string& fileInName,
+                                               std::ostream& optOs) {
+  auto fin =
+      std::ifstream{fileInName, std::ifstream::ate | std::ifstream::binary};
+  if (!fin.is_open()) {
+    throw std::runtime_error(
+        fmt::format("Could not open file: \"{}\"", fileInName));
+  }
 
-    fin.unsetf(std::ios::skipws);  // Not to eat newlines.
-    std::streampos finSize;
-    fin.seekg(0, std::ios::end);
-    finSize = fin.tellg();
-    optOs << fmt::format("File size: {}.", finSize) << std::endl;
-    fin.seekg(0, std::ios::beg);
+  fin.unsetf(std::ios::skipws);  // Not to eat newlines.
+  auto finSize = std::streampos();
+  fin.seekg(0, std::ios::end);
+  finSize = fin.tellg();
+  optOs << fmt::format("File size: {}.\n", finSize);
+  fin.seekg(0, std::ios::beg);
 
-    auto ret = std::vector<std::byte>(finSize);
-    fin.read(reinterpret_cast<char*>(ret.data()), finSize);
-    return ret;
+  auto ret = std::vector<std::byte>(finSize);
+  fin.read(reinterpret_cast<char*>(ret.data()), finSize);
+  return ret;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 FileOpener::FileOpener(const std::string& inFileName,
-                       const std::string& outFileName,
-                       std::ostream& optOs)
-        : _finData(_openInFile(inFileName, optOs)),
-          _fout(outFileName, std::ios::binary) {
-    if (!_fout.is_open()) {
-        throw std::runtime_error(
-            fmt::format("Could not open file: \"{}\"", outFileName));
-    }
+                       const std::string& outFileName, std::ostream& optOs)
+    : finData_(openInFile_(inFileName, optOs)),
+      fout_(outFileName, std::ios::binary) {
+  if (!fout_.is_open()) {
+    throw std::runtime_error(
+        fmt::format("Could not open file: \"{}\"", outFileName));
+  }
 }

@@ -91,6 +91,21 @@
         "__verbose_abort": "cpp",
         "ios": "cpp",
         "locale": "cpp",
-        "queue": "cpp"
-    }
+        "queue": "cpp",
+        "format": "cpp",
+        "valarray": "cpp",
+        "stack": "cpp",
+        "unordered_set": "cpp",
+        "charconv": "cpp"
+    },
+    "cSpell.words": [
+        "APPLIB",
+        "bugprone",
+        "falses",
+        "fout",
+        "ords",
+        "PPMA",
+        "PPMD",
+        "rngv"
+    ]
 }

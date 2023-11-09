@@ -10,9 +10,11 @@ enable_testing()
 
 add_executable(applib_tests
     bits_word_flow.cpp
-    bits_word.cpp
     bytes_word_flow.cpp
-    bytes_word.cpp
+    to_bits.cpp
+    to_ints.cpp
+    u64_tail_bits.cpp
+    u64_tail_bytes.cpp
 )
 
 if (CMAKE_CROSSCOMPILING)

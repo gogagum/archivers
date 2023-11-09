@@ -13,13 +13,13 @@ std::ostream& LogStreamGet::getLogStream(const std::string &strParam) {
     } else {
         if (strParam != "off") {
             throw std::logic_error(fmt::format(
-                    "{} is invalig log-stream parameter",
+                    "{} is invalid log-stream parameter",
                     strParam)
                 );
         }
-        return _nullStream;
+        return nullStream_;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ostream LogStreamGet::_nullStream{nullptr};
+std::ostream LogStreamGet::nullStream_{nullptr}; // NOLINT

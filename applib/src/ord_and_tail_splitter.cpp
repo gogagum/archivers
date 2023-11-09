@@ -6,7 +6,7 @@ auto OrdAndTailSplitter::process(
         const std::span<const std::byte>& inData,
         std::uint8_t numBits) -> Ret {
     #define FILE_SPLITTER_BITS_CASE(bits) \
-        case (bits): return _process<bits>(inData);
+        case (bits): return process_<bits>(inData);
 
     switch (numBits) {
         FILE_SPLITTER_BITS_CASE(8);

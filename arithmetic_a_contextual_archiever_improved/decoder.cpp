@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     try {
         auto cfg = DecodeImpl::configure(argc, argv);
 
-        const auto takeWithLog = [&]<class T>(const std::string& msg, T) {    
+        const auto takeWithLog = [&]<class T>(const std::string& msg, T) {
             const auto ret = cfg.decoded.takeT<T>();
             cfg.outStream << msg << static_cast<std::int64_t>(ret) << std::endl;
             return ret;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
         const auto bitsCount = takeWithLog("Bits count: ", std::uint64_t{});
 
         auto dict = ael::dict::AdaptiveAContextualDictionaryImproved(
-            symBitLen, ctxCellsCnt, ctxCellLength);
+            {symBitLen, ctxCellsCnt, ctxCellLength});
 
         DecodeImpl::process(cfg.decoded, dict, wordsCount, bitsCount, symBitLen, tailSize,
                             cfg.fileOpener.getOutFileStream(), cfg.outStream);

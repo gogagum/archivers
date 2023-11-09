@@ -1,97 +1,60 @@
 #ifndef BIT_WORD_FLOW_HPP
 #define BIT_WORD_FLOW_HPP
 
-#include <applib/word/bits_word.hpp>
-#include <ael/data_parser.hpp>
+#include <applib/flow/impl/to_bits.hpp>
+#include <applib/flow/impl/to_ints.hpp>
 
-#include <span>
 #include <cstdint>
-#include <cstddef>
-#include <boost/container/static_vector.hpp>
+#include <ranges>
+#include <span>
 
-namespace bi = boost::iterators;
+using std::views::drop;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The BitsWordFlow class
 ///
-template <std::uint16_t _numBits>
-class BitsWordFlow {
+template <std::uint16_t _numBits> class BitsWordFlow {
 private:
-    using _Word = BitsWord<_numBits>;
+  using BitsRng_ = decltype(ToBits<std::uint64_t>::perform(
+      std::declval<const std::span<const std::byte> &>()));
+
+  using IntsRng_ = decltype(ToInts<std::uint64_t, _numBits>::perform(
+      std::declval<const BitsRng_ &>()));
+
 public:
-    constexpr static std::uint16_t numBits = BitsWord<_numBits>::numBits;
-    using Tail = boost::container::static_vector<bool, numBits>;
-private:
-    class Iterator;
+  constexpr static std::uint16_t numBits = _numBits;
+  using Tail = decltype(std::declval<const BitsRng_ &>() |
+                        drop(std::declval<std::size_t>() * numBits));
+
 public:
+  /**
+   * @brief BitsWordFlow constructor from span.
+   * @param data - bytes to create words.
+   */
+  explicit BitsWordFlow(std::span<const std::byte> data)
+      : _data(data), _bitsRng(u64BitsRng_()), _intsRng(u64WordsRng_()) {}
 
-    /**
-     * @brief BitsWordFlow constructor from span.
-     * @param data - bytes to create words.
-     */
-    BitsWordFlow(std::span<const std::byte> data) : _data(data) {}
+  auto rng() const {
+    return _intsRng;
+  }
 
-    /**
-     * @brief begin - get iterator to begin.
-     * @return iterator to first word for output.
-     */
-    Iterator begin() const { return Iterator(_data.getBeginBitsIter()); }
-
-    /**
-     * @brief end - get iterator to end.
-     * @return itearator word after last word for output.
-     */
-    Iterator end() const { return Iterator(_data.getBeginBitsIter()) + size(); }
-
-    /**
-     * @brief getNumberOfWords - get number of words in data.
-     * @return number of words.
-     */
-    std::size_t size() const { return _data.getNumBytes() * 8 / numBits; }
-
-    /**
-     * @brief getTail get tail bits.
-     * @return tail bits array.
-     */
-    Tail getTail() const
-    { return Tail(_data.getBeginBitsIter() + size() * _numBits, _data.getEndBitsIter()); }
+  /**
+   * @brief getTail get tail bits.
+   * @return tail bits array.
+   */
+  auto getTail() const { return _bitsRng | drop(rng().size() * numBits); }
 
 private:
-    mutable ael::DataParser _data;
-};
+  auto u64BitsRng_() const { return ToBits<std::uint64_t>::perform(_data); }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief The BitsWordFlow::Iterator class
-///
-template <std::uint16_t _numBits>
-class BitsWordFlow<_numBits>::Iterator : public bi::iterator_facade<
-    Iterator,
-    _Word,
-    boost::random_access_traversal_tag,
-    _Word
-> {
-public:
-    using type = Iterator;
+  auto u64WordsRng_() const {
+    return ToInts<std::uint64_t, numBits>::perform(_bitsRng);
+  }
+
 private:
-    using BitsIterator = ael::DataParser::BitsIterator;
-public:
-    Iterator(BitsIterator bitsIterator) : _bitsIter(bitsIterator) {}
-protected:
-    ////////////////////////////////////////////////////////////////////////////
-    _Word dereference() const           { return _Word(_bitsIter); }
-    ////////////////////////////////////////////////////////////////////////////
-    std::ptrdiff_t
-    distance_to (const type& other)     { return other._bitsIter - _bitsIter; }
-    ////////////////////////////////////////////////////////////////////////////
-    bool equal(const type& other) const { return _bitsIter == other._bitsIter; }
-    ////////////////////////////////////////////////////////////////////////////
-    void increment()                    { _bitsIter += _numBits; }
-    ////////////////////////////////////////////////////////////////////////////
-    void advance(std::ptrdiff_t offset) { _bitsIter += offset * _numBits; }
-private:
-    BitsIterator _bitsIter;
-private:
-    friend class boost::iterators::iterator_core_access;
+  std::span<const std::byte> _data;
+  BitsRng_ _bitsRng;
+  IntsRng_ _intsRng;
 };
 
 #endif // BIT_WORD_FLOW_HPP
