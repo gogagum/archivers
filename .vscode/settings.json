@@ -96,7 +96,10 @@
         "valarray": "cpp",
         "stack": "cpp",
         "unordered_set": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "cfenv": "cpp",
+        "stdfloat": "cpp",
+        "typeindex": "cpp"
     },
     "cSpell.words": [
         "APPLIB",

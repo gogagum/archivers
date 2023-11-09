@@ -41,7 +41,7 @@ class FileOpener {
    * @brief getOutFileStream - get output stream reference.
    * @return
    */
-  std::ofstream& getOutFileStream();
+  std::basic_ofstream<std::byte>& getOutFileStream();
 
  private:
   std::vector<std::byte> openInFile_(const std::string& fileInName,
@@ -49,7 +49,7 @@ class FileOpener {
 
  private:
   std::vector<std::byte> finData_;
-  std::ofstream fout_;
+  std::basic_ofstream<std::byte> fout_;
 };
 
 #endif  // APPLIB_FILE_OPENER_HPP

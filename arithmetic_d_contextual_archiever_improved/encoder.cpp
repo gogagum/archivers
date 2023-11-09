@@ -5,7 +5,7 @@
 #include <applib/ord_and_tail_splitter.hpp>
 #include <boost/program_options.hpp>
 #include <cstdint>
-#include <indicators/progress_bar.hpp>
+#include <applib/progress_bar.hpp>
 #include <iostream>
 #include <string>
 
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
         "Out file name.")("bits,b", bpo::value(&numBits)->default_value(16),
                           "Word bits count.")(
         "cells-cnt,c", bpo::value(&ctxCellsCnt)->default_value(4),
-        "Contect cells count.")("cell-length,q",
+        "Content cells count.")("cell-length,q",
                                 bpo::value(&ctxCellLength)->default_value(8),
                                 "Context length.")(
         "log-stream,l", bpo::value(&logStreamParam)->default_value("stdout"),
@@ -54,24 +54,17 @@ int main(int argc, char* argv[]) {
     encoded->putT<std::uint8_t>(ctxCellLength);
     const auto wordsCountPos = encoded->saveSpaceForT<std::uint64_t>();
     const auto bitsCountPos = encoded->saveSpaceForT<std::uint64_t>();
-    auto progressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{wordsOrds.size()},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Encoding"},
-        indicators::option::Stream{outStream});
+    constexpr auto barWidth = 50uz;
+    auto progressBar =
+        ProgressBar(barWidth, wordsOrds.size(), "Encoding", outStream);
     auto [encoded2, wordsCount, bitsCount] =
         ael::ArithmeticCoder(std::move(encoded))
-            .encode(wordsOrds, dict,
-                    [&progressBar]() {
-                      progressBar.tick();
-                    })
+            .encode(wordsOrds, dict, progressBar.getTick())
             .finalize();
     encoded2->putTToPosition(wordsCount, wordsCountPos);
     encoded2->putTToPosition(bitsCount, bitsCountPos);
     std::ranges::copy(tail, encoded->getBitBackInserter());
-    fileOpener.getOutFileStream().write(
-        reinterpret_cast<const char*>(encoded2->data()), encoded2->size());
+    fileOpener.getOutFileStream().write(encoded2->data(), encoded2->size());
   } catch (const std::exception& error) {
     std::cerr << error.what() << "\n";
     return 1;

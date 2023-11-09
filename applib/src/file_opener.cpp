@@ -9,7 +9,7 @@ std::span<const std::byte> FileOpener::getInData() const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-std::ofstream& FileOpener::getOutFileStream() {
+std::basic_ofstream<std::byte>& FileOpener::getOutFileStream() {
   return fout_;
 }
 

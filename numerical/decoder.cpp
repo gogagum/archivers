@@ -3,9 +3,9 @@
 #include <ael/numerical_decoder.hpp>
 #include <applib/decode_impl.hpp>
 #include <applib/file_opener.hpp>
+#include <applib/progress_bar.hpp>
 #include <boost/program_options.hpp>
 #include <cstdint>
-#include <indicators/progress_bar.hpp>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -25,36 +25,18 @@ int main(int argc, char* argv[]) {
         takeWithLog("Bits for content decoding: ", std::uint64_t{});
 
     auto contentWordsOrds = std::vector<std::uint64_t>();
-    auto wordsProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{dictSize},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Decoding words"},
-        indicators::option::Stream{cfg.outStream});
-    auto countsProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{dictSize},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Decoding counts"},
-        indicators::option::Stream{cfg.outStream});
-    auto contentProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{contentWordsCnt},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Decoding content"},
-        indicators::option::Stream{cfg.outStream});
+    constexpr auto barWidth = 50uz;
+    auto wordsProgressBar =
+        ProgressBar(barWidth, dictSize, "Decoding words", cfg.outStream);
+    auto countsProgressBar =
+        ProgressBar(barWidth, dictSize, "Decoding counts", cfg.outStream);
+    auto contentProgressBar = ProgressBar(barWidth, contentWordsCnt,
+                                          "Decoding content", cfg.outStream);
+    constexpr auto maxOrd = std::uint64_t{256};
     ael::NumericalDecoder(cfg.decoded, dictSize, contentWordsCnt, totalBitsCnt)
-        .decode(
-            std::back_inserter(contentWordsOrds), 256,
-            [&wordsProgressBar] {
-              wordsProgressBar.tick();
-            },
-            [&countsProgressBar] {
-              countsProgressBar.tick();
-            },
-            [&contentProgressBar] {
-              contentProgressBar.tick();
-            });
+        .decode(std::back_inserter(contentWordsOrds), maxOrd,
+                wordsProgressBar.getTick(), countsProgressBar.getTick(),
+                contentProgressBar.getTick());
 
     auto dataConstructor = ael::ByteDataConstructor();
 
@@ -64,9 +46,8 @@ int main(int argc, char* argv[]) {
         }),
         dataConstructor.getByteBackInserter());
 
-    cfg.fileOpener.getOutFileStream().write(
-        reinterpret_cast<const char*>(dataConstructor.data()),
-        dataConstructor.size());
+    cfg.fileOpener.getOutFileStream().write(dataConstructor.data(),
+                                            dataConstructor.size());
 
   } catch (const std::exception& error) {
     std::cerr << error.what();

@@ -5,12 +5,9 @@
 #include <applib/flow/bytes_word_flow.hpp>
 #include <applib/log_stream_get.hpp>
 #include <applib/ord_and_tail_splitter.hpp>
+#include <applib/progress_bar.hpp>
 #include <boost/program_options.hpp>
-#include <boost/range/adaptor/transformed.hpp>
-#include <indicators/progress_bar.hpp>
 #include <iostream>
-#include <iterator>
-#include <ranges>
 
 namespace bpo = boost::program_options;
 
@@ -54,44 +51,23 @@ int main(int argc, char* argv[]) {
 
     auto countsMapping = ael::NumericalCoder::countWords(ordFlow);
 
-    auto wordsProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{countsMapping.size()},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Encoding words"},
-        indicators::option::Stream{outStream});
-    auto countsProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{countsMapping.size()},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Encoding counts"},
-        indicators::option::Stream{outStream});
-    auto contentProgressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{ordFlow.size()},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Encoding content"},
-        indicators::option::Stream{outStream});
+    constexpr auto barWidth = 50uz;
+    auto wordsProgressBar = ProgressBar(barWidth, countsMapping.size(),
+                                        "Encoding words", outStream);
+    auto countsProgressBar = ProgressBar(barWidth, countsMapping.size(),
+                                         "Encoding counts", outStream);
+    auto contentProgressBar =
+        ProgressBar(barWidth, ordFlow.size(), "Encoding content", outStream);
 
     auto [dataCtr2, dictSize, contentWordsEncoded, totalBitsCnt, maxOrd] =
         ael::NumericalCoder(std::move(dataConstructor))
-            .encode(
-                ordFlow, countsMapping,
-                [&wordsProgressBar] {
-                  wordsProgressBar.tick();
-                },
-                [&countsProgressBar] {
-                  countsProgressBar.tick();
-                },
-                [&contentProgressBar] {
-                  contentProgressBar.tick();
-                });
+            .encode(ordFlow, countsMapping, wordsProgressBar.getTick(),
+                    countsProgressBar.getTick(), contentProgressBar.getTick());
 
     dataCtr2->putTToPosition(dictSize, dictSizePos);
     dataCtr2->putTToPosition(totalBitsCnt, totalBitsCntPos);
 
-    fileOpener.getOutFileStream().write(reinterpret_cast<const char*>(dataCtr2->data()),
-                                        dataCtr2->size());
+    fileOpener.getOutFileStream().write(dataCtr2->data(), dataCtr2->size());
 
   } catch (const std::runtime_error& error) {
     std::cerr << error.what() << "\n";

@@ -1,16 +1,15 @@
 #ifndef APPLIB_DECODE_IMPL_HPP
 #define APPLIB_DECODE_IMPL_HPP
 
+#include <ael/arithmetic_decoder.hpp>
+#include <ael/data_parser.hpp>
 #include <cstdint>
+#include <indicators/progress_bar.hpp>
 #include <ostream>
 #include <vector>
 
-#include <indicators/progress_bar.hpp>
-
-#include <ael/arithmetic_decoder.hpp>
-#include <ael/data_parser.hpp>
-
 #include "file_opener.hpp"
+#include "progress_bar.hpp"
 #include "word_packer.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,49 +17,47 @@
 ///
 struct DecodeImpl {
   struct ConfigureRet {
-    std::ostream &outStream;
+    std::ostream& outStream;
     FileOpener fileOpener;
     ael::DataParser decoded;
   };
 
-  static std::ostream nullOut;
+  static ConfigureRet configure(int argc, char* argv[]);
 
-  static ConfigureRet configure(int argc, char *argv[]);
-
-  static void process(ael::DataParser &decoded, auto &dict,
+  static void process(ael::DataParser& decoded, auto& dict,
                       std::size_t wordsCount, std::size_t bitsCount,
                       std::uint16_t symBitLen, std::uint16_t tailSize,
-                      std::ostream &bytesOutStream,
-                      std::ostream &optLogOutStream);
+                      std::basic_ostream<std::byte>& bytesOutStream,
+                      std::ostream& optLogOutStream);
+
+ private:
+  static std::ostream nullOut;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-void DecodeImpl::process(ael::DataParser &decoded, auto &dict,
+void DecodeImpl::process(ael::DataParser& decoded, auto& dict,
                          std::size_t wordsCount, std::size_t bitsCount,
                          std::uint16_t symBitLen, std::uint16_t tailSize,
-                         std::ostream &bytesOutStream,
-                         std::ostream &optLogOutStream) {
+                         std::basic_ostream<std::byte>& bytesOutStream,
+                         std::ostream& optLogOutStream) {
   auto dataConstructor = ael::ByteDataConstructor();
 
-  std::vector<std::uint64_t> ords;
+  auto ords = std::vector<std::uint64_t>{};
 
+  constexpr auto barWidth = std::size_t{50};
   auto progressBar =
-      indicators::ProgressBar(indicators::option::BarWidth{50},
-                              indicators::option::MaxProgress{wordsCount},
-                              indicators::option::ShowPercentage{true},
-                              indicators::option::PostfixText{"Decoding"},
-                              indicators::option::Stream{optLogOutStream});
+      ProgressBar(barWidth, wordsCount, "Decoding", optLogOutStream);
   ael::ArithmeticDecoder(decoded, bitsCount)
       .decode(dict, std::back_inserter(ords), wordsCount,
-              [&progressBar]() { progressBar.tick(); });
+              progressBar.getTick());
 
   WordPacker::process(ords, dataConstructor, symBitLen);
 
-  //std::copy(decoded.getEndBitsIter() - tailSize, decoded.getEndBitsIter(),  // TODO
-  //          dataConstructor.getBitBackInserter());
+  // std::copy(decoded.getEndBitsIter() - tailSize, decoded.getEndBitsIter(), //
+  // TODO
+  //           dataConstructor.getBitBackInserter());
 
-  bytesOutStream.write(reinterpret_cast<const char *>(dataConstructor.data()),
-                       dataConstructor.size());
+  bytesOutStream.write(dataConstructor.data(), dataConstructor.size());
 }
 
-#endif // APPLIB_DECODE_IMPL_HPP
+#endif  // APPLIB_DECODE_IMPL_HPP

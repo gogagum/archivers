@@ -1,21 +1,17 @@
+#include <ael/arithmetic_coder.hpp>
+#include <ael/dictionary/adaptive_dictionary.hpp>
+#include <applib/file_opener.hpp>
+#include <applib/log_stream_get.hpp>
+#include <applib/ord_and_tail_splitter.hpp>
+#include <applib/progress_bar.hpp>
+#include <boost/program_options.hpp>
 #include <cstdint>
 #include <iostream>
 #include <string>
 
-#include <boost/program_options.hpp>
-
-#include <indicators/progress_bar.hpp>
-
-#include <ael/arithmetic_coder.hpp>
-#include <ael/dictionary/adaptive_dictionary.hpp>
-
-#include <applib/file_opener.hpp>
-#include <applib/log_stream_get.hpp>
-#include <applib/ord_and_tail_splitter.hpp>
-
 namespace bpo = boost::program_options;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   bpo::options_description appOptionsDescr("Console options.");
 
   std::string inFileName;
@@ -40,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     outFileName = outFileName.empty() ? inFileName + "-encoded" : outFileName;
 
-    auto &outStream = LogStreamGet::getLogStream(logStreamParam);
+    auto& outStream = LogStreamGet::getLogStream(logStreamParam);
     auto fileOpener = FileOpener(inFileName, outFileName, outStream);
     auto dict =
         ael::dict::AdaptiveDictionary({std::uint64_t{1} << numBits, ratio});
@@ -54,22 +50,18 @@ int main(int argc, char *argv[]) {
     encoded->putT<std::uint16_t>(tail.size());
     const auto wordsCountPos = encoded->saveSpaceForT<std::uint64_t>();
     const auto bitsCountPos = encoded->saveSpaceForT<std::uint64_t>();
-    auto progressBar = indicators::ProgressBar(
-        indicators::option::BarWidth{50},
-        indicators::option::MaxProgress{wordsOrds.size()},
-        indicators::option::ShowPercentage{true},
-        indicators::option::PostfixText{"Encoding"},
-        indicators::option::Stream{outStream});
+    constexpr auto barWidth = 50uz;
+    auto progressBar =
+        ProgressBar(barWidth, wordsOrds.size(), "Encoding", outStream);
     auto [encoded2, wordsCount, bitsCount] =
         ael::ArithmeticCoder(std::move(encoded))
-            .encode(wordsOrds, dict, [&progressBar]() { progressBar.tick(); })
+            .encode(wordsOrds, dict, progressBar.getTick())
             .finalize();
     encoded2->putTToPosition(wordsCount, wordsCountPos);
     encoded2->putTToPosition(bitsCount, bitsCountPos);
     std::ranges::copy(tail, encoded2->getBitBackInserter());
-    fileOpener.getOutFileStream().write(
-        reinterpret_cast<const char*>(encoded2->data()), encoded2->size());
-  } catch (const std::runtime_error &error) {
+    fileOpener.getOutFileStream().write(encoded2->data(), encoded2->size());
+  } catch (const std::runtime_error& error) {
     std::cerr << error.what() << "\n";
     return 2;
   }

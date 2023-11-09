@@ -3,6 +3,7 @@ add_library(archievers-applib STATIC)
 add_subdirectory(thirdparty)
 
 find_package(fmt)
+find_package(indicators)
 
 target_sources(archievers-applib
     PRIVATE
